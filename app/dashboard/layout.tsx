@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
-// import { Geist, Geist_Mono } from "next/font/google";
-// import "./globals.css";
 import Navigation from "@/components/layout/Sidebar";
-
-
+import AuthProvider from "@/components/gloabl/AuthProvider"; 
 
 export const metadata: Metadata = {
   title: "Mailer kayhan audio",
@@ -12,18 +9,16 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
-      <body
-        // className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body>
         <Navigation />
-       <div className="pl-[5rem]" >
-         {children}
-       </div>
+        <AuthProvider>
+          <div className="pl-[5rem]">{children}</div>
+        </AuthProvider>
       </body>
     </html>
   );

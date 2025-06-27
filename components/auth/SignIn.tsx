@@ -1,10 +1,10 @@
 "use client";
 import Image from "next/image";
 import { useState } from "react";
-// import { useLoginMutation } from "@/store/api/userApi";
+import { useSignInMutation } from "@/store/api/userApiSlice";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-// import {  toast } from 'react-hot-toast'; // 
+import {  toast } from 'react-hot-toast'; // 
 interface ApiError {
   status: number;
   data: {
@@ -21,19 +21,20 @@ const LoginPage = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-//   const [login , {isLoading}] = useLoginMutation();
-//   const router = useRouter()
-//   const handleSubmit = async(e: React.FormEvent) => {
-//     e.preventDefault();
-//     try {
-//       await login(formData).unwrap();
-//       toast.success("User login successfully!");
-//       router.push("/")
-//     } catch (error) {
-//       const err = error as ApiError;
-//       toast.error(err.data?.message || "Something went wrong");
-//     } // Replace with your API call
-//   };
+  const [login , {isLoading}] = useSignInMutation();
+  const router = useRouter()
+  const handleSubmit = async(e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+   const res =    await login(formData).unwrap();
+      toast.success("User login successfully!");
+      console.log("user login succesffuly",res)
+      // router.push("/")
+    } catch (error) {
+      const err = error as ApiError;
+      toast.error(err.data?.message || "Something went wrong");
+    } // Replace with your API call
+  };
 
   return (
     <div className="min-h-screen flex bg-gray-900 text-white">
@@ -54,7 +55,7 @@ const LoginPage = () => {
           <h2 className="text-3xl font-bold mb-6 text-center text-white">
             Login
           </h2>
-          <form  className="space-y-2">
+          <form onSubmit={handleSubmit}  className="space-y-2">
             {/* Email Input */}
             <div className="my-2">
               <input

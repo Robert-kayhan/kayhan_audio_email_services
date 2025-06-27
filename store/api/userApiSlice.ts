@@ -1,25 +1,26 @@
 import { apiSlice } from "./apiSlcie";
-
+import { User_url } from "../constant";
 const userApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     //signup
-    signUp: builder.mutation({
-      query: (data) => ({
-        url: "",
-        method: "POST",
-        body: data,
+    getme: builder.query({
+      query: () => ({
+        url: User_url,
+        method: "GET",
+        credentials: "include", 
       }),
     }),
     //login
     signIn: builder.mutation({
       query: (data) => ({
-        url: "",
+        url: `${User_url}/sign-in`,
         method: "POST",
         body: data,
+        credentials: "include", 
       }),
     }),
     // all user
   }),
 });
 
-export const {useSignInMutation , useSignUpMutation} = userApi;
+export const {useSignInMutation , useGetmeQuery} = userApi;
