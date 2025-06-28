@@ -11,7 +11,7 @@ type TableProps<T> = {
   columns: Column<T>[];
   data: T[];
   onEdit?: (row: T) => void;
-  onDelete?: (row: T) => void;
+  onDelete?: any;
   showActions?: boolean;
   pageSize?: number;
 };

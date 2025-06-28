@@ -1,10 +1,10 @@
+// app/providers/AuthClient.tsx
 "use client";
-import { useGetmeQuery } from "@/store/api/userApiSlice";
+import { useGetmeQuery } from "@/store/api/AuthApi";
 
-export default function AuthProvider({ children }: { children: React.ReactNode }) {
+export default function AuthClient({ children }: { children: React.ReactNode }) {
   const { data: user, isLoading } = useGetmeQuery({});
 
-  // You can optionally show loading or pass user via context
   if (isLoading) return <div>Loading...</div>;
 
   return <>{children}</>;
