@@ -8,9 +8,10 @@ import { useCreateMultipleUserMutation } from "@/store/api/UserApi";
 type Props = {
   isOpen: boolean;
   onClose: () => void;
+  refetch:any
 };
 
-export default function UploadExcelModal({ isOpen, onClose }: Props) {
+export default function UploadExcelModal({ isOpen, onClose,refetch }: Props) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileName, setFileName] = useState<string>("");
   const [loading, setLoading] = useState(false);
@@ -31,6 +32,7 @@ export default function UploadExcelModal({ isOpen, onClose }: Props) {
       toast.success(res.message || "Users uploaded successfully");
       setSelectedFile(null);
       setFileName("");
+      refetch()
       onClose();
     } catch (error) {
       toast.error(

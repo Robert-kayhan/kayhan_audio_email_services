@@ -9,6 +9,7 @@ import { useGetAllUserQuery } from "@/store/api/UserApi";
 import Pagination from "@/components/gloabl/Pagination";
 import { useDeleteUserMutation } from "@/store/api/UserApi";
 import toast from "react-hot-toast";
+import UserForUpdate from "@/components/leads/UpdateUserModel";
 type User = {
   name: string;
   email: string;
@@ -29,14 +30,15 @@ export default function TablePage() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [userShowModal, setUserShowModal] = useState(false);
+  const [updateuserShowModal, setUpdateuserShowModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(25);
-
-  const { data, isLoading, isError ,refetch} = useGetAllUserQuery({
+  const [user, setUser] = useState<any>();
+  const { data, isLoading, isError, refetch } = useGetAllUserQuery({
     page: currentPage,
     limit,
   });
-  const [deleteUser] = useDeleteUserMutation()
+  const [deleteUser] = useDeleteUserMutation();
   // Destructure safely
   const users = data?.data ?? [];
   const pagination = data?.pagination ?? {
@@ -48,21 +50,35 @@ export default function TablePage() {
   const totalPages = pagination.totalPages;
   const showPagination = Array.from({ length: totalPages }, (_, i) => i + 1);
 
-  const handleEdit = (row: User) => alert("Edit: " + JSON.stringify(row));
-  const handleDelete = async (row: any) => {
-  try {
-    await deleteUser(row.email).unwrap();
-    toast.success("User deleted successfully");
-    refetch(); // Refetch user list
-  } catch (error) {
-    toast.error("Failed to delete user");
-    console.error(error);
-  }
+  const handleEdit = (row: any) => {
+  const [firstname, ...rest] = row.name.split(" ");
+  const lastname = rest.join(" ");
+
+  setUser({
+    firstname,
+    lastname,
+    email: row.email,
+    phone: row.phone,
+    address: row.address || "", // If available, else fallback to ""
+  });
+
+  setUpdateuserShowModal(true);
 };
+
+  const handleDelete = async (row: any) => {
+    try {
+      await deleteUser(row.email).unwrap();
+      toast.success("User deleted successfully");
+      refetch(); // Refetch user list
+    } catch (error) {
+      toast.error("Failed to delete user");
+      console.error(error);
+    }
+  };
 
   return (
     <div className="p-4">
-      {/* Header */}  
+      {/* Header */}
       <div className="flex justify-between items-center px-3 py-2 gap-4 flex-wrap">
         <h2 className="text-2xl font-serif font-bold">Leads</h2>
 
@@ -155,12 +171,20 @@ export default function TablePage() {
 
       {/* Modals */}
       <UploadExcelModal
+      refetch={refetch}
         isOpen={showModal}
         onClose={() => setShowModal(false)}
       />
       <UserFormModal
+      refetch={refetch}
         isOpen={userShowModal}
         onClose={() => setUserShowModal(false)}
+      />
+      <UserForUpdate
+        user={user}
+        isOpen={updateuserShowModal}
+        refetch={refetch}
+        onClose={() => setUpdateuserShowModal(false)}
       />
     </div>
   );

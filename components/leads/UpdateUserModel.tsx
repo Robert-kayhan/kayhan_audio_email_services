@@ -1,24 +1,43 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { X } from "lucide-react";
+import { useUpdateUserMutation } from "@/store/api/UserApi";
+import toast from "react-hot-toast";
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  refetch:any
+  user: any;
+  refetch:any // should contain id, firstname, lastname, etc.
 }
-import { useCreateSingleUserMutation } from "@/store/api/UserApi";
-import toast from "react-hot-toast";
-const UserFormModal: React.FC<Props> = ({ isOpen, onClose,refetch }) => {
+
+const UserForUpdate: React.FC<Props> = ({ isOpen, onClose, user ,refetch}) => {
   const [formData, setFormData] = useState({
+    id: undefined,
     firstname: "",
     lastname: "",
     email: "",
     phone: "",
     address: "",
   });
-  const [createSingleUser] = useCreateSingleUserMutation();
+
+  const [updateUser] = useUpdateUserMutation();
+
+  // ✅ Populate form data from the `user` prop
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        id: user.id,
+        firstname: user.firstname || "",
+        lastname: user.lastname || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        address: user.address || "",
+      });
+    }
+  }, [user]);
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -26,34 +45,33 @@ const UserFormModal: React.FC<Props> = ({ isOpen, onClose,refetch }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
- const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  const { firstname, lastname, email, phone, address } = formData;
+    const {  firstname, lastname, email, phone, address } = formData;
+    // ✅ Validation
+    if (!firstname.trim()) return toast.error("First name is required");
+    if (!lastname.trim()) return toast.error("Last name is required");
+    if (!email.trim()) return toast.error("Email is required");
+    if (!/^\S+@\S+\.\S+$/.test(email))
+      return toast.error("Invalid email format");
+    if (!phone.trim()) return toast.error("Phone number is required");
+    if (!/^\d{10,15}$/.test(phone)) return toast.error("Invalid phone number");
+    if (!address.trim()) return toast.error("Address is required");
 
-  // Basic validation
-  if (!firstname.trim()) return toast.error("First name is required");
-  if (!lastname.trim()) return toast.error("Last name is required");
-  if (!email.trim()) return toast.error("Email is required");
-  if (!/^\S+@\S+\.\S+$/.test(email)) return toast.error("Invalid email format");
-  if (!phone.trim()) return toast.error("Phone number is required");
-  if (!/^\d{10,15}$/.test(phone)) return toast.error("Invalid phone number");
-  if (!address.trim()) return toast.error("Address is required");
-
-  try {
-    const res = await createSingleUser(formData).unwrap();
-    toast.success(res.message || "User created successfully");
-    refetch()
-    onClose();
-  } catch (error) {
-    toast.error(
-      (error as any)?.data?.message ||
-      (error as any)?.message ||
-      "Something went wrong"
-    );
-  }
-};
-
+    try {
+      const res = await updateUser({id :user.email,data :formData}).unwrap(); 
+      toast.success(res.message || "User updated successfully");
+      refetch()
+      onClose();
+    } catch (error) {
+      toast.error(
+        (error as any)?.data?.message ||
+        (error as any)?.message ||
+        "Something went wrong"
+      );
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -68,9 +86,9 @@ const UserFormModal: React.FC<Props> = ({ isOpen, onClose,refetch }) => {
         </button>
 
         <div className="mb-6 text-center">
-          <h2 className="text-3xl font-semibold">Create New User</h2>
+          <h2 className="text-3xl font-semibold">Update User</h2>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Fill in the details below
+            Edit the user details below
           </p>
         </div>
 
@@ -145,7 +163,7 @@ const UserFormModal: React.FC<Props> = ({ isOpen, onClose,refetch }) => {
               type="submit"
               className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md transition font-medium"
             >
-              Save User
+              Update User
             </button>
           </div>
         </form>
@@ -154,4 +172,4 @@ const UserFormModal: React.FC<Props> = ({ isOpen, onClose,refetch }) => {
   );
 };
 
-export default UserFormModal;
+export default UserForUpdate;
