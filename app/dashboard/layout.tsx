@@ -1,6 +1,7 @@
+// app/layout.tsx
 import type { Metadata } from "next";
 import Navigation from "@/components/layout/Sidebar";
-import AuthProvider from "@/components/gloabl/AuthProvider"; 
+import AuthClient from "@/components/gloabl/AuthProvider"; // ✅ this is the correct client-side wrapper
 
 export const metadata: Metadata = {
   title: "Mailer kayhan audio",
@@ -16,9 +17,9 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <Navigation />
-        <AuthProvider>
-          <div className="pl-[5rem]">{children}</div>
-        </AuthProvider>
+        <AuthClient>
+          <div className="pl-0 md:pl-[5rem]">{children}</div>
+        </AuthClient>
       </body>
     </html>
   );

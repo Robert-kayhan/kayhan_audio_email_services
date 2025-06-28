@@ -7,16 +7,17 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
 }
-
+import { useCreateSingleUserMutation } from "@/store/api/UserApi";
+import toast from "react-hot-toast";
 const UserFormModal: React.FC<Props> = ({ isOpen, onClose }) => {
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
+    firstname: "",
+    lastname: "",
     email: "",
     phone: "",
     address: "",
   });
-
+  const [createSingleUser] = useCreateSingleUserMutation();
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -24,11 +25,33 @@ const UserFormModal: React.FC<Props> = ({ isOpen, onClose }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Form Data:", formData);
+ const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  const { firstname, lastname, email, phone, address } = formData;
+
+  // Basic validation
+  if (!firstname.trim()) return toast.error("First name is required");
+  if (!lastname.trim()) return toast.error("Last name is required");
+  if (!email.trim()) return toast.error("Email is required");
+  if (!/^\S+@\S+\.\S+$/.test(email)) return toast.error("Invalid email format");
+  if (!phone.trim()) return toast.error("Phone number is required");
+  if (!/^\d{10,15}$/.test(phone)) return toast.error("Invalid phone number");
+  if (!address.trim()) return toast.error("Address is required");
+
+  try {
+    const res = await createSingleUser(formData).unwrap();
+    toast.success(res.message || "User created successfully");
     onClose();
-  };
+  } catch (error) {
+    toast.error(
+      (error as any)?.data?.message ||
+      (error as any)?.message ||
+      "Something went wrong"
+    );
+  }
+};
+
 
   if (!isOpen) return null;
 
@@ -44,16 +67,21 @@ const UserFormModal: React.FC<Props> = ({ isOpen, onClose }) => {
 
         <div className="mb-6 text-center">
           <h2 className="text-3xl font-semibold">Create New User</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Fill in the details below</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Fill in the details below
+          </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <form
+          onSubmit={handleSubmit}
+          className="grid grid-cols-1 md:grid-cols-2 gap-5"
+        >
           <div>
             <label className="block mb-1 text-sm font-medium">First Name</label>
             <input
-              name="firstName"
+              name="firstname"
               required
-              value={formData.firstName}
+              value={formData.firstname}
               onChange={handleChange}
               placeholder="Enter first name"
               className="w-full px-4 py-2 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -63,9 +91,9 @@ const UserFormModal: React.FC<Props> = ({ isOpen, onClose }) => {
           <div>
             <label className="block mb-1 text-sm font-medium">Last Name</label>
             <input
-              name="lastName"
+              name="lastname"
               required
-              value={formData.lastName}
+              value={formData.lastname}
               onChange={handleChange}
               placeholder="Enter last name"
               className="w-full px-4 py-2 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"

@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import { useState } from "react";
-import { useSignInMutation } from "@/store/api/userApiSlice";
+import { useSignInMutation } from "@/store/api/AuthApi";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {  toast } from 'react-hot-toast'; // 

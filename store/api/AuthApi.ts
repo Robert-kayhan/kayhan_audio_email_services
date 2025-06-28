@@ -1,11 +1,11 @@
 import { apiSlice } from "./apiSlcie";
-import { User_url } from "../constant";
-const userApi = apiSlice.injectEndpoints({
+import { Auth_url } from "../constant";
+const authApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     //signup
     getme: builder.query({
       query: () => ({
-        url: User_url,
+        url: Auth_url,
         method: "GET",
         credentials: "include", 
       }),
@@ -13,7 +13,7 @@ const userApi = apiSlice.injectEndpoints({
     //login
     signIn: builder.mutation({
       query: (data) => ({
-        url: `${User_url}/sign-in`,
+        url: `${Auth_url}/sign-in`,
         method: "POST",
         body: data,
         credentials: "include", 
@@ -23,4 +23,4 @@ const userApi = apiSlice.injectEndpoints({
   }),
 });
 
-export const {useSignInMutation , useGetmeQuery} = userApi;
+export const {useSignInMutation , useGetmeQuery} = authApi;
