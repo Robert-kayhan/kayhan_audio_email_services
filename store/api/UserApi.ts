@@ -28,7 +28,7 @@ updateUser: builder.mutation({
       query: ({id, data}) => ({
         url: `${USER_url}/user/${id}`,
         body: data,
-        method: "POST",
+        method: "PUT",
       }),
     }),
     
