@@ -36,7 +36,7 @@ const Navigation = () => {
 
   return (
     <div
-      className="group hidden md:flex flex-col justify-between p-4 text-white bg-black w-[4%] hover:w-[15%] h-screen fixed transition-all duration-300"
+      className="group hidden md:flex flex-col justify-between p-4 text-white bg-black w-[4%] hover:w-[15%] z-50 h-screen fixed transition-all duration-300"
     >
       {/* Top Navigation Items */}
       <div className="flex flex-col justify-center space-y-4">
@@ -50,7 +50,7 @@ const Navigation = () => {
           <span className="hidden group-hover:inline nav-item-name mt-12">Campaigns</span>
         </Link>
 
-        <Link href="/templates" className="flex items-center hover:translate-x-2 transition-transform">
+        <Link href="/dashboard/template" className="flex items-center hover:translate-x-2 transition-transform">
           <FileText className="mr-2 mt-12" size={20} />
           <span className="hidden group-hover:inline nav-item-name mt-12">Templates</span>
         </Link>
