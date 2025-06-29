@@ -8,7 +8,7 @@ interface PaginationProps {
   totalPages: number;
   setCurrentPage: (page: number) => void;
   limit: number;
-  showPagination: number[];
+  showPagination: any;
   tableDataLength: number;
 }
 
@@ -66,7 +66,7 @@ export default function Pagination({
               <ChevronLeft className="w-5 h-5" />
             </button>
 
-            {showPagination.map((pageNumber) => (
+            {showPagination.map((pageNumber:any) => (
               <button
                 key={pageNumber}
                 onClick={() => setCurrentPage(pageNumber)}
