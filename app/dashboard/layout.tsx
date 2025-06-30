@@ -17,9 +17,9 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <Navigation />
-        <AuthClient>
+        {/* <AuthClient> */}
           <div className="pl-0 md:pl-[5rem]">{children}</div>
-        </AuthClient>
+        {/* </AuthClient> */}
       </body>
     </html>
   );
