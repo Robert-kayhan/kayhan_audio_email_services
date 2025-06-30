@@ -5,7 +5,7 @@ export function middleware(req: NextRequest) {
   const token = req.cookies.get("jwt");
 
   if (!token) {
-    return NextResponse.redirect(new URL("/sign-up", req.url));
+    return NextResponse.redirect(new URL("/sign-in", req.url));
   }
 
   return NextResponse.next();
