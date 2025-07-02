@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import CustomTable, { Column } from "@/components/gloabl/Table";
+import CustomTable, { Column } from "@/components/global/Table";
 import { ChevronDown } from "lucide-react";
-import Pagination from "@/components/gloabl/Pagination";
+import Pagination from "@/components/global/Pagination";
 import toast from "react-hot-toast";
 import Link from "next/link";
 

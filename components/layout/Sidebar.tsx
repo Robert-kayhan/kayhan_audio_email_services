@@ -51,7 +51,7 @@ const Navigation = () => {
           <span className="hidden group-hover:inline nav-item-name mt-12">Templates</span>
         </Link>
 
-        <Link href="/dashboard/lead" className="flex items-center hover:translate-x-2 transition-transform">
+        <Link href="/dashboard/user" className="flex items-center hover:translate-x-2 transition-transform">
           <User className="mr-2 mt-12" size={20} />
           <span className="hidden group-hover:inline nav-item-name mt-12">User</span>
         </Link>
