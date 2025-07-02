@@ -3,7 +3,7 @@ import {
   useGetAllTemplatesQuery,
   useDeleteTemplateMutation,
 } from "@/store/api/templateApi";
-import Pagination from "@/components/gloabl/Pagination";
+import Pagination from "@/components/global/Pagination";
 import { Trash2, Pencil } from "lucide-react";
 import toast from "react-hot-toast";
 import Link from "next/link";
@@ -31,7 +31,7 @@ const TemplateSelectorModal: React.FC<Props> = ({
     page: currentPage,
     limit,
   });
-
+  console.log("this is data ", data);
   const [deleteTemplate] = useDeleteTemplateMutation();
 
   const templates = data?.data || [];
@@ -95,7 +95,7 @@ const TemplateSelectorModal: React.FC<Props> = ({
         ) : (
           <>
             <div style={{ display: "grid", gap: "12px", marginTop: "16px" }}>
-              {templates.map((tpl) => (
+              {templates.map((tpl:any) => (
                 <div
                   key={tpl.id}
                   onClick={() => {
@@ -110,29 +110,55 @@ const TemplateSelectorModal: React.FC<Props> = ({
                     background: "#2a2a2a",
                     color: "#fff",
                     display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
+                    flexDirection: "column", // Changed to column layout
+                    gap: "10px",
                   }}
                 >
-                  <span>{tpl.name}</span>
-
                   <div
-                    style={{ display: "flex", gap: "10px" }}
-                    onClick={(e) => e.stopPropagation()} // prevent triggering onSelect
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
                   >
-                    <Link href={`/dashboard/template/edit/${tpl.id}`} >
-                    <Pencil
-                      size={18}
-                      // onClick={() => router.push(`/template/edit/${tpl.id}`)}
-                      className="text-blue-400 hover:text-blue-500 cursor-pointer"
-                    />
-                    </Link>
-                    <Trash2
-                      size={18}
-                      onClick={(e) => handleDelete(e, tpl.id)}
-                      className="text-red-500 hover:text-red-600 cursor-pointer"
-                    />
+                    <strong>{tpl.name}</strong>
+
+                    <div
+                      style={{ display: "flex", gap: "10px" }}
+                      onClick={(e) => e.stopPropagation()} // prevent triggering onSelect
+                    >
+                      <Link href={`/dashboard/template/edit/${tpl.id}`}>
+                        <Pencil
+                          size={18}
+                          className="text-blue-400 hover:text-blue-500 cursor-pointer"
+                        />
+                      </Link>
+                      <Trash2
+                        size={18}
+                        onClick={(e) => handleDelete(e, tpl.id)}
+                        className="text-red-500 hover:text-red-600 cursor-pointer"
+                      />
+                    </div>
                   </div>
+
+                  {/* HTML Preview */}
+                  <div
+                    style={{
+                      marginTop: "4px",
+                      padding: "8px",
+                      background: "#fff",
+                      color: "#000",
+                      borderRadius: "4px",
+                      maxHeight: "150px",
+                      overflowY: "auto",
+                      fontSize: "14px",
+                    }}
+                    dangerouslySetInnerHTML={{
+                      __html:
+                        tpl.html ||
+                        "<p style='color:gray;'>No preview available</p>",
+                    }}
+                  />
                 </div>
               ))}
             </div>

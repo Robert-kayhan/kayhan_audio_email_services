@@ -29,10 +29,9 @@ const LoginPage = () => {
    const res =    await login(formData).unwrap();
       toast.success("User login successfully!");
       console.log("user login succesffuly",res)
-      // router.push("/")
+      router.push("/dashboard/template")
     } catch (error) {
-      const err = error as ApiError;
-      toast.error(err.data?.message || "Something went wrong");
+      toast.error( "Invalid credentials");
     } // Replace with your API call
   };
 

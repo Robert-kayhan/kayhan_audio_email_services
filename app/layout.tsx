@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import StateProvider from "@/components/gloabl/StateProvider";
+import StateProvider from "@/components/global/StateProvider";
 
 export const metadata: Metadata = {
   title: "Create Next App",

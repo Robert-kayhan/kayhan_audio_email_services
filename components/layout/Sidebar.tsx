@@ -9,11 +9,7 @@ import {
   Users,
   FileText,
   Settings,
-  LogOut,
-  LogIn,
-  UserPlus,
-  ChevronDown,
-  ChevronUp,
+ User
 } from "lucide-react";
 
 // TEMP mock user (you can replace with Redux or real auth check)
@@ -45,7 +41,7 @@ const Navigation = () => {
           <span className="hidden group-hover:inline nav-item-name mt-12">Dashboard</span>
         </Link>
 
-        <Link href="/campaigns" className="flex items-center hover:translate-x-2 transition-transform">
+        <Link href="/dashboard/campaign" className="flex items-center hover:translate-x-2 transition-transform">
           <Mail className="mr-2 mt-12" size={20} />
           <span className="hidden group-hover:inline nav-item-name mt-12">Campaigns</span>
         </Link>
@@ -55,11 +51,14 @@ const Navigation = () => {
           <span className="hidden group-hover:inline nav-item-name mt-12">Templates</span>
         </Link>
 
-        <Link href="/dashboard/lead" className="flex items-center hover:translate-x-2 transition-transform">
-          <Users className="mr-2 mt-12" size={20} />
-          <span className="hidden group-hover:inline nav-item-name mt-12">Subscribers</span>
+        <Link href="/dashboard/user" className="flex items-center hover:translate-x-2 transition-transform">
+          <User className="mr-2 mt-12" size={20} />
+          <span className="hidden group-hover:inline nav-item-name mt-12">User</span>
         </Link>
-
+         <Link href="/dashboard/lead-group" className="flex items-center hover:translate-x-2 transition-transform">
+          <Users className="mr-2 mt-12" size={20} />
+          <span className="hidden group-hover:inline nav-item-name mt-12">Leads Group </span>
+        </Link>
         <Link href="/settings" className="flex items-center hover:translate-x-2 transition-transform">
           <Settings className="mr-2 mt-12" size={20} />
           <span className="hidden group-hover:inline nav-item-name mt-12">Settings</span>
