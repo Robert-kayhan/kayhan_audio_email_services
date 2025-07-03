@@ -1,0 +1,109 @@
+"use client";
+
+import { useState } from "react";
+import { useGetAllUserQuery } from "@/store/api/UserApi";
+import CustomTable, { Column } from "@/components/global/Table";
+import Pagination from "@/components/global/Pagination";
+import { User } from "@/util/interface";
+import { CheckSquare, Square } from "lucide-react";
+
+interface Props {
+  selectedUserIds: any;
+  setSelectedUserIds: (ids: any) => void;
+  onNext: () => void;
+}
+
+export default function AddRecipients({
+  selectedUserIds,
+  setSelectedUserIds,
+  onNext,
+}: Props) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [limit, setLimit] = useState(25);
+
+  const { data, isLoading } = useGetAllUserQuery({
+    page: currentPage,
+    limit,
+  });
+
+  const users: User[] = data?.data || [];
+  const pagination = data?.pagination || {};
+  const totalItems = pagination.totalItems || 0;
+  const totalPages = pagination.totalPages || 1;
+  const showPagination = Array.from({ length: totalPages }, (_, i) => i + 1);
+
+  const isUserSelected = (id: number) => selectedUserIds.includes(id);
+
+  const toggleUser = (id: number) => {
+    setSelectedUserIds((prev:any) =>
+      prev.includes(id) ? prev.filter((uid:any) => uid !== id) : [...prev, id]
+    );
+  };
+
+  const columns: Column<User>[] = [
+    {
+      header: "",
+      accessor: "id",
+      render: (_, row:any) => (
+        <button onClick={() => toggleUser(row.id)} className="flex items-center">
+          {isUserSelected(row.id) ? (
+            <CheckSquare className="text-blue-500" size={18} />
+          ) : (
+            <Square className="text-gray-400" size={18} />
+          )}
+        </button>
+      ),
+    },
+    { header: "ID", accessor: "id" },
+    { header: "Name", accessor: "name" },
+    { header: "Email", accessor: "email" },
+  ];
+
+  return (
+    <div className="p-6 text-white bg-gray-950 min-h-screen rounded-lg shadow">
+      <div className="mb-4 flex justify-between items-center">
+        <h2 className="text-lg font-semibold">Select Recipients</h2>
+        <select
+          className="text-sm px-3 py-1 rounded-md bg-black border text-white focus:outline-none"
+          value={limit}
+          onChange={(e) => {
+            setLimit(Number(e.target.value));
+            setCurrentPage(1);
+          }}
+        >
+          {[5, 10, 25, 50].map((size) => (
+            <option key={size} value={size}>
+              Show {size}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {isLoading ? (
+        <p>Loading users...</p>
+      ) : (
+        <CustomTable columns={columns} data={users} pageSize={limit}  />
+      )}
+
+      <Pagination
+        currentPage={currentPage}
+        totalRecords={totalItems}
+        totalPages={totalPages}
+        setCurrentPage={setCurrentPage}
+        limit={limit}
+        showPagination={showPagination}
+        tableDataLength={users.length}
+      />
+
+      <div className="mt-6 flex justify-end">
+        <button
+          onClick={onNext}
+          disabled={selectedUserIds.length === 0}
+          className="px-6 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  );
+}
