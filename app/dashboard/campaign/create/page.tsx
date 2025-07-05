@@ -9,7 +9,7 @@ import AssociateList from "@/components/campaign/AssociateList";
 import CampaignDetailsForm, {
   CampaignDetails,
 } from "@/components/campaign/campaign";
-import { useCreateCampaignMutation } from "@/store/api/campaignApi";
+import { useCreateCampaignMutation ,useSendComgainMutation} from "@/store/api/campaignApi";
 const steps = [
   { id: "form", label: "Campaign Details", icon: Megaphone },
   { id: "template", label: "Choose Template", icon: ClipboardList },
@@ -29,48 +29,57 @@ const CampaignStepper = () => {
     senderName: "",
   });
 
-  const [selectedTemplateId, setSelectedTemplateId] = useState<any>(
-    null
-  );
+  const [selectedTemplateId, setSelectedTemplateId] = useState<any>(null);
 
   const [selectedRecipientIds, setSelectedRecipientIds] = useState<string[]>(
     []
   );
-
+  const [campgainId, setCampgainId] = useState<any>(null);
   const [selectedListId, setSelectedListId] = useState<string | null>(null);
   const [createCampaign] = useCreateCampaignMutation();
-  console.log(selectedTemplateId , "this is template id")
- const handleCreateComgain = async () => {
-  try {
-    if (
-      !campaignDetails.campaignName ||
-      !campaignDetails.fromEmail ||
-      !campaignDetails.senderName ||
-      !selectedTemplateId ||
-      !selectedListId
-    ) {
-      alert("Missing required campaign data.");
-      return;
+  console.log(selectedTemplateId, "this is template id");
+  const handleCreateComgain = async () => {
+    try {
+      if (
+        !campaignDetails.campaignName ||
+        !campaignDetails.fromEmail ||
+        !campaignDetails.senderName ||
+        !selectedTemplateId ||
+        !selectedListId
+      ) {
+        alert("Missing required campaign data.");
+        return;
+      }
+
+      const payload = {
+        campaignName: campaignDetails.campaignName,
+        campaignSubject : campaignDetails.subject,
+        fromEmail: campaignDetails.fromEmail,
+        senderName: campaignDetails.senderName,
+        templateId: parseInt(selectedTemplateId.id),
+        leadGroupId: parseInt(selectedListId),
+      };
+      console.log(payload, "this is payload");
+      const res = await createCampaign(payload).unwrap();
+      alert("Campaign created successfully!");
+      setCampgainId(res.data.id)
+      console.log("Created:", res.data.id);
+      setCurrentStep("send");
+    } catch (error) {
+      console.error("Error creating campaign:", error);
+      alert("Failed to create campaign.");
     }
-
-    const payload = {
-      campaignName: campaignDetails.campaignName,
-      fromEmail: campaignDetails.fromEmail,
-      senderName: campaignDetails.senderName,
-      templateId: parseInt(selectedTemplateId.id), 
-      leadGroupId: parseInt(selectedListId),
-    };
-    console.log(payload , "this is payload")
-    const res = await createCampaign(payload).unwrap();
-    alert("Campaign created successfully!");
-    console.log("Created:", res);
-    setCurrentStep("send")
-  } catch (error) {
-    console.error("Error creating campaign:", error);
-    alert("Failed to create campaign.");
+  };
+  const [sendComgain] = useSendComgainMutation()
+  const handlesendComgain = async()=>{
+    try {
+      const res = await sendComgain(campgainId).unwrap()
+      console.log(res)
+    } catch (error) {
+      console.log(error)
+    }
+    
   }
-};
-
   const renderContent = () => {
     switch (currentStep) {
       case "form":
@@ -153,12 +162,7 @@ const CampaignStepper = () => {
             <button
               className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
               onClick={() => {
-                console.log("Sending campaign", {
-                  campaignDetails,
-                  templateId: selectedTemplateId,
-                  // recipientIds: selectedRecipientIds,
-                  listId: selectedListId,
-                });
+               handlesendComgain()
               }}
             >
               Send Campaign

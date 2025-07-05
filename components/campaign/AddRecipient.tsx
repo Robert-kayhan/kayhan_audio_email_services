@@ -33,19 +33,39 @@ export default function AddRecipients({
   const showPagination = Array.from({ length: totalPages }, (_, i) => i + 1);
 
   const isUserSelected = (id: number) => selectedUserIds.includes(id);
-
+  const allUserIdsOnCurrentPage = users.map((user) => user.id);
   const toggleUser = (id: number) => {
-    setSelectedUserIds((prev:any) =>
-      prev.includes(id) ? prev.filter((uid:any) => uid !== id) : [...prev, id]
+    setSelectedUserIds((prev: any) =>
+      prev.includes(id) ? prev.filter((uid: any) => uid !== id) : [...prev, id]
     );
   };
+  const toggleSelectAllCurrentPage = () => {
+    const areAllSelected = allUserIdsOnCurrentPage.every((id) =>
+      selectedUserIds.includes(id)
+    );
 
+    if (areAllSelected) {
+      // Unselect all on current page
+      setSelectedUserIds((prev: number[]) =>
+        prev.filter((id:any) => !allUserIdsOnCurrentPage.includes(id))
+      );
+    } else {
+      // Select all on current page
+      const newSelected = Array.from(
+        new Set([...selectedUserIds, ...allUserIdsOnCurrentPage])
+      );
+      setSelectedUserIds(newSelected);
+    }
+  };
   const columns: Column<User>[] = [
     {
       header: "",
       accessor: "id",
-      render: (_, row:any) => (
-        <button onClick={() => toggleUser(row.id)} className="flex items-center">
+      render: (_, row: any) => (
+        <button
+          onClick={() => toggleUser(row.id)}
+          className="flex items-center"
+        >
           {isUserSelected(row.id) ? (
             <CheckSquare className="text-blue-500" size={18} />
           ) : (
@@ -82,7 +102,9 @@ export default function AddRecipients({
       {isLoading ? (
         <p>Loading users...</p>
       ) : (
-        <CustomTable columns={columns} data={users} pageSize={limit}  />
+       <div> <button className="border-b my-2" onClick={toggleSelectAllCurrentPage} >Select All user</button>
+         <CustomTable columns={columns} data={users} pageSize={limit} />
+       </div>
       )}
 
       <Pagination
