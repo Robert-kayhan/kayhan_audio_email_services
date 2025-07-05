@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import CustomTable, { Column } from "@/components/global/Table";
-import { ChevronDown } from "lucide-react";
+import { useGetAllCampaignQuery } from "@/store/api/campaignApi";
 import Pagination from "@/components/global/Pagination";
 import toast from "react-hot-toast";
 import Link from "next/link";
 
-// Mock campaign type and data
+// Define Campaign type
 type Campaign = {
   id: number;
   name: string;
@@ -16,60 +16,39 @@ type Campaign = {
   createdAt: string;
 };
 
-const mockCampaigns: Campaign[] = [
-  {
-    id: 1,
-    name: "Welcome Campaign",
-    subject: "Welcome to our service!",
-    status: "Sent",
-    createdAt: "2025-06-28",
-  },
-  {
-    id: 2,
-    name: "Summer Sale",
-    subject: "Get 30% off on all items",
-    status: "Draft",
-    createdAt: "2025-06-25",
-  },
-  {
-    id: 3,
-    name: "Product Launch",
-    subject: "Announcing our new feature",
-    status: "Scheduled",
-    createdAt: "2025-06-20",
-  },
-];
-
-const columns: Column<Campaign>[] = [
-  { header: "Name", accessor: "name", sortable: true },
-  { header: "Subject", accessor: "subject", sortable: true },
-  { header: "Status", accessor: "status" },
+// Table columns
+const columns: Column<any>[] = [
+  { header: "Name", accessor: "campaignName", sortable: true },
+  { header: "Subject", accessor: "campaignSubject", sortable: true },
+  { header: "senderName", accessor: "senderName" },
   { header: "Created At", accessor: "createdAt" },
 ];
 
 export default function CampaignsPage() {
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-  const [formModal, setFormModal] = useState(false);
-  const [updateModal, setUpdateModal] = useState(false);
-  const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(25);
 
-  const campaigns = mockCampaigns;
-  const totalItems = campaigns.length;
-  const totalPages = 1;
-  const showPagination = [1];
+  const { data, isLoading, isError } = useGetAllCampaignQuery({
+    page: currentPage,
+    limit,
+  });
+
+  const campaigns: Campaign[] = data?.campaigns || [];
+  const totalItems = data?.total || 0;
+  const totalPages = Math.ceil(totalItems / limit);
+  const showPagination = Array.from({ length: totalPages }, (_, i) => i + 1);
 
   const handleEdit = (row: Campaign) => {
-    setCampaign(row);
-    setUpdateModal(true);
-    toast.success(`Editing "${row.name}" (static mode)`);
+    toast.success(`Editing "${row.name}" (mock only)`);
   };
 
   const handleDelete = async (row: Campaign) => {
     toast.success(`Deleted "${row.name}" (mock only)`);
   };
+
+  // Handle loading & error
+  if (isLoading) return <div className="p-4">Loading campaigns...</div>;
+  if (isError) return <div className="p-4 text-red-500">Failed to load campaigns.</div>;
 
   return (
     <div className="p-4">
@@ -78,6 +57,7 @@ export default function CampaignsPage() {
         <h2 className="text-2xl font-serif font-bold">Campaigns</h2>
 
         <div className="flex items-center gap-3">
+          {/* Page Size Selector */}
           <select
             className="text-sm px-3 py-1 rounded-md bg-black text-white focus:outline-none"
             value={limit}
@@ -93,15 +73,13 @@ export default function CampaignsPage() {
             ))}
           </select>
 
-          {/* Create Dropdown */}
-          <div className="relative inline-block text-left">
-            <Link href="/dashboard/campaign/create"
-              // onClick={() => setDropdownOpen((prev) => !prev)}
-              className="bg-blue-600 text-white px-4 py-2 rounded-md flex items-center gap-1 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-400"
-            >
-              Create
-            </Link>
-          </div>
+          {/* Create Button */}
+          <Link
+            href="/dashboard/campaign/create"
+            className="bg-blue-600 text-white px-4 py-2 rounded-md flex items-center gap-1 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-400"
+          >
+            Create
+          </Link>
         </div>
       </div>
 

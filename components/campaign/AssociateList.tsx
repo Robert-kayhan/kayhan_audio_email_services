@@ -4,16 +4,17 @@ import { useState, useEffect } from "react";
 import CustomTable, { Column } from "@/components/global/Table";
 import Pagination from "@/components/global/Pagination";
 import {
-  useDeleteLeadGroupMutation,
+  useGetLeadGroupQuery,
   useGetAllLeadGroupQuery,
   useCreateLeadGroupMutation,
+  useUpdateLeadGroupMutation,
 } from "@/store/api/leadAPi";
 import toast from "react-hot-toast";
 import { CheckSquare, Square } from "lucide-react";
 
 interface Props {
-  selectedUserIds: any; // FIX: Explicit typing
-  onSelectGroupId: (groupId: any) => void;
+  selectedUserIds: any; // type assumed
+  onSelectGroupId:any;
 }
 
 const AssociateList = ({ selectedUserIds, onSelectGroupId }: Props) => {
@@ -21,8 +22,8 @@ const AssociateList = ({ selectedUserIds, onSelectGroupId }: Props) => {
   const [limit, setLimit] = useState(25);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [groupName, setGroupName] = useState("");
-  const [selectedGroupId, setSelectedGroupId] = useState<any>(null);
-  console.log(selectedUserIds, "this is usersid");
+  const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null);
+
   const { data, isLoading, isError, refetch } = useGetAllLeadGroupQuery({
     page: currentPage,
     limit,
@@ -30,6 +31,7 @@ const AssociateList = ({ selectedUserIds, onSelectGroupId }: Props) => {
 
   const [createLeadGroup, { isLoading: creating }] =
     useCreateLeadGroupMutation();
+  const [updateLeadGroup] = useUpdateLeadGroupMutation();
 
   const groups = data?.data ?? [];
   const pagination = data?.pagination ?? {
@@ -38,15 +40,48 @@ const AssociateList = ({ selectedUserIds, onSelectGroupId }: Props) => {
     totalPages: 1,
   };
 
-  const toggleGroup = (id: number) => {
-    const newSelection = selectedGroupId === id ? null : id;
+  const { data: existingGroup } = useGetLeadGroupQuery(selectedGroupId ?? 0, {
+    skip: !selectedGroupId, // ✅ Avoids running when null
+  });
+
+  const toggleGroup = async (id: number) => {
+    const isSame = selectedGroupId === id;
+    const newSelection = isSame ? null : id;
     setSelectedGroupId(newSelection);
-    onSelectGroupId(newSelection!);
+    onSelectGroupId(newSelection);
+
+    if (isSame || selectedUserIds.length === 0) return;
+
+    try {
+      // ✅ Extract old user IDs
+      const oldUserIds: number[] = existingGroup?.users?.map((u:any) => u.id) || [];
+
+      // ✅ Merge and deduplicate
+      const mergedUserIds = Array.from(
+        new Set([...oldUserIds, ...selectedUserIds])
+      );
+
+      const data = {
+        groupName: existingGroup?.groupName || "Untitled Group",
+        userIds: mergedUserIds,
+      };
+
+      await updateLeadGroup({
+        id,
+        data,
+      }).unwrap();
+
+      toast.success("Users added to the group successfully.");
+      refetch();
+    } catch (error) {
+      console.error("Update group failed:", error);
+      toast.error("Failed to update group.");
+    }
   };
 
   const handleCreateGroup = async () => {
     if (!groupName.trim()) return toast.error("Group name is required");
-    if (selectedUserIds.length === 0) return toast.error("No users selected");
+    if (!selectedUserIds.length) return toast.error("No users selected");
 
     try {
       const res = await createLeadGroup({
@@ -116,7 +151,7 @@ const AssociateList = ({ selectedUserIds, onSelectGroupId }: Props) => {
             onClick={() => setIsModalOpen(true)}
             className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
           >
-            Create
+            Create Group
           </button>
         </div>
       </div>
@@ -147,7 +182,7 @@ const AssociateList = ({ selectedUserIds, onSelectGroupId }: Props) => {
         </>
       )}
 
-      {/* Modal */}
+      {/* Create Group Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
           <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg w-full max-w-md p-6">
