@@ -24,6 +24,23 @@ const UserApi = apiSlice.injectEndpoints({
         method: "GET",
       }),
     }),
+    getAllUserWithLead: builder.query({
+      query: ({ page = 1, limit = 10, search = "", hasLeadOnly = false }) => {
+        const params = new URLSearchParams({
+          page: page.toString(),
+          limit: limit.toString(),
+        });
+
+        if (search) params.append("search", search);
+        if (hasLeadOnly) params.append("hasLeadOnly", "true");
+
+        return {
+          url: `${USER_url}/lead-user?${params.toString()}`,
+          method: "GET",
+        };
+      },
+    }),
+
     updateUser: builder.mutation({
       query: ({ id, data }) => ({
         url: `${USER_url}/user/${id}`,
@@ -47,4 +64,5 @@ export const {
   useGetAllUserQuery,
   useDeleteUserMutation,
   useUpdateUserMutation,
+  useGetAllUserWithLeadQuery
 } = UserApi;
