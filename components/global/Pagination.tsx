@@ -18,11 +18,25 @@ export default function Pagination({
   totalPages,
   setCurrentPage,
   limit,
-  showPagination,
   tableDataLength,
 }: PaginationProps) {
+  const maxVisiblePages = 7;
+  const pageNumbers = [];
+
+  let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+  let endPage = startPage + maxVisiblePages - 1;
+
+  if (endPage > totalPages) {
+    endPage = totalPages;
+    startPage = Math.max(1, endPage - maxVisiblePages + 1);
+  }
+
+  for (let i = startPage; i <= endPage; i++) {
+    pageNumbers.push(i);
+  }
+
   return (
-    <div className="flex items-center justify-between  pt-4 px-2">
+    <div className="flex items-center justify-between pt-4 px-2">
       <div className="flex flex-1 flex-col-reverse gap-2 md:flex-row items-center justify-between w-full">
         {/* Info */}
         <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -39,26 +53,10 @@ export default function Pagination({
 
         {/* Pagination Controls */}
         <div className="flex items-center gap-3">
-          {/* Mobile Dropdown */}
-          {/* <div className="block md:hidden">
-            <select
-              onChange={(e) => setCurrentPage(Number(e.target.value))}
-              value={currentPage}
-              className="px-3 py-1 border rounded-md text-sm text-gray-700 dark:text-white bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 shadow-sm"
-            >
-              <option disabled>Go to Page</option>
-              {showPagination.map((pageNumber) => (
-                <option key={pageNumber} value={pageNumber}>
-                  Page {pageNumber}
-                </option>
-              ))}
-            </select>
-          </div> */}
-
-          {/* Arrows + Page Numbers */}
           <nav className="flex items-center gap-1">
+            {/* Prev */}
             <button
-              onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
+              onClick={() => setCurrentPage(currentPage - 1)}
               className="p-2 rounded-full text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
               disabled={currentPage === 1}
               aria-label="Previous page"
@@ -66,7 +64,21 @@ export default function Pagination({
               <ChevronLeft className="w-5 h-5" />
             </button>
 
-            {showPagination.map((pageNumber:any) => (
+            {/* First page */}
+            {startPage > 1 && (
+              <>
+                <button
+                  onClick={() => setCurrentPage(1)}
+                  className="px-3 py-1.5 text-sm rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  1
+                </button>
+                {startPage > 2 && <span className="px-2">...</span>}
+              </>
+            )}
+
+            {/* Page numbers */}
+            {pageNumbers.map((pageNumber) => (
               <button
                 key={pageNumber}
                 onClick={() => setCurrentPage(pageNumber)}
@@ -80,8 +92,22 @@ export default function Pagination({
               </button>
             ))}
 
+            {/* Last page */}
+            {endPage < totalPages && (
+              <>
+                {endPage < totalPages - 1 && <span className="px-2">...</span>}
+                <button
+                  onClick={() => setCurrentPage(totalPages)}
+                  className="px-3 py-1.5 text-sm rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  {totalPages}
+                </button>
+              </>
+            )}
+
+            {/* Next */}
             <button
-              onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}
+              onClick={() => setCurrentPage(currentPage + 1)}
               className="p-2 rounded-full text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
               disabled={currentPage === totalPages}
               aria-label="Next page"
