@@ -26,12 +26,13 @@ const LoginPage = () => {
   const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
     try {
-   const res =    await login(formData).unwrap();
+   const res = await login(formData).unwrap();
       toast.success("User login successfully!");
       console.log("user login succesffuly",res)
       router.push("/dashboard/template")
     } catch (error) {
       toast.error( "Invalid credentials");
+      console.log(error)
     } // Replace with your API call
   };
 
