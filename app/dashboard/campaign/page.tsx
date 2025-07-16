@@ -48,7 +48,7 @@ export default function CampaignsPage() {
 
   // Handle loading & error
   if (isLoading) return <div className="p-4">Loading campaigns...</div>;
-  if (isError) return <div className="p-4 text-red-500">Failed to load campaigns.</div>;
+  // if (isError) return <div className="p-4 text-red-500">Failed to load campaigns.</div>;
 
   return (
     <div className="p-4">
@@ -66,7 +66,7 @@ export default function CampaignsPage() {
               setCurrentPage(1);
             }}
           >
-            {[5, 10, 25, 50].map((size) => (
+            {[5, 10, 25, 50,100].map((size) => (
               <option key={size} value={size}>
                 Show {size}
               </option>
