@@ -37,92 +37,76 @@ const CampaignDetailsForm = ({ details, setDetails, onNext }: Props) => {
   };
 
   return (
-    <div className="p-6 text-white space-y-6">
-      <h2 className="text-2xl font-semibold text-white">📋 Campaign Details</h2>
+    <div className="p-6 max-w-2xl mx-auto text-white">
+      <h2 className="text-2xl font-semibold mb-4">Campaign Details</h2>
 
       {error && (
-        <div className="bg-red-500/20 text-red-400 px-4 py-2 rounded border border-red-500">
+        <div className="bg-red-500/20 text-red-300 px-4 py-2 mb-4 rounded border border-red-500">
           {error}
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        <div className="relative">
+      <div className="space-y-4">
+        <div>
+          <label className="block mb-1 text-sm">Campaign Name *</label>
           <input
+            type="text"
             name="campaignName"
-            id="campaignName"
             value={details.campaignName}
             onChange={handleChange}
-            className="peer w-full bg-gray-800 text-white border border-gray-600 p-3 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder=" "
+            className="w-full bg-gray-800 border border-gray-600 p-2 rounded"
           />
-          <label
-            htmlFor="campaignName"
-            className="absolute left-3 top-2.5 text-gray-400 text-sm peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 transition-all"
-          >
-            Campaign Name *
-          </label>
         </div>
 
-        <div className="relative">
+        <div>
+          <label className="block mb-1 text-sm">Email Subject *</label>
           <input
+            type="text"
             name="subject"
-            id="subject"
             value={details.subject}
             onChange={handleChange}
-            className="peer w-full bg-gray-800 text-white border border-gray-600 p-3 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder=" "
+            className="w-full bg-gray-800 border border-gray-600 p-2 rounded"
           />
-          <label
-            htmlFor="subject"
-            className="absolute left-3 top-2.5 text-gray-400 text-sm peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 transition-all"
-          >
-            Email Subject *
-          </label>
         </div>
 
-        <div className="relative">
+        <div>
+          <label className="block mb-1 text-sm">From Email *</label>
           <input
-            name="fromEmail"
-            id="fromEmail"
             type="email"
+            name="fromEmail"
             value={details.fromEmail}
             onChange={handleChange}
-            className="peer w-full bg-gray-800 text-white border border-gray-600 p-3 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder=" "
+            className="w-full bg-gray-800 border border-gray-600 p-2 rounded"
           />
-          <label
-            htmlFor="fromEmail"
-            className="absolute left-3 top-2.5 text-gray-400 text-sm peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 transition-all"
-          >
-            From Email *
-          </label>
         </div>
 
-        <div className="relative">
+        <div>
+          <label className="block mb-1 text-sm">Sender Name *</label>
           <input
+            type="text"
             name="senderName"
-            id="senderName"
             value={details.senderName}
             onChange={handleChange}
-            className="peer w-full bg-gray-800 text-white border border-gray-600 p-3 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder=" "
+            className="w-full bg-gray-800 border border-gray-600 p-2 rounded"
           />
-          <label
-            htmlFor="senderName"
-            className="absolute left-3 top-2.5 text-gray-400 text-sm peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 transition-all"
-          >
-            Sender Name *
-          </label>
         </div>
 
-      
+        <div>
+          <label className="block mb-1 text-sm">Description</label>
+          <textarea
+            name="description"
+            value={details.description || ""}
+            onChange={handleChange}
+            rows={3}
+            className="w-full bg-gray-800 border border-gray-600 p-2 rounded"
+          />
+        </div>
       </div>
 
-      <div className="flex justify-end pt-4">
+      <div className="flex justify-end mt-6">
         <button
           onClick={handleSubmit}
-          className="bg-blue-600 hover:bg-blue-700 transition px-6 py-2 rounded text-white font-medium"
+          className="bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded text-white font-medium"
         >
           Next →
         </button>
