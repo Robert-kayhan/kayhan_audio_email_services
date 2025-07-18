@@ -7,7 +7,7 @@ export function middleware(req: NextRequest) {
   console.log(req.cookies)
   // ✅ Redirect authenticated users away from auth pages
   if (token && (pathname === "/sign-in" || pathname === "/sign-up")) {
-    url.pathname = "/dashboard";
+    url.pathname = "/dashboard/campaign";
     return NextResponse.redirect(url);
   }
 
