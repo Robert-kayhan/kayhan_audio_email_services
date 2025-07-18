@@ -60,7 +60,7 @@ const Navigation = () => {
           <Users className="mr-2 mt-12" size={20} />
           <span className="hidden group-hover:inline nav-item-name mt-12">Leads Group </span>
         </Link>
-          <Link href="/dashboard/lead-group" className="flex items-center hover:translate-x-2 transition-transform">
+          <Link href="/dashboard/macth-with-orders" className="flex items-center hover:translate-x-2 transition-transform">
           <LucideListOrdered className="mr-2 mt-12" size={20} />
           <span className="hidden group-hover:inline nav-item-name mt-12">Match order </span>
         </Link>

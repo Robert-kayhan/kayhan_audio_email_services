@@ -6,11 +6,12 @@ import { useGetAllCampaignQuery } from "@/store/api/campaignApi";
 import Pagination from "@/components/global/Pagination";
 import toast from "react-hot-toast";
 import Link from "next/link";
-
+import { useDeleteCampaignMutation } from "@/store/api/campaignApi";
+import { tracingChannel } from "diagnostics_channel";
 // Define Campaign type
 type Campaign = {
   id: number;
-  name: string;
+  campaignName: string;
   subject: string;
   status: string;
   createdAt: string;
@@ -28,7 +29,7 @@ export default function CampaignsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(25);
 
-  const { data, isLoading, isError } = useGetAllCampaignQuery({
+  const { data, isLoading, refetch } = useGetAllCampaignQuery({
     page: currentPage,
     limit,
   });
@@ -37,13 +38,17 @@ export default function CampaignsPage() {
   const totalItems = data?.total || 0;
   const totalPages = Math.ceil(totalItems / limit);
   const showPagination = Array.from({ length: totalPages }, (_, i) => i + 1);
-
-  const handleEdit = (row: Campaign) => {
-    toast.success(`Editing "${row.name}" (mock only)`);
-  };
+  const [deleteCampaign] = useDeleteCampaignMutation();
 
   const handleDelete = async (row: Campaign) => {
-    toast.success(`Deleted "${row.name}" (mock only)`);
+    try {
+      await deleteCampaign(row.id);
+      toast.success(`Deleted "${row.campaignName}" successfully`);
+      refetch()
+    } catch (error) {
+      console.log(error);
+      toast.error(`Failed to delete "${row.campaignName}"`);
+    }
   };
 
   // Handle loading & error
@@ -66,7 +71,7 @@ export default function CampaignsPage() {
               setCurrentPage(1);
             }}
           >
-            {[5, 10, 25, 50,100].map((size) => (
+            {[5, 10, 25, 50, 100].map((size) => (
               <option key={size} value={size}>
                 Show {size}
               </option>
@@ -85,13 +90,15 @@ export default function CampaignsPage() {
 
       {/* Table */}
       {campaigns.length === 0 ? (
-        <div className="text-center py-8 text-gray-400">No campaigns found.</div>
+        <div className="text-center py-8 text-gray-400">
+          No campaigns found.
+        </div>
       ) : (
         <>
           <CustomTable<Campaign>
             columns={columns}
             data={campaigns}
-            onEdit={handleEdit}
+            // onEdit={handleEdit}
             onDelete={handleDelete}
             showActions
             pageSize={limit}
