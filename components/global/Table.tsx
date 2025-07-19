@@ -76,7 +76,7 @@ export default function CustomTable<T>({
 
   return (
     <div className="overflow-x-auto w-full">
-      <table className="min-w-full border border-gray-300 dark:border-gray-700 rounded-md">
+      <table className="min-w-full border  border-gray-300 dark:border-gray-700 rounded-md">
         <thead className="bg-gray-100 dark:bg-gray-800">
           <tr>
             {columns.map((col) => (

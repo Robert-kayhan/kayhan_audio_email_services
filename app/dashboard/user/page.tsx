@@ -10,6 +10,7 @@ import Pagination from "@/components/global/Pagination";
 import { useDeleteUserMutation } from "@/store/api/UserApi";
 import toast from "react-hot-toast";
 import UserForUpdate from "@/components/leads/UpdateUserModel";
+import Link from "next/link";
 type User = {
   name: string;
   email: string;
@@ -111,15 +112,12 @@ export default function TablePage() {
 
             {dropdownOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white text-black border border-gray-200 rounded shadow z-50 dark:bg-gray-800 dark:text-white dark:border-gray-700">
-                <button
-                  onClick={() => {
-                    setDropdownOpen(false);
-                    setUserShowModal(true);
-                  }}
+                <Link
+                  href="/dashboard/user/create"
                   className="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   Create Single Lead
-                </button>
+                </Link>
                 <button
                   onClick={() => {
                     setDropdownOpen(false);
@@ -182,11 +180,11 @@ export default function TablePage() {
         isOpen={showModal}
         onClose={() => setShowModal(false)}
       />
-      <UserFormModal
+      {/* <UserFormModal
         refetch={refetch}
         isOpen={userShowModal}
         onClose={() => setUserShowModal(false)}
-      />
+      /> */}
       <UserForUpdate
         user={user}
         isOpen={updateuserShowModal}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import CustomTable, { Column } from "@/components/global/Table";
 import Pagination from "@/components/global/Pagination";
 import {
@@ -13,8 +13,8 @@ import toast from "react-hot-toast";
 import { CheckSquare, Square } from "lucide-react";
 
 interface Props {
-  selectedUserIds: any; // type assumed
-  onSelectGroupId:any;
+  selectedUserIds: any;
+  onSelectGroupId: any;
 }
 
 const AssociateList = ({ selectedUserIds, onSelectGroupId }: Props) => {
@@ -29,8 +29,7 @@ const AssociateList = ({ selectedUserIds, onSelectGroupId }: Props) => {
     limit,
   });
 
-  const [createLeadGroup, { isLoading: creating }] =
-    useCreateLeadGroupMutation();
+  const [createLeadGroup, { isLoading: creating }] = useCreateLeadGroupMutation();
   const [updateLeadGroup] = useUpdateLeadGroupMutation();
 
   const groups = data?.data ?? [];
@@ -41,7 +40,7 @@ const AssociateList = ({ selectedUserIds, onSelectGroupId }: Props) => {
   };
 
   const { data: existingGroup } = useGetLeadGroupQuery(selectedGroupId ?? 0, {
-    skip: !selectedGroupId, // ✅ Avoids running when null
+    skip: !selectedGroupId,
   });
 
   const toggleGroup = async (id: number) => {
@@ -53,24 +52,15 @@ const AssociateList = ({ selectedUserIds, onSelectGroupId }: Props) => {
     if (isSame || selectedUserIds.length === 0) return;
 
     try {
-      // ✅ Extract old user IDs
-      const oldUserIds: number[] = existingGroup?.users?.map((u:any) => u.id) || [];
-
-      // ✅ Merge and deduplicate
-      const mergedUserIds = Array.from(
-        new Set([...oldUserIds, ...selectedUserIds])
-      );
+      const oldUserIds: number[] = existingGroup?.users?.map((u: any) => u.id) || [];
+      const mergedUserIds = Array.from(new Set([...oldUserIds, ...selectedUserIds]));
 
       const data = {
         groupName: existingGroup?.groupName || "Untitled Group",
         userIds: mergedUserIds,
       };
 
-      await updateLeadGroup({
-        id,
-        data,
-      }).unwrap();
-
+      await updateLeadGroup({ id, data }).unwrap();
       toast.success("Users added to the group successfully.");
       refetch();
     } catch (error) {
@@ -109,14 +99,11 @@ const AssociateList = ({ selectedUserIds, onSelectGroupId }: Props) => {
       header: "",
       accessor: "id",
       render: (_, row: any) => (
-        <button
-          onClick={() => toggleGroup(row.id)}
-          className="flex items-center"
-        >
+        <button onClick={() => toggleGroup(row.id)} className="flex items-center">
           {selectedGroupId === row.id ? (
             <CheckSquare className="text-blue-500" size={18} />
           ) : (
-            <Square className="text-gray-400" size={18} />
+            <Square className="text-gray-400 dark:text-gray-500" size={18} />
           )}
         </button>
       ),
@@ -127,13 +114,13 @@ const AssociateList = ({ selectedUserIds, onSelectGroupId }: Props) => {
   ];
 
   return (
-    <div className="p-4">
+    <div className="p-4 text-black dark:text-white bg-white dark:bg-gray-950 rounded-md">
       <div className="flex justify-between items-center px-3 py-2 gap-4 flex-wrap">
         <h2 className="text-xl font-semibold">Choose Lead Group</h2>
 
         <div className="flex items-center gap-3">
           <select
-            className="text-sm px-3 py-1 rounded-md bg-black text-white focus:outline-none"
+            className="text-sm px-3 py-1 rounded-md border bg-white text-black border-gray-300 focus:outline-none dark:bg-gray-800 dark:text-white dark:border-gray-700"
             value={limit}
             onChange={(e) => {
               setLimit(Number(e.target.value));
@@ -157,13 +144,11 @@ const AssociateList = ({ selectedUserIds, onSelectGroupId }: Props) => {
       </div>
 
       {isLoading ? (
-        <div className="text-center py-8 text-gray-500">Loading groups...</div>
+        <div className="text-center py-8 text-gray-500 dark:text-gray-400">Loading groups...</div>
       ) : isError ? (
-        <div className="text-center py-8 text-red-500">
-          Failed to fetch groups.
-        </div>
+        <div className="text-center py-8 text-red-500">Failed to fetch groups.</div>
       ) : groups.length === 0 ? (
-        <div className="text-center py-8 text-gray-400">No groups found.</div>
+        <div className="text-center py-8 text-gray-500">No groups found.</div>
       ) : (
         <>
           <CustomTable columns={columns} data={groups} showActions={false} />
@@ -173,16 +158,12 @@ const AssociateList = ({ selectedUserIds, onSelectGroupId }: Props) => {
             totalPages={pagination.totalPages}
             setCurrentPage={setCurrentPage}
             limit={limit}
-            showPagination={Array.from(
-              { length: pagination.totalPages },
-              (_, i) => i + 1
-            )}
+            showPagination={Array.from({ length: pagination.totalPages }, (_, i) => i + 1)}
             tableDataLength={groups.length}
           />
         </>
       )}
 
-      {/* Create Group Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
           <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg w-full max-w-md p-6">
@@ -194,7 +175,7 @@ const AssociateList = ({ selectedUserIds, onSelectGroupId }: Props) => {
               placeholder="Enter group name"
               value={groupName}
               onChange={(e) => setGroupName(e.target.value)}
-              className="w-full p-2 border border-gray-300 dark:border-gray-700 rounded-md dark:bg-gray-800 dark:text-white mb-4"
+              className="w-full p-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 dark:text-white mb-4"
             />
             <div className="flex justify-end gap-3">
               <button

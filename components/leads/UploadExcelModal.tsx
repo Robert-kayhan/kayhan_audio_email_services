@@ -8,10 +8,10 @@ import { useCreateMultipleUserMutation } from "@/store/api/UserApi";
 type Props = {
   isOpen: boolean;
   onClose: () => void;
-  refetch:any
+  refetch: any;
 };
 
-export default function UploadExcelModal({ isOpen, onClose,refetch }: Props) {
+export default function UploadExcelModal({ isOpen, onClose, refetch }: Props) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileName, setFileName] = useState<string>("");
   const [loading, setLoading] = useState(false);
@@ -32,7 +32,7 @@ export default function UploadExcelModal({ isOpen, onClose,refetch }: Props) {
       toast.success(res.message || "Users uploaded successfully");
       setSelectedFile(null);
       setFileName("");
-      refetch()
+      refetch();
       onClose();
     } catch (error) {
       toast.error(
@@ -73,6 +73,15 @@ export default function UploadExcelModal({ isOpen, onClose,refetch }: Props) {
           }}
           className="w-full border border-zinc-700 rounded p-2 bg-zinc-800 text-sm text-white"
         />
+
+        {/* ✅ Download link added here */}
+        <a
+         href="/SampleXLSXFile.xlsx" // Change path as needed
+          download
+          className="mt-3 inline-block text-blue-400 hover:underline text-sm"
+        >
+          Download template file
+        </a>
 
         {fileName && (
           <p className="mt-3 text-sm text-gray-400">Selected: {fileName}</p>

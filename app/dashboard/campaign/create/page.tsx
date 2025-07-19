@@ -130,7 +130,7 @@ const CampaignStepper = () => {
         );
       case "review":
         return (
-          <div className="p-4 text-gray-100 space-y-3">
+          <div className="p-4 dark:text-gray-100 space-y-3">
             <h3 className="text-lg font-semibold">Review Summary</h3>
             <p><b>Campaign Name:</b> {campaignDetails.campaignName}</p>
             <p><b>Subject:</b> {campaignDetails.subject}</p>
@@ -146,7 +146,7 @@ const CampaignStepper = () => {
         );
       case "send":
         return (
-          <div className="p-4 text-gray-100 space-y-4">
+          <div className="p-4 dark:text-gray-100 space-y-4">
             <h3 className="text-lg font-semibold">Send Campaign</h3>
             <p>📬 Campaign will be sent using selected settings.</p>
             <button
@@ -162,64 +162,66 @@ const CampaignStepper = () => {
     }
   };
 
-  return (
-    <div className="p-6 bg-gray-900 min-h-screen">
-      <h2 className="text-xl font-semibold mb-6 text-white">Campaign Builder</h2>
-      <div className="flex items-center justify-between mb-6">
-        {steps.map((step, index) => {
-          const Icon = step.icon;
-          const stepIndex = index;
-          const currentStepIndex = steps.findIndex((s) => s.id === currentStep);
+return (
+  <div className="p-6 min-h-screen bg-white text-black dark:bg-gray-900 dark:text-white transition-colors duration-300">
+    <h2 className="text-xl font-semibold mb-6">Campaign Builder</h2>
 
-          const isActive = currentStep === step.id;
-          const isCompleted = stepIndex < currentStepIndex;
+    <div className="flex items-center justify-between mb-6">
+      {steps.map((step, index) => {
+        const Icon = step.icon;
+        const stepIndex = index;
+        const currentStepIndex = steps.findIndex((s) => s.id === currentStep);
+        const isActive = currentStep === step.id;
+        const isCompleted = stepIndex < currentStepIndex;
 
-          return (
+        return (
+          <div
+            key={step.id}
+            className={`flex-1 flex flex-col items-center text-center relative ${
+              stepIndex <= completedStepIndex ? "cursor-pointer" : "cursor-not-allowed"
+            }`}
+            onClick={() => {
+              if (stepIndex <= completedStepIndex) {
+                setCurrentStep(step.id);
+              }
+            }}
+          >
             <div
-              key={step.id}
-              className={`flex-1 flex flex-col items-center text-center relative ${
-                stepIndex <= completedStepIndex ? "cursor-pointer" : "cursor-not-allowed"
+              className={`w-10 h-10 flex items-center justify-center border-2 rounded-full mb-2 transition-all duration-200 ${
+                isActive
+                  ? "border-blue-400 text-blue-400"
+                  : isCompleted
+                  ? "border-green-500 text-green-500"
+                  : "border-gray-400 dark:border-gray-600 text-gray-500 dark:text-gray-400"
               }`}
-              onClick={() => {
-                if (stepIndex <= completedStepIndex) {
-                  setCurrentStep(step.id);
-                }
-              }}
             >
-              <div
-                className={`w-10 h-10 flex items-center justify-center border-2 rounded-full mb-2 transition-all duration-200 ${
-                  isActive
-                    ? "border-blue-400 text-blue-400"
-                    : isCompleted
-                    ? "border-green-500 text-green-500"
-                    : "border-gray-600 text-gray-400"
-                }`}
-              >
-                <Icon className="w-5 h-5" />
-              </div>
-              <p
-                className={`text-sm font-medium ${
-                  isActive
-                    ? "text-blue-300"
-                    : isCompleted
-                    ? "text-green-400"
-                    : "text-gray-400"
-                }`}
-              >
-                {step.label}
-              </p>
-              {index < steps.length - 1 && (
-                <div className="absolute top-5 right-[-50%] w-full h-0.5 border-t border-dashed border-gray-600 z-[-1]" />
-              )}
+              <Icon className="w-5 h-5" />
             </div>
-          );
-        })}
-      </div>
-      <div className="bg-gray-800 border border-gray-700 rounded-md shadow-sm">
-        {renderContent()}
-      </div>
+            <p
+              className={`text-sm font-medium ${
+                isActive
+                  ? "text-blue-500"
+                  : isCompleted
+                  ? "text-green-500"
+                  : "text-gray-600 dark:text-gray-400"
+              }`}
+            >
+              {step.label}
+            </p>
+            {index < steps.length - 1 && (
+              <div className="absolute top-5 right-[-50%] w-full h-0.5 border-t border-dashed border-gray-300 dark:border-gray-600 z-[-1]" />
+            )}
+          </div>
+        );
+      })}
     </div>
-  );
+
+    <div className="bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm">
+      {renderContent()}
+    </div>
+  </div>
+);
+
 };
 
 export default CampaignStepper;

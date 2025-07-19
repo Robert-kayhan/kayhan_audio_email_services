@@ -37,11 +37,11 @@ const CampaignDetailsForm = ({ details, setDetails, onNext }: Props) => {
   };
 
   return (
-    <div className="p-6 max-w-2xl mx-auto text-white">
+    <div className="p-6 max-w-2xl mx-auto text-gray-900 dark:text-white">
       <h2 className="text-2xl font-semibold mb-4">Campaign Details</h2>
 
       {error && (
-        <div className="bg-red-500/20 text-red-300 px-4 py-2 mb-4 rounded border border-red-500">
+        <div className="bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300 px-4 py-2 mb-4 rounded border border-red-400 dark:border-red-500">
           {error}
         </div>
       )}
@@ -54,7 +54,7 @@ const CampaignDetailsForm = ({ details, setDetails, onNext }: Props) => {
             name="campaignName"
             value={details.campaignName}
             onChange={handleChange}
-            className="w-full bg-gray-800 border border-gray-600 p-2 rounded"
+            className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 p-2 rounded text-gray-900 dark:text-white"
           />
         </div>
 
@@ -65,7 +65,7 @@ const CampaignDetailsForm = ({ details, setDetails, onNext }: Props) => {
             name="subject"
             value={details.subject}
             onChange={handleChange}
-            className="w-full bg-gray-800 border border-gray-600 p-2 rounded"
+            className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 p-2 rounded text-gray-900 dark:text-white"
           />
         </div>
 
@@ -76,7 +76,7 @@ const CampaignDetailsForm = ({ details, setDetails, onNext }: Props) => {
             name="fromEmail"
             value={details.fromEmail}
             onChange={handleChange}
-            className="w-full bg-gray-800 border border-gray-600 p-2 rounded"
+            className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 p-2 rounded text-gray-900 dark:text-white"
           />
         </div>
 
@@ -87,7 +87,7 @@ const CampaignDetailsForm = ({ details, setDetails, onNext }: Props) => {
             name="senderName"
             value={details.senderName}
             onChange={handleChange}
-            className="w-full bg-gray-800 border border-gray-600 p-2 rounded"
+            className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 p-2 rounded text-gray-900 dark:text-white"
           />
         </div>
 
@@ -98,7 +98,7 @@ const CampaignDetailsForm = ({ details, setDetails, onNext }: Props) => {
             value={details.description || ""}
             onChange={handleChange}
             rows={3}
-            className="w-full bg-gray-800 border border-gray-600 p-2 rounded"
+            className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 p-2 rounded text-gray-900 dark:text-white"
           />
         </div>
       </div>
