@@ -7,7 +7,7 @@ const authApi = apiSlice.injectEndpoints({
       query: () => ({
         url: Auth_url,
         method: "GET",
-        credentials: "include", 
+        credentials: "include",
       }),
     }),
     //login
@@ -16,11 +16,17 @@ const authApi = apiSlice.injectEndpoints({
         url: `${Auth_url}/sign-in`,
         method: "POST",
         body: data,
-        credentials: "include", 
+        credentials: "include",
       }),
     }),
-    // all user
+    logout: builder.mutation({
+      query: () => ({
+        url: `${Auth_url}/logout`,
+        method: "POST",
+        credentials: "include",
+      }),
+    }),
   }),
 });
 
-export const {useSignInMutation , useGetmeQuery} = authApi;
+export const { useSignInMutation, useGetmeQuery, useLogoutMutation } = authApi;

@@ -46,13 +46,15 @@ const ChooseTemplate: React.FC<Props> = ({ onSelect }) => {
   };
 
   return (
-    <div className="min-h-screen px-4 py-8 text-gray-100 bg-[#1e1e1e]">
-  <h3 className="text-2xl font-bold mb-8 text-white">📄 Select a Template</h3>
+  <div className="min-h-screen px-4 py-8 bg-white text-gray-900 dark:bg-[#1e1e1e] dark:text-gray-100">
+  <h3 className="text-2xl font-bold mb-8 text-black dark:text-white">
+    📄 Select a Template
+  </h3>
 
   {isLoading ? (
-    <p className="text-gray-300">Loading templates...</p>
+    <p className="text-gray-600 dark:text-gray-300">Loading templates...</p>
   ) : isError ? (
-    <p className="text-red-400">Error loading templates</p>
+    <p className="text-red-600 dark:text-red-400">Error loading templates</p>
   ) : (
     <>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -60,30 +62,27 @@ const ChooseTemplate: React.FC<Props> = ({ onSelect }) => {
           <div
             key={tpl.id}
             onClick={() => onSelect({ id: tpl.id, design: tpl.design })}
-            className="bg-[#2a2a2a] border border-gray-600 rounded-lg p-4 cursor-pointer hover:border-blue-500 hover:shadow-lg transition-all duration-200 flex flex-col"
+            className="bg-gray-100 dark:bg-[#2a2a2a] border border-gray-300 dark:border-gray-600 rounded-lg p-4 cursor-pointer hover:border-blue-500 hover:shadow-lg transition-all duration-200 flex flex-col"
           >
             {/* Header with name and view icon */}
             <div className="flex items-center justify-between mb-3">
-              <span className="font-semibold text-white truncate max-w-[70%]">
+              <span className="font-semibold text-black dark:text-white truncate max-w-[70%]">
                 {tpl.name}
               </span>
-              <div
-                className="flex gap-2"
-                onClick={(e) => e.stopPropagation()}
-              >
+              <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
                 <LucideView
                   size={18}
-                  className="text-blue-400 hover:text-blue-500 transition cursor-pointer"
+                  className="text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-500 transition cursor-pointer"
                   onClick={(e) => {
                     e.stopPropagation();
-                    // Optional: call view modal here
+                    // Optional: open view modal
                   }}
                 />
               </div>
             </div>
 
             {/* Template preview */}
-            <div className="flex-1 overflow-hidden rounded border border-gray-400 bg-white text-black">
+            <div className="flex-1 overflow-hidden rounded border border-gray-300 dark:border-gray-400 bg-white dark:bg-gray-100 text-black">
               <div
                 className="p-2 h-[420px] overflow-y-auto text-sm"
                 dangerouslySetInnerHTML={{

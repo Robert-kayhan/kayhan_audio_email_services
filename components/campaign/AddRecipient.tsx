@@ -39,24 +39,24 @@ export default function AddRecipients({
       prev.includes(id) ? prev.filter((uid: any) => uid !== id) : [...prev, id]
     );
   };
+
   const toggleSelectAllCurrentPage = () => {
     const areAllSelected = allUserIdsOnCurrentPage.every((id) =>
       selectedUserIds.includes(id)
     );
 
     if (areAllSelected) {
-      // Unselect all on current page
       setSelectedUserIds((prev: number[]) =>
-        prev.filter((id:any) => !allUserIdsOnCurrentPage.includes(id))
+        prev.filter((id: any) => !allUserIdsOnCurrentPage.includes(id))
       );
     } else {
-      // Select all on current page
       const newSelected = Array.from(
         new Set([...selectedUserIds, ...allUserIdsOnCurrentPage])
       );
       setSelectedUserIds(newSelected);
     }
   };
+
   const columns: Column<User>[] = [
     {
       header: "",
@@ -69,7 +69,7 @@ export default function AddRecipients({
           {isUserSelected(row.id) ? (
             <CheckSquare className="text-blue-500" size={18} />
           ) : (
-            <Square className="text-gray-400" size={18} />
+            <Square className="text-gray-400 dark:text-gray-500" size={18} />
           )}
         </button>
       ),
@@ -80,11 +80,11 @@ export default function AddRecipients({
   ];
 
   return (
-    <div className="p-6 text-white bg-gray-950 min-h-screen rounded-lg shadow">
+    <div className="p-6 min-h-screen rounded-lg shadow bg-white text-black dark:bg-gray-950 dark:text-white">
       <div className="mb-4 flex justify-between items-center">
         <h2 className="text-lg font-semibold">Select Recipients</h2>
         <select
-          className="text-sm px-3 py-1 rounded-md bg-black border text-white focus:outline-none"
+          className="text-sm px-3 py-1 rounded-md border focus:outline-none bg-white text-black border-gray-300 dark:bg-black dark:text-white dark:border-gray-700"
           value={limit}
           onChange={(e) => {
             setLimit(Number(e.target.value));
@@ -102,9 +102,15 @@ export default function AddRecipients({
       {isLoading ? (
         <p>Loading users...</p>
       ) : (
-       <div> <button className="border-b my-2" onClick={toggleSelectAllCurrentPage} >Select All user</button>
-         <CustomTable columns={columns} data={users} pageSize={limit} />
-       </div>
+        <div>
+          <button
+            className="border-b border-gray-300 dark:border-gray-700 my-2 text-black dark:text-white"
+            onClick={toggleSelectAllCurrentPage}
+          >
+            Select All Users
+          </button>
+          <CustomTable columns={columns} data={users} pageSize={limit} />
+        </div>
       )}
 
       <Pagination
