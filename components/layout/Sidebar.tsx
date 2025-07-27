@@ -96,7 +96,7 @@ const Navigation = () => {
             Match order{" "}
           </span>
         </Link>
-        <button onClick={logoutHandler} className="flex items-center hover:translate-x-2 transition-transform">
+        <button onClick={()=>logoutHandler()} className="flex items-center hover:translate-x-2 transition-transform">
           <LogOutIcon className="mr-2 mt-12" size={20} />
           <span className="hidden group-hover:inline nav-item-name mt-12 group-hover:cursor-pointer">
             LogOut

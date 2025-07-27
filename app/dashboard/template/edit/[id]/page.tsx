@@ -8,7 +8,7 @@ import {
   useUpdateTemplateMutation,
 } from "@/store/api/templateApi";
 import toast from "react-hot-toast";
-
+import { parseAndLoadDesign } from "@/util/ComanFuction";
 const EmailEditor = dynamic(() => import("react-email-editor"), {
   ssr: false,
 });
@@ -18,12 +18,15 @@ const EditTemplatePage = () => {
   const editorRef = useRef<any>(null);
 
   const { data, isLoading, isError } = useGetTemplateByIdQuery(id as string);
-  const [updateTemplate, { isLoading: isUpdating }] = useUpdateTemplateMutation();
+  const [updateTemplate, { isLoading: isUpdating }] =
+    useUpdateTemplateMutation();
 
   // Load design into editor
   useEffect(() => {
     if (data && editorRef.current?.editor) {
-      editorRef.current.editor.loadDesign(data.design);
+      console.log(data.design, "this is desgin ");
+      parseAndLoadDesign(data.design, editorRef);
+      // editorRef.current.editor.loadDesign(data.design);
     }
   }, [data]);
 
@@ -36,16 +39,16 @@ const EditTemplatePage = () => {
 
     editorRef.current.editor.exportHtml((htmlData: any) => {
       // editorRef.current.editor.exportDesign((designData: any) => {
-        updateTemplate({
-          id: id as string,
-          name: data?.name || "Untitled",
-          html: htmlData.html,
-          design: htmlData.design,
-        })
-          .unwrap()
-          .then(() => toast.success(" Template updated successfully"))
-          .catch(() => toast.error("❌ Failed to update template"));
-      });
+      updateTemplate({
+        id: id as string,
+        name: data?.name || "Untitled",
+        html: htmlData.html,
+        design: htmlData.design,
+      })
+        .unwrap()
+        .then(() => toast.success(" Template updated successfully"))
+        .catch(() => toast.error("❌ Failed to update template"));
+    });
     // });
   };
 
@@ -91,7 +94,7 @@ const EditTemplatePage = () => {
           ref={editorRef}
           style={{ height: "100vh", width: "100%" }}
           onLoad={() => {
-            if (data) editorRef.current?.editor.loadDesign(data.design);
+            if (data) parseAndLoadDesign(data.design, editorRef);
           }}
         />
       </div>

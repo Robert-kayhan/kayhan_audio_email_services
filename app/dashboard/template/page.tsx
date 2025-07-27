@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import TemplateSelectorModal from "@/components/template/TemplateSelectorModal";
 import PredefinedTemplateModal from "@/components/template/PredefinedTemplateModal";
 const EmailEditor = dynamic(() => import("react-email-editor"), { ssr: false });
+import { parseAndLoadDesign } from "@/util/ComanFuction";
 
 interface Template {
   id: string;
@@ -99,7 +100,8 @@ const EmailBuilderPage = () => {
         open={showTemplates}
         onClose={() => setShowTemplates(false)}
         onSelect={(design) => {
-          editorRef.current?.editor.loadDesign(design);
+          // editorRef.current?.editor.loadDesign(design);
+          parseAndLoadDesign(design, editorRef);
         }}
       />
       {/* <PredefinedTemplateModal

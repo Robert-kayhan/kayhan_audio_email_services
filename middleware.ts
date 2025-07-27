@@ -4,7 +4,7 @@ export function middleware(req: NextRequest) {
   const token = req.cookies.get("jwt");
   const url = req.nextUrl.clone();
   const pathname = req.nextUrl.pathname;
-  console.log(req.cookies)
+  // console.log(req.cookies)
   // ✅ Redirect authenticated users away from auth pages
   if (token && (pathname === "/sign-in" || pathname === "/sign-up")) {
     url.pathname = "/dashboard/campaign";
