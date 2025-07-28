@@ -37,7 +37,7 @@ export default function TablePage() {
   const [user, setUser] = useState<any>();
   const { data, isLoading, isError, refetch } = useGetAllUserQuery({
     page: currentPage,
-    limit,
+    limit : 100,
   });
   const [deleteUser] = useDeleteUserMutation();
   // Destructure safely
@@ -93,7 +93,7 @@ export default function TablePage() {
               setCurrentPage(1); // Reset to first page
             }}
           >
-            {[5, 10, 25, 50].map((size) => (
+            {[5, 10, 25, 50 ,100].map((size) => (
               <option key={size} value={size}>
                 Show {size}
               </option>
@@ -147,6 +147,7 @@ export default function TablePage() {
       ) : (
         <>
           <CustomTable
+          pageSize={limit}
             columns={columns}
             data={users}
             showActions
