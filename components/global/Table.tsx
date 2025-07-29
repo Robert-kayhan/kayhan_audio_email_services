@@ -32,7 +32,7 @@ export default function CustomTable<T>({
   onDelete,
   customActions = [],
   showActions = false,
-  pageSize = 10,
+  pageSize = 25,
   rowKey,
 }: TableProps<T>) {
   const [sortBy, setSortBy] = useState<keyof T | null>(null);
