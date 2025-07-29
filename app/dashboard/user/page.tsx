@@ -76,7 +76,7 @@ export default function TablePage() {
       console.error(error);
     }
   };
-
+   
   return (
     <div className="p-4">
       {/* Header */}
