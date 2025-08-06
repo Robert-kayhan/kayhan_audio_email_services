@@ -12,6 +12,7 @@ import {
   Settings,
   User,
   LogOutIcon,
+  PhoneCall,
 } from "lucide-react";
 import { useLogoutMutation } from "@/store/api/AuthApi";
 import { log } from "console";
@@ -94,6 +95,15 @@ const Navigation = () => {
           <LucideListOrdered className="mr-2 mt-12" size={20} />
           <span className="hidden group-hover:inline nav-item-name mt-12">
             Match order{" "}
+          </span>
+        </Link>
+        <Link
+          href="/dashboard/lead-folow-up"
+          className="flex items-center hover:translate-x-2 transition-transform"
+        >
+          <PhoneCall className="mr-2 mt-12" size={20} />
+          <span className="hidden group-hover:inline nav-item-name mt-12">
+            CRM
           </span>
         </Link>
         <button onClick={()=>logoutHandler()} className="flex items-center hover:translate-x-2 transition-transform">

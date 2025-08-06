@@ -6,7 +6,7 @@ import { ChevronDown } from "lucide-react";
 import Pagination from "@/components/global/Pagination";
 import { useDeleteUserMutation } from "@/store/api/UserApi";
 import toast from "react-hot-toast";
-import { useGetAllLeadGroupQuery , useDeleteLeadGroupMutation } from "@/store/api/leadAPi";
+import { useGetAllLeadGroupQuery , useDeleteLeadGroupMutation } from "@/store/api/lead/leadAPi";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 

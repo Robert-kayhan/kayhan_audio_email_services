@@ -81,7 +81,7 @@ const UsersOrderPage = () => {
           <CustomTable<User>
             columns={columns}
             data={users}
-            rowKey="id"
+            // rowKey="id"
             pageSize={limit}
             showActions={false}
           />

@@ -20,12 +20,12 @@ export default function AddRecipients({
 }: Props) {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(25);
-
+  const [selectData , setSelectData] = useState<any>()
   const { data, isLoading } = useGetAllUserQuery({
     page: currentPage,
     limit,
   });
-
+  console.log(data , "this is data")
   const users: User[] = data?.data || [];
   const pagination = data?.pagination || {};
   const totalItems = pagination.totalItems || 0;
@@ -39,12 +39,14 @@ export default function AddRecipients({
       prev.includes(id) ? prev.filter((uid: any) => uid !== id) : [...prev, id]
     );
   };
-
+  
   const toggleSelectAllCurrentPage = () => {
     const areAllSelected = allUserIdsOnCurrentPage.every((id) =>
       selectedUserIds.includes(id)
     );
-
+    const allData = [...data]
+    setSelectData(allData)
+    console.log(selectData , "this is data")
     if (areAllSelected) {
       setSelectedUserIds((prev: number[]) =>
         prev.filter((id: any) => !allUserIdsOnCurrentPage.includes(id))
@@ -57,27 +59,36 @@ export default function AddRecipients({
     }
   };
 
-  const columns: Column<User>[] = [
-    {
-      header: "",
-      accessor: "id",
-      render: (_, row: any) => (
-        <button
-          onClick={() => toggleUser(row.id)}
-          className="flex items-center"
-        >
-          {isUserSelected(row.id) ? (
-            <CheckSquare className="text-blue-500" size={18} />
-          ) : (
-            <Square className="text-gray-400 dark:text-gray-500" size={18} />
-          )}
-        </button>
-      ),
-    },
-    { header: "ID", accessor: "id" },
-    { header: "Name", accessor: "name" },
-    { header: "Email", accessor: "email" },
-  ];
+ const columns: Column<User>[] = [
+  {
+    header: (
+      <button onClick={toggleSelectAllCurrentPage}>
+        {allUserIdsOnCurrentPage.every((id) => selectedUserIds.includes(id)) ? (
+          <CheckSquare className="text-blue-500" size={18} />
+        ) : (
+          <Square className="text-gray-400 dark:text-gray-500" size={18} />
+        )}
+      </button>
+    ),
+    accessor: "id",
+    render: (_, row: any) => (
+      <button
+        onClick={() => toggleUser(row.id)}
+        className="flex items-center"
+      >
+        {isUserSelected(row.id) ? (
+          <CheckSquare className="text-blue-500" size={18} />
+        ) : (
+          <Square className="text-gray-400 dark:text-gray-500" size={18} />
+        )}
+      </button>
+    ),
+  },
+  { header: "ID", accessor: "id" },
+  { header: "Name", accessor: "name" },
+  { header: "Email", accessor: "email" },
+];
+
 
   return (
     <div className="p-6 min-h-screen rounded-lg shadow bg-white text-black dark:bg-gray-950 dark:text-white">

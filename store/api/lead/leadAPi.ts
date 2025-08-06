@@ -1,5 +1,5 @@
-import { apiSlice } from "./apiSlcie";
-import { Lead_url } from "../constant";
+import { apiSlice } from "../apiSlcie";
+import { Lead_url } from "../../constant";
 const LeadApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     createLeadGroup: builder.mutation({

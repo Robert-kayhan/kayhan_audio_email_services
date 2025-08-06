@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation"; // or use react-router if not using Next.js
 import { useGetAllUserQuery } from "@/store/api/UserApi";
-import { useGetLeadGroupQuery, useUpdateLeadGroupMutation } from "@/store/api/leadAPi";
+import { useGetLeadGroupQuery, useUpdateLeadGroupMutation } from "@/store/api/lead/leadAPi";
 import CustomTable, { Column } from "@/components/global/Table";
 import Pagination from "@/components/global/Pagination";
 import { CheckSquare, Square } from "lucide-react";

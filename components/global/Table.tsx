@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 
 export type Column<T> = {
-  header: string;
+  header: any;
   accessor: keyof T;
   sortable?: boolean;
   render?: (value: any, row: T) => React.ReactNode;
@@ -19,10 +19,10 @@ type TableProps<T> = {
   data: T[];
   onEdit?: (row: T) => void;
   onDelete?: (row: T) => void;
-  customActions?: CustomAction<T>[]; // <-- support for extra actions
+  customActions?: CustomAction<T>[];
   showActions?: boolean;
   pageSize?: number;
-  rowKey?: keyof T;
+  rowKey?: (row: T, index: number) => string | number;
 };
 
 export default function CustomTable<T>({
@@ -76,7 +76,7 @@ export default function CustomTable<T>({
 
   return (
     <div className="overflow-x-auto w-full">
-      <table className="min-w-full border  border-gray-300 dark:border-gray-700 rounded-md">
+      <table className="min-w-full border border-gray-300 dark:border-gray-700 rounded-md">
         <thead className="bg-gray-100 dark:bg-gray-800">
           <tr>
             {columns.map((col) => (
@@ -84,11 +84,14 @@ export default function CustomTable<T>({
                 key={String(col.accessor)}
                 onClick={() => col.sortable && handleSort(col.accessor)}
                 className={`p-3 text-left font-medium text-sm text-gray-800 dark:text-gray-200 cursor-pointer select-none ${
-                  col.sortable ? "hover:text-blue-600 dark:hover:text-blue-400" : ""
+                  col.sortable
+                    ? "hover:text-blue-600 dark:hover:text-blue-400"
+                    : ""
                 }`}
               >
                 {col.header}
-                {sortBy === col.accessor && (sortOrder === "asc" ? " 🔼" : " 🔽")}
+                {sortBy === col.accessor &&
+                  (sortOrder === "asc" ? " 🔼" : " 🔽")}
               </th>
             ))}
             {showActions && (
@@ -100,7 +103,7 @@ export default function CustomTable<T>({
         </thead>
         <tbody>
           {paginatedData.map((row, index) => {
-            const key = rowKey ? String(row[rowKey]) : index;
+            const key = rowKey ? rowKey(row, index) : index;
             return (
               <tr
                 key={key}
@@ -113,7 +116,7 @@ export default function CustomTable<T>({
                   >
                     {col.render
                       ? col.render(row[col.accessor], row)
-                      : String(row[col.accessor])}
+                      : String(row[col.accessor] ?? "")}
                   </td>
                 ))}
                 {showActions && (
@@ -138,7 +141,10 @@ export default function CustomTable<T>({
                       <button
                         key={idx}
                         onClick={() => action.onClick(row)}
-                        className={action.className || "text-green-600 dark:text-green-400 hover:underline"}
+                        className={
+                          action.className ||
+                          "text-green-600 dark:text-green-400 hover:underline"
+                        }
                       >
                         {action.label}
                       </button>
@@ -150,7 +156,7 @@ export default function CustomTable<T>({
           })}
         </tbody>
       </table>
-
+          
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex justify-between items-center mt-4 text-sm px-2">
