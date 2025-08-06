@@ -8,7 +8,7 @@ import {
   useGetAllLeadGroupQuery,
   useCreateLeadGroupMutation,
   useUpdateLeadGroupMutation,
-} from "@/store/api/leadAPi";
+} from "@/store/api/lead/leadAPi";
 import toast from "react-hot-toast";
 import { CheckSquare, Square } from "lucide-react";
 

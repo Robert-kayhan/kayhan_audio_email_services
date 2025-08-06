@@ -6,7 +6,7 @@ import CustomTable, { Column } from "@/components/global/Table";
 import Pagination from "@/components/global/Pagination";
 import { User } from "@/util/interface";
 import { CheckSquare, Square } from "lucide-react";
-import { useCreateLeadGroupMutation } from "@/store/api/leadAPi";
+import { useCreateLeadGroupMutation } from "@/store/api/lead/leadAPi";
 
 export default function CreateLeadGroupPage() {
   const [groupName, setGroupName] = useState("");
@@ -112,7 +112,7 @@ export default function CreateLeadGroupPage() {
           columns={columns}
           data={users}
           pageSize={limit}
-          rowKey="id"
+          // rowKey="id"
         />
       </div>
       )}
