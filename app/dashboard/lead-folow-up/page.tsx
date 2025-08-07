@@ -17,7 +17,7 @@ type LeadFollowUp = {
   isActiveCustomer: string;
 };
 
-const leadStatusOptions = ["all","New","first Follow up", "second Follow up","third Follow up",   "Sale done"] as const;
+const leadStatusOptions = ["all","Today's  Follow up", "New","first Follow up", "second Follow up","third Follow up",   "Sale done","Sale not done"] as const;
 
 const LeadFollowUpPage = () => {
   const [page, setPage] = useState(1);
@@ -41,31 +41,76 @@ const LeadFollowUpPage = () => {
   const totalPages = data?.totalPages ?? 1;
   const showPagination = Array.from({ length: totalPages }, (_, i) => i + 1);
 
-  const columns: Column<LeadFollowUp>[] = [
-    { header: "ID", accessor: "id", sortable: true ,render: (_, row) =>
-         (
-          <Link href={`/dashboard/lead-folow-up/${row.id}`} className="text-green-600">{row.id}</Link>
-        )},
-    {
-      header: "Name",
-      accessor: "firstName",
-      render: (_, row) => `${row.firstName} ${row.lastName}`,
-    },
-    { header: "Email", accessor: "email" },
-    { header: "Phone", accessor: "phone" },
-    { header: "Status", accessor: "leadStatus" },
-    { header: "Expected Close", accessor: "expectedCloseDate" },
-    {
-      header: "Customer",
-      accessor: "isActiveCustomer",
-      render: (val) =>
-        val === "yes" ? (
+ const columns: Column<LeadFollowUp>[] = [
+  {
+    header: "ID",
+    accessor: "id",
+    sortable: true,
+    render: (_, row) => (
+      <Link href={`/dashboard/lead-folow-up/${row.id}`} className="text-green-600 hover:underline">
+        {row.id}
+      </Link>
+    ),
+  },
+  {
+    header: "Name",
+    accessor: "firstName",
+    render: (_, row) => (
+      <Link href={`/dashboard/lead-folow-up/${row.id}`} className="hover:underline">
+        {row.firstName} {row.lastName}
+      </Link>
+    ),
+  },
+  {
+    header: "Email",
+    accessor: "email",
+    render: (val, row) => (
+      <Link href={`/dashboard/lead-folow-up/${row.id}`} className="hover:underline">
+        {val}
+      </Link>
+    ),
+  },
+  {
+    header: "Phone",
+    accessor: "phone",
+    render: (val, row) => (
+      <Link href={`/dashboard/lead-folow-up/${row.id}`} className="hover:underline">
+        {val}
+      </Link>
+    ),
+  },
+  {
+    header: "Status",
+    accessor: "leadStatus",
+    render: (val, row) => (
+      <Link href={`/dashboard/lead-folow-up/${row.id}`} className="hover:underline">
+        {val}
+      </Link>
+    ),
+  },
+  {
+    header: "Expected Close",
+    accessor: "expectedCloseDate",
+    render: (val, row) => (
+      <Link href={`/dashboard/lead-folow-up/${row.id}`} className="hover:underline">
+        {val}
+      </Link>
+    ),
+  },
+  {
+    header: "Customer",
+    accessor: "isActiveCustomer",
+    render: (val, row) => (
+      <Link href={`/dashboard/lead-folow-up/${row.id}`} className="hover:underline">
+        {val === "yes" ? (
           <span className="text-green-600">Yes</span>
         ) : (
           <span className="text-gray-400">No</span>
-        ),
-    },
-  ];
+        )}
+      </Link>
+    ),
+  },
+];
 
   return (
     <div className="p-6 mx-auto">

@@ -5,6 +5,7 @@ import Select from "react-select";
 import toast from "react-hot-toast";
 import { Country, State, City } from "country-state-city";
 import { useCreateSingleUserMutation } from "@/store/api/UserApi";
+import { useRouter } from "next/navigation";
 
 const CreateUserPage = () => {
   const [createSingleUser] = useCreateSingleUserMutation();
@@ -49,6 +50,8 @@ const CreateUserPage = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
+  const router = useRouter();
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,7 +75,7 @@ const CreateUserPage = () => {
       state: selectedState.label,
       city: selectedCity.label,
     };
-    console.log(payload , "this is payload")
+    console.log(payload, "this is payload");
     try {
       const res = await createSingleUser(payload).unwrap();
       toast.success(res.message || "User created successfully");
@@ -83,18 +86,51 @@ const CreateUserPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-950 text-white p-6">
+      <button
+        onClick={() => router.back()}
+        className="mb-4 flex items-center text-sm text-blue-400 hover:text-blue-300 transition"
+      >
+        ← Back
+      </button>
+
       <div className="max-w-4xl mx-auto bg-gray-900 p-8 rounded-xl shadow-md">
-        <h2 className="text-3xl font-semibold mb-2 text-center">Create New User</h2>
-        <p className="text-center text-gray-400 mb-8">Fill in the details below</p>
+        <h2 className="text-3xl font-semibold mb-2 text-center">
+          Create New User
+        </h2>
+        <p className="text-center text-gray-400 mb-8">
+          Fill in the details below
+        </p>
 
         <form
           onSubmit={handleSubmit}
           className="grid grid-cols-1 md:grid-cols-2 gap-5"
         >
-          <InputField label="First Name" name="firstname" value={formData.firstname} onChange={handleInputChange} />
-          <InputField label="Last Name" name="lastname" value={formData.lastname} onChange={handleInputChange} />
-          <InputField type="email" label="Email" name="email" value={formData.email} onChange={handleInputChange} full />
-          <InputField label="Phone" name="phone" value={formData.phone} onChange={handleInputChange} />
+          <InputField
+            label="First Name"
+            name="firstname"
+            value={formData.firstname}
+            onChange={handleInputChange}
+          />
+          <InputField
+            label="Last Name"
+            name="lastname"
+            value={formData.lastname}
+            onChange={handleInputChange}
+          />
+          <InputField
+            type="email"
+            label="Email"
+            name="email"
+            value={formData.email}
+            onChange={handleInputChange}
+            full
+          />
+          <InputField
+            label="Phone"
+            name="phone"
+            value={formData.phone}
+            onChange={handleInputChange}
+          />
           <div>
             <label className="block text-sm mb-1">Country</label>
             <Select
@@ -134,8 +170,19 @@ const CreateUserPage = () => {
               classNamePrefix="select"
             />
           </div>
-          <InputField label="Street Address" name="street" value={formData.street} onChange={handleInputChange} full />
-          <InputField label="Postcode" name="postcode" value={formData.postcode} onChange={handleInputChange} />
+          <InputField
+            label="Street Address"
+            name="street"
+            value={formData.street}
+            onChange={handleInputChange}
+            full
+          />
+          <InputField
+            label="Postcode"
+            name="postcode"
+            value={formData.postcode}
+            onChange={handleInputChange}
+          />
 
           <div className="md:col-span-2 text-right mt-4">
             <button
