@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useGetAllUserQuery } from "@/store/api/UserApi";
 import CustomTable, { Column } from "@/components/global/Table";
 import Pagination from "@/components/global/Pagination";
@@ -14,9 +14,22 @@ export default function CreateLeadGroupPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(25);
 
+  // 🔍 Search states
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      setSearch(searchInput);
+      setCurrentPage(1);
+    }, 500);
+    return () => clearTimeout(delay);
+  }, [searchInput]);
+
   const { data, isLoading, refetch } = useGetAllUserQuery({
     page: currentPage,
     limit,
+    search,
   });
 
   const users: User[] = data?.data || [];
@@ -47,6 +60,7 @@ export default function CreateLeadGroupPage() {
       alert("Group created!");
       setGroupName("");
       setSelectedUserIds([]);
+      setSearchInput("");
       refetch();
     } catch (err: any) {
       alert(err.message || "Something went wrong");
@@ -58,10 +72,7 @@ export default function CreateLeadGroupPage() {
       header: "",
       accessor: "id",
       render: (_, row: any) => (
-        <button
-          onClick={() => toggleUser(row.id)}
-          className="flex items-center"
-        >
+        <button onClick={() => toggleUser(row.id)} className="flex items-center">
           {isUserSelected(row.id) ? (
             <CheckSquare className="text-blue-500" size={18} />
           ) : (
@@ -77,10 +88,11 @@ export default function CreateLeadGroupPage() {
 
   return (
     <div className="p-6 text-white bg-gray-950 min-h-screen">
-     <div className="flex justify-between">
-       <h1 className="text-2xl font-bold mb-4">Create Lead Group</h1>
-      
-     </div>
+      <div className="flex justify-between">
+        <h1 className="text-2xl font-bold mb-4">Create Lead Group</h1>
+      </div>
+
+      {/* Group Name Input */}
       <input
         type="text"
         value={groupName}
@@ -89,32 +101,49 @@ export default function CreateLeadGroupPage() {
         className="w-full mb-6 px-4 py-2 rounded-md border border-gray-700 bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
 
+      {/* Search + Page Size Select */}
+      <div className="mb-4 flex flex-wrap gap-2 justify-between items-center">
+        {/* 🔍 Search Input */}
+        <div className="flex gap-2 items-center">
+          <input
+            type="text"
+            placeholder="Search users..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            className="px-3 py-1 rounded-md border bg-black text-white border-gray-700 text-sm focus:outline-none"
+          />
+          {search && (
+            <button
+              onClick={() => setSearchInput("")}
+              className="text-red-400 text-sm hover:underline"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+
+        {/* Page Size Dropdown */}
+        <select
+          className="text-sm px-3 py-1 rounded-md bg-black border text-white focus:outline-none"
+          value={limit}
+          onChange={(e) => {
+            setLimit(Number(e.target.value));
+            setCurrentPage(1);
+          }}
+        >
+          {[5, 10, 25, 50].map((size) => (
+            <option key={size} value={size}>
+              Show {size}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Table */}
       {isLoading ? (
         <p>Loading users...</p>
       ) : (
-
-      <div>
-          <select
-        className="text-sm px-3 py-1 float-end my-1 rounded-md bg-black border text-white focus:outline-none"
-        value={limit}
-        onChange={(e) => {
-          setLimit(Number(e.target.value));
-          setCurrentPage(1);
-        }}
-      >
-        {[5, 10, 25, 50].map((size) => (
-          <option key={size} value={size}>
-            Show {size}
-          </option>
-        ))}
-      </select>
-        <CustomTable
-          columns={columns}
-          data={users}
-          pageSize={limit}
-          // rowKey="id"
-        />
-      </div>
+        <CustomTable columns={columns} data={users} pageSize={limit} />
       )}
 
       {/* Pagination Controls */}
@@ -128,6 +157,7 @@ export default function CreateLeadGroupPage() {
         tableDataLength={users.length}
       />
 
+      {/* Submit Button */}
       <div className="mt-6 flex justify-end">
         <button
           onClick={handleSubmit}
