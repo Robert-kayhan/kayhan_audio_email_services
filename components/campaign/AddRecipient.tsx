@@ -21,9 +21,12 @@ export default function AddRecipients({
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(25);
   const [selectData , setSelectData] = useState<any>()
+    const [search, setSearch] = useState("");
+  
   const { data, isLoading } = useGetAllUserQuery({
     page: currentPage,
     limit,
+    search
   });
   console.log(data , "this is data")
   const users: User[] = data?.data || [];
@@ -109,6 +112,25 @@ export default function AddRecipients({
           ))}
         </select>
       </div>
+        {/* <div className="mb-4 flex flex-wrap gap-2 justify-between items-center"> */}
+        {/* 🔍 Search Input */}
+        <div className="flex gap-2 items-center">
+          <input
+            type="text"
+            placeholder="Search users..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="px-3 py-1 rounded-md border bg-black text-white border-gray-700 text-sm focus:outline-none"
+          />
+          {search && (
+            <button
+              onClick={() => setSearch("")}
+              className="text-red-400 text-sm hover:underline"
+            >
+              Clear
+            </button>
+          )}
+        </div>
 
       {isLoading ? (
         <p>Loading users...</p>

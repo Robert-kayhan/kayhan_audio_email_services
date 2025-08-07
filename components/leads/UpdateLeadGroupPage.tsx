@@ -1,9 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams } from "next/navigation"; // or use react-router if not using Next.js
+import { useParams } from "next/navigation";
 import { useGetAllUserQuery } from "@/store/api/UserApi";
-import { useGetLeadGroupQuery, useUpdateLeadGroupMutation } from "@/store/api/lead/leadAPi";
+import {
+  useGetLeadGroupQuery,
+  useUpdateLeadGroupMutation,
+} from "@/store/api/lead/leadAPi";
 import CustomTable, { Column } from "@/components/global/Table";
 import Pagination from "@/components/global/Pagination";
 import { CheckSquare, Square } from "lucide-react";
@@ -11,23 +14,39 @@ import { User } from "@/util/interface";
 
 const UpdateLeadGroupPage = () => {
   const params = useParams();
-  const groupId = Number(params?.id); 
+  const groupId = Number(params?.id);
+
   const [groupName, setGroupName] = useState("");
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(25);
 
+  // 🔍 Search state
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      setSearch(searchInput);
+      setCurrentPage(1);
+    }, 500);
+
+    return () => clearTimeout(delay);
+  }, [searchInput]);
+
   const { data, isLoading, refetch } = useGetAllUserQuery({
     page: currentPage,
     limit,
+    search,
   });
 
-  const { data: groupData, isLoading: loadingGroup } = useGetLeadGroupQuery({id : groupId});
+  const { data: groupData, isLoading: loadingGroup } = useGetLeadGroupQuery({
+    id: groupId,
+  });
 
-  console.log(groupData)
-  const [updateLeadGroup, { isLoading: updating }] = useUpdateLeadGroupMutation();
+  const [updateLeadGroup, { isLoading: updating }] =
+    useUpdateLeadGroupMutation();
 
-  // Fill form from fetched group data
   useEffect(() => {
     if (groupData) {
       setGroupName(groupData.groupName || "");
@@ -44,7 +63,7 @@ const UpdateLeadGroupPage = () => {
   };
 
   const handleSubmit = async () => {
-    if (!groupName.trim() || selectedUserIds.length === 0) {  
+    if (!groupName.trim() || selectedUserIds.length === 0) {
       alert("Enter group name and select at least one user");
       return;
     }
@@ -52,10 +71,10 @@ const UpdateLeadGroupPage = () => {
     try {
       await updateLeadGroup({
         id: groupId,
-       data : {
-         groupName,
-        userIds: selectedUserIds,
-       }
+        data: {
+          groupName,
+          userIds: selectedUserIds,
+        },
       }).unwrap();
 
       alert("Group updated successfully!");
@@ -85,7 +104,7 @@ const UpdateLeadGroupPage = () => {
       ),
     },
     { header: "ID", accessor: "id" },
-    { header: "First Name", accessor: "name" },
+    { header: "Name", accessor: "name" },
     { header: "Email", accessor: "email" },
   ];
 
@@ -99,6 +118,7 @@ const UpdateLeadGroupPage = () => {
         <p>Loading group data...</p>
       ) : (
         <>
+          {/* Group Name */}
           <input
             type="text"
             value={groupName}
@@ -107,9 +127,29 @@ const UpdateLeadGroupPage = () => {
             className="w-full mb-6 px-4 py-2 rounded-md border border-gray-700 bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
 
-          <div>
+          <div className="mb-4 flex flex-wrap gap-2 justify-between items-center">
+            {/* 🔍 Search Input */}
+            <div className="flex gap-2 items-center">
+              <input
+                type="text"
+                placeholder="Search users..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                className="px-3 py-1 rounded-md border bg-black text-white border-gray-700 text-sm focus:outline-none"
+              />
+              {search && (
+                <button
+                  onClick={() => setSearchInput("")}
+                  className="text-red-400 text-sm hover:underline"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+
+            {/* Page Size Selector */}
             <select
-              className="text-sm px-3 py-1 float-end my-1 rounded-md bg-black border text-white focus:outline-none"
+              className="text-sm px-3 py-1 rounded-md bg-black border text-white focus:outline-none"
               value={limit}
               onChange={(e) => {
                 setLimit(Number(e.target.value));
@@ -122,10 +162,12 @@ const UpdateLeadGroupPage = () => {
                 </option>
               ))}
             </select>
-
-            <CustomTable columns={columns} data={users} pageSize={limit}  />
           </div>
 
+          {/* Table */}
+          <CustomTable columns={columns} data={users} pageSize={limit} />
+
+          {/* Pagination */}
           <Pagination
             currentPage={currentPage}
             totalRecords={totalItems}
@@ -136,6 +178,7 @@ const UpdateLeadGroupPage = () => {
             tableDataLength={users.length}
           />
 
+          {/* Submit */}
           <div className="mt-6 flex justify-end">
             <button
               onClick={handleSubmit}
