@@ -83,7 +83,8 @@ const Navigation = () => {
             className="flex items-center text-white"
           >
             <span className="nav-item-name hidden group-hover:inline-block cursor-pointer">
-              {userInfo.username}
+              {/* {userInfo.username} */}
+              Kayhan Audio
             </span>
           </button>
         </div>
