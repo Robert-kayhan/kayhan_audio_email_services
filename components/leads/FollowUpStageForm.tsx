@@ -105,8 +105,8 @@ const FollowUpStageForm: React.FC<FollowUpProps> = ({
           <option value="">Select Type</option>
           <option value="Call">Call</option>
           <option value="Email">Email</option>
-          <option value="Visit">Visit</option>
-          <option value="Meeting">Meeting</option>
+          <option value="Visit">In Person</option>
+          {/* <option value="Meeting">Meeting</option> */}
         </select>
       </div>
 
@@ -119,8 +119,14 @@ const FollowUpStageForm: React.FC<FollowUpProps> = ({
           className="w-full px-3 py-2 rounded bg-gray-800 border border-gray-600"
         />
       </div>
+    <Select
+        label="Sale Status"
+        value={saleStatus}
+        options={["Sale done", "Sale not done"]}
+        onChange={(val: string) => setSaleStatus(val)}
+      />
 
-      <div>
+     {saleStatus !== "Sale done" && <div>
         <label className="block text-sm text-gray-300">
           Next Follow-Up Date
         </label>
@@ -130,14 +136,9 @@ const FollowUpStageForm: React.FC<FollowUpProps> = ({
           onChange={(e) => setNextDate(e.target.value)}
           className="w-full px-3 py-2 rounded bg-gray-800 border border-gray-600"
         />
-      </div>
+      </div>}
 
-      <Select
-        label="Sale Status"
-        value={saleStatus}
-        options={["Sale done", "Sale not done"]}
-        onChange={(val: string) => setSaleStatus(val)}
-      />
+  
 
       <div className="text-right">
         <button

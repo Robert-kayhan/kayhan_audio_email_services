@@ -14,7 +14,6 @@ export default function CreateLeadGroupPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(25);
 
-  // 🔍 Search states
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
 
@@ -72,11 +71,14 @@ export default function CreateLeadGroupPage() {
       header: "",
       accessor: "id",
       render: (_, row: any) => (
-        <button onClick={() => toggleUser(row.id)} className="flex items-center">
+        <button
+          onClick={() => toggleUser(row.id)}
+          className="flex items-center focus:outline-none"
+        >
           {isUserSelected(row.id) ? (
             <CheckSquare className="text-blue-500" size={18} />
           ) : (
-            <Square className="text-gray-400" size={18} />
+            <Square className="text-gray-400 dark:text-gray-600" size={18} />
           )}
         </button>
       ),
@@ -87,7 +89,8 @@ export default function CreateLeadGroupPage() {
   ];
 
   return (
-    <div className="p-6 text-white bg-gray-950 min-h-screen">
+    <div className="p-6 min-h-screen bg-white text-black dark:bg-gray-950 dark:text-white transition-colors">
+      {/* Header */}
       <div className="flex justify-between">
         <h1 className="text-2xl font-bold mb-4">Create Lead Group</h1>
       </div>
@@ -98,33 +101,31 @@ export default function CreateLeadGroupPage() {
         value={groupName}
         onChange={(e) => setGroupName(e.target.value)}
         placeholder="Group Name"
-        className="w-full mb-6 px-4 py-2 rounded-md border border-gray-700 bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="w-full mb-6 px-4 py-2 rounded-md border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
 
       {/* Search + Page Size Select */}
       <div className="mb-4 flex flex-wrap gap-2 justify-between items-center">
-        {/* 🔍 Search Input */}
         <div className="flex gap-2 items-center">
           <input
             type="text"
             placeholder="Search users..."
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            className="px-3 py-1 rounded-md border bg-black text-white border-gray-700 text-sm focus:outline-none"
+            className="px-3 py-1 rounded-md border border-gray-300 dark:border-gray-700 bg-gray-800 text-white text-sm focus:outline-none"
           />
           {search && (
             <button
               onClick={() => setSearchInput("")}
-              className="text-red-400 text-sm hover:underline"
+              className="text-red-600 dark:text-red-400 text-sm hover:underline"
             >
               Clear
             </button>
           )}
         </div>
 
-        {/* Page Size Dropdown */}
         <select
-          className="text-sm px-3 py-1 rounded-md bg-black border text-white focus:outline-none"
+          className="text-sm px-3 py-1 rounded-md border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-black dark:text-white focus:outline-none"
           value={limit}
           onChange={(e) => {
             setLimit(Number(e.target.value));
@@ -146,7 +147,7 @@ export default function CreateLeadGroupPage() {
         <CustomTable columns={columns} data={users} pageSize={limit} />
       )}
 
-      {/* Pagination Controls */}
+      {/* Pagination */}
       <Pagination
         currentPage={currentPage}
         totalRecords={totalItems}
@@ -162,7 +163,7 @@ export default function CreateLeadGroupPage() {
         <button
           onClick={handleSubmit}
           disabled={creating}
-          className="px-6 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white"
+          className="px-6 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
         >
           {creating ? "Creating..." : "Create Group"}
         </button>
