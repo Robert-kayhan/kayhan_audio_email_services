@@ -12,7 +12,7 @@ import { useGetNotesQuery } from "@/store/api/lead/leadFollowApi";
 const UpdateLeadBasic: React.FC = () => {
   const { id } = useParams();
   const { data: lead, isLoading, refetch } = useGetLeadByIdQuery(id as string);
-  console.log(lead)
+  console.log(lead);
   const [updateLead, { isLoading: isUpdating }] = useUpdateLeadMutation();
 
   const [formData, setFormData] = useState({
@@ -22,10 +22,10 @@ const UpdateLeadBasic: React.FC = () => {
     email: "",
     address: "",
   });
-
+  const router = useRouter()
   const [noteModalOpen, setNoteModalOpen] = useState(false);
   const [notes, setNotes] = useState<any[]>([]);
-  const {data :LeadData} = useGetNotesQuery(id)
+  const { data: LeadData } = useGetNotesQuery(id);
   useEffect(() => {
     if (lead) {
       setFormData({
@@ -57,29 +57,55 @@ const UpdateLeadBasic: React.FC = () => {
 
   if (isLoading) return <div className="p-6 text-white">Loading...</div>;
   if (!lead) return <div className="p-6 text-white">No data found</div>;
-  console.log(LeadData , "this is ")
+  console.log(LeadData, "this is ");
   return (
     <div className="p-6 max-w-4xl mx-auto text-white space-y-8">
-      
+  <button
+      onClick={() => router.back()}
+      className="inline-flex items-center px-4 py-2 rounded-md bg-gray-800 hover:bg-gray-700 text-white text-sm font-medium transition"
+    >
+      ← Back
+    </button>
       <div className="flex justify-between">
-      <h1 className="text-2xl font-bold">Update Lead </h1>
-          <button
-            onClick={() => setNoteModalOpen(true)}
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
-          >
-            + Add Note
-          </button>
-
-       
+        <h1 className="text-2xl font-bold">Update Lead </h1>
+        <button
+          onClick={() => setNoteModalOpen(true)}
+          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+        >
+          + Add Note
+        </button>
       </div>
 
       {/* Editable Section */}
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Input label="First Name" value={formData.firstName} onChange={(v) => handleChange("firstName", v)} />
-        <Input label="Last Name" value={formData.lastName} onChange={(v) => handleChange("lastName", v)} />
-        <Input label="Phone" value={formData.phone} onChange={(v) => handleChange("phone", v)} />
-        <Input label="Email" value={formData.email} onChange={(v) => handleChange("email", v)} />
-        <Input label="Address" value={formData.address} onChange={(v) => handleChange("address", v)} />
+      <form
+        onSubmit={handleSubmit}
+        className="grid grid-cols-1 md:grid-cols-2 gap-4"
+      >
+        <Input
+          label="First Name"
+          value={formData.firstName}
+          onChange={(v) => handleChange("firstName", v)}
+        />
+        <Input
+          label="Last Name"
+          value={formData.lastName}
+          onChange={(v) => handleChange("lastName", v)}
+        />
+        <Input
+          label="Phone"
+          value={formData.phone}
+          onChange={(v) => handleChange("phone", v)}
+        />
+        <Input
+          label="Email"
+          value={formData.email}
+          onChange={(v) => handleChange("email", v)}
+        />
+        <Input
+          label="Address"
+          value={formData.address}
+          onChange={(v) => handleChange("address", v)}
+        />
         <div className="md:col-span-2 text-right pt-4">
           <button
             type="submit"
@@ -94,11 +120,10 @@ const UpdateLeadBasic: React.FC = () => {
       <hr className="border-gray-700" />
 
       {/* Notes Section */}
-      
 
       {/* Note Modal */}
       <NoteModal
-      leadId={lead.id}
+        leadId={lead.id}
         isOpen={noteModalOpen}
         onClose={() => setNoteModalOpen(false)}
         notes={notes}
@@ -116,7 +141,10 @@ const UpdateLeadBasic: React.FC = () => {
         <ViewSection title="Sales Info">
           <ReadOnly label="Quote Given" value={lead.quoteGiven} />
           <ReadOnly label="Expected Value" value={lead.expectedValue} />
-          <ReadOnly label="Expected Close Date" value={lead.expectedCloseDate} />
+          <ReadOnly
+            label="Expected Close Date"
+            value={lead.expectedCloseDate}
+          />
         </ViewSection>
 
         <ViewSection title="Customer Info">
@@ -133,19 +161,29 @@ const UpdateLeadBasic: React.FC = () => {
         </ViewSection>
 
         {/* Follow-Up Sections */}
-        {lead.firstFollowUpDate && lead.firstFollowUpType && lead.firstFollowUpNotes && (
-          <ViewSection title="1st Follow-Up">
-            <ReadOnly label="Date" value={lead.firstFollowUpDate} />
-            <ReadOnly label="Type" value={lead.firstFollowUpType} />
-            <ReadOnly label="Notes" value={lead.firstFollowUpNotes} multiline />
-          </ViewSection>
-        )}
+        {lead.firstFollowUpDate &&
+          lead.firstFollowUpType &&
+          lead.firstFollowUpNotes && (
+            <ViewSection title="1st Follow-Up">
+              <ReadOnly label="Date" value={lead.firstFollowUpDate} />
+              <ReadOnly label="Type" value={lead.firstFollowUpType} />
+              <ReadOnly
+                label="Notes"
+                value={lead.firstFollowUpNotes}
+                multiline
+              />
+            </ViewSection>
+          )}
 
         {lead.secondFollowUpType && lead.secondFollowUpNotes && (
           <ViewSection title="2nd Follow-Up">
             <ReadOnly label="Date" value={lead.secondFollowUpDate} />
             <ReadOnly label="Type" value={lead.secondFollowUpType} />
-            <ReadOnly label="Notes" value={lead.secondFollowUpNotes} multiline />
+            <ReadOnly
+              label="Notes"
+              value={lead.secondFollowUpNotes}
+              multiline
+            />
           </ViewSection>
         )}
 
@@ -181,7 +219,10 @@ const UpdateLeadBasic: React.FC = () => {
               />
             ) : null}
 
-            {lead.firstFollowUpType && lead.firstFollowUpNotes && !lead.secondFollowUpType && !lead.secondFollowUpNotes ? (
+            {lead.firstFollowUpType &&
+            lead.firstFollowUpNotes &&
+            !lead.secondFollowUpType &&
+            !lead.secondFollowUpNotes ? (
               <FollowUpStageForm
                 stage="second"
                 leadId={id as string}
@@ -194,7 +235,10 @@ const UpdateLeadBasic: React.FC = () => {
               />
             ) : null}
 
-            {lead.secondFollowUpType && lead.secondFollowUpNotes && !lead.thirdFollowUpType && !lead.thirdFollowUpNotes ? (
+            {lead.secondFollowUpType &&
+            lead.secondFollowUpNotes &&
+            !lead.thirdFollowUpType &&
+            !lead.thirdFollowUpNotes ? (
               <FollowUpStageForm
                 stage="third"
                 leadId={id as string}
@@ -207,7 +251,10 @@ const UpdateLeadBasic: React.FC = () => {
               />
             ) : null}
 
-            {lead.thirdFollowUpType && lead.thirdFollowUpNotes && !lead.finalFollowUpType && !lead.finalFollowUpNotes ? (
+            {lead.thirdFollowUpType &&
+            lead.thirdFollowUpNotes &&
+            !lead.finalFollowUpType &&
+            !lead.finalFollowUpNotes ? (
               <FollowUpStageForm
                 stage="final"
                 leadId={id as string}
@@ -221,10 +268,13 @@ const UpdateLeadBasic: React.FC = () => {
             ) : null}
           </div>
         )}
-         {LeadData.length > 0 && (
+        {Array.isArray(LeadData) && LeadData.length > 0 && (
           <ul className="space-y-2">
-            {LeadData.map(({id ,note}:any) => (
-              <li key={id} className="bg-gray-800 border border-gray-700 p-3 rounded text-white">
+            {LeadData.map(({ id, note }: any) => (
+              <li
+                key={id}
+                className="bg-gray-800 border border-gray-700 p-3 rounded text-white"
+              >
                 <div className="text-sm text-gray-400 mb-1">Note #{id}</div>
                 <div className="whitespace-pre-line">{note}</div>
               </li>
