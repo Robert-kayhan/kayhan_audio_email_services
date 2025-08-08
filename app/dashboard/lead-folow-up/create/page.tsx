@@ -172,7 +172,7 @@ const LeadCustomerDetail = () => {
               <Select
                 label="Lead Source"
                 value={formData.leadSource}
-                options={["Website", "FaceBook","tik tok", "Instagram", "YouTube", "Walk-in", "Referral"]}
+                options={["Website", "FaceBook","tik tok", "Instagram", "YouTube", "Walk-in", "Referral","Call"]}
                 onChange={(val: any) => handleChange("leadSource", val)}
               />
               <Input

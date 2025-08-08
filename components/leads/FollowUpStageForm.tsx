@@ -100,10 +100,11 @@ const FollowUpStageForm: React.FC<FollowUpProps> = ({
         <select
           value={FollowUpType}
           onChange={(e) => setType(e.target.value)}
+          
           className="w-full px-3 py-2 rounded bg-gray-800 border border-gray-600"
         >
           <option value="">Select Type</option>
-          <option value="Call">Call</option>
+          <option value="Over the Phone">Over the Phone </option>
           <option value="Email">Email</option>
           <option value="Visit">In Person</option>
           {/* <option value="Meeting">Meeting</option> */}

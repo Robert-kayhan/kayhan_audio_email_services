@@ -43,9 +43,9 @@ const LoginPage = () => {
         <Image
           height={800}
           width={800}
-          src="/auth.png" // Replace with your image path
+          src="/Mailer.png" // Replace with your image path
           alt="Login"
-          className="w-full h-auto object-cover"
+          className="w-full h-auto object-cover "
         />
       </div>
 
