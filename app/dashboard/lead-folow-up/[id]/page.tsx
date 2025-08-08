@@ -33,7 +33,7 @@ const UpdateLeadBasic: React.FC = () => {
   const router = useRouter();
   const [noteModalOpen, setNoteModalOpen] = useState(false);
   const [notes, setNotes] = useState<any[]>([]);
-  const { data: LeadData } = useGetNotesQuery(id);
+  const { data: LeadData ,refetch : refecthNotes } = useGetNotesQuery(id);
   useEffect(() => {
     if (lead) {
       setFormData({
@@ -45,7 +45,8 @@ const UpdateLeadBasic: React.FC = () => {
       });
     }
     refetch();
-  }, [lead]);
+    refecthNotes()
+  }, [lead, LeadData]);
 
   const handleChange = (key: string, value: string) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
@@ -56,12 +57,12 @@ const UpdateLeadBasic: React.FC = () => {
       const data = { saleStatus };
       await updateSaleStatus({ id, data }).unwrap();
       alert("Sale status updated!");
-      router.push("/dashboard/lead-folow-up")
+      router.push("/dashboard/lead-folow-up");
     } catch (error) {
       console.error("Failed to update sale status", error);
     }
   };
-
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -136,6 +137,7 @@ const UpdateLeadBasic: React.FC = () => {
 
       {/* Note Modal */}
       <NoteModal
+        refetch={refecthNotes}
         leadId={lead.id}
         isOpen={noteModalOpen}
         onClose={() => setNoteModalOpen(false)}
@@ -282,33 +284,32 @@ const UpdateLeadBasic: React.FC = () => {
           </div>
         )}
         {lead.finalFollowUpType && (
-  <div className="space-y-4">
-    {lead.saleStatus !== "Sale done" && (
-      <>
-        <Select
-          label="Sale Status"
-          value={saleStatus}
-          options={["Sale done", "Sale not done"]}
-          onChange={(val: string) => setSaleStatus(val)}
-        />
-        <button
-          onClick={handleSaleDone}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-        >
-          Update Sale Status
-        </button>
-      </>
-    )}
+          <div className="space-y-4">
+            {lead.saleStatus !== "Sale done" && (
+              <>
+                <Select
+                  label="Sale Status"
+                  value={saleStatus}
+                  options={["Sale done", "Sale not done"]}
+                  onChange={(val: string) => setSaleStatus(val)}
+                />
+                <button
+                  onClick={handleSaleDone}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+                >
+                  Update Sale Status
+                </button>
+              </>
+            )}
 
-    <button
-      onClick={() => setNoteModalOpen(true)}
-      className="bg-green-600 hover:bg-green-700 float-end text-white px-4 py-2 rounded"
-    >
-      + Add Note
-    </button>
-  </div>
-)}
-
+            <button
+              onClick={() => setNoteModalOpen(true)}
+              className="bg-green-600 hover:bg-green-700 float-end text-white px-4 py-2 rounded"
+            >
+              + Add Note
+            </button>
+          </div>
+        )}
 
         {Array.isArray(LeadData) && LeadData.length > 0 && (
           <ul className="space-y-2">
