@@ -4,7 +4,9 @@ import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   useGetLeadByIdQuery,
+  useUpdateFollowUpStageMutation,
   useUpdateLeadMutation,
+  useUpdateSaleStatusMutation,
 } from "@/store/api/lead/leadFollowApi";
 import FollowUpStageForm from "@/components/leads/FollowUpStageForm";
 import NoteModal from "@/components/leads/NoteModal";
@@ -22,7 +24,13 @@ const UpdateLeadBasic: React.FC = () => {
     email: "",
     address: "",
   });
-  const router = useRouter()
+  const defaultData = {
+    SaleStatus: "",
+  };
+  const [saleStatus, setSaleStatus] = useState(defaultData.SaleStatus || "");
+  const [updateSaleStatus] = useUpdateSaleStatusMutation();
+
+  const router = useRouter();
   const [noteModalOpen, setNoteModalOpen] = useState(false);
   const [notes, setNotes] = useState<any[]>([]);
   const { data: LeadData } = useGetNotesQuery(id);
@@ -43,6 +51,17 @@ const UpdateLeadBasic: React.FC = () => {
     setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
+  const handleSaleDone = async () => {
+    try {
+      const data = { saleStatus };
+      await updateSaleStatus({ id, data }).unwrap();
+      alert("Sale status updated!");
+      router.push("/dashboard/lead-folow-up")
+    } catch (error) {
+      console.error("Failed to update sale status", error);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -60,20 +79,14 @@ const UpdateLeadBasic: React.FC = () => {
   console.log(LeadData, "this is ");
   return (
     <div className="p-6 max-w-4xl mx-auto text-white space-y-8">
-  <button
-      onClick={() => router.back()}
-      className="inline-flex items-center px-4 py-2 rounded-md bg-gray-800 hover:bg-gray-700 text-white text-sm font-medium transition"
-    >
-      ← Back
-    </button>
+      <button
+        onClick={() => router.back()}
+        className="inline-flex items-center px-4 py-2 rounded-md bg-gray-800 hover:bg-gray-700 text-white text-sm font-medium transition"
+      >
+        ← Back
+      </button>
       <div className="flex justify-between">
         <h1 className="text-2xl font-bold">Update Lead </h1>
-        <button
-          onClick={() => setNoteModalOpen(true)}
-          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
-        >
-          + Add Note
-        </button>
       </div>
 
       {/* Editable Section */}
@@ -220,7 +233,7 @@ const UpdateLeadBasic: React.FC = () => {
             ) : null}
 
             {lead.firstFollowUpType &&
-            lead.firstFollowUpNotes &&
+            // lead.firstFollowUpNotes &&
             !lead.secondFollowUpType &&
             !lead.secondFollowUpNotes ? (
               <FollowUpStageForm
@@ -236,7 +249,7 @@ const UpdateLeadBasic: React.FC = () => {
             ) : null}
 
             {lead.secondFollowUpType &&
-            lead.secondFollowUpNotes &&
+            // lead.secondFollowUpNotes &&
             !lead.thirdFollowUpType &&
             !lead.thirdFollowUpNotes ? (
               <FollowUpStageForm
@@ -252,7 +265,7 @@ const UpdateLeadBasic: React.FC = () => {
             ) : null}
 
             {lead.thirdFollowUpType &&
-            lead.thirdFollowUpNotes &&
+            // lead.thirdFollowUpNotes &&
             !lead.finalFollowUpType &&
             !lead.finalFollowUpNotes ? (
               <FollowUpStageForm
@@ -268,6 +281,35 @@ const UpdateLeadBasic: React.FC = () => {
             ) : null}
           </div>
         )}
+        {lead.finalFollowUpType && (
+  <div className="space-y-4">
+    {lead.saleStatus !== "Sale done" && (
+      <>
+        <Select
+          label="Sale Status"
+          value={saleStatus}
+          options={["Sale done", "Sale not done"]}
+          onChange={(val: string) => setSaleStatus(val)}
+        />
+        <button
+          onClick={handleSaleDone}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+        >
+          Update Sale Status
+        </button>
+      </>
+    )}
+
+    <button
+      onClick={() => setNoteModalOpen(true)}
+      className="bg-green-600 hover:bg-green-700 float-end text-white px-4 py-2 rounded"
+    >
+      + Add Note
+    </button>
+  </div>
+)}
+
+
         {Array.isArray(LeadData) && LeadData.length > 0 && (
           <ul className="space-y-2">
             {LeadData.map(({ id, note }: any) => (
@@ -340,5 +382,32 @@ const ViewSection = ({
   <div>
     <h2 className="text-lg font-semibold text-gray-300 mb-2">{title}</h2>
     <div className="grid md:grid-cols-2 gap-4">{children}</div>
+  </div>
+);
+const Select = ({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  options: string[];
+  onChange: (val: string) => void;
+}) => (
+  <div>
+    <label className="text-sm text-gray-300 block mb-1">{label}</label>
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="w-full px-3 py-2 rounded-md bg-gray-900 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+    >
+      <option value="">Select {label}</option>
+      {options.map((opt) => (
+        <option key={opt} value={opt}>
+          {opt}
+        </option>
+      ))}
+    </select>
   </div>
 );

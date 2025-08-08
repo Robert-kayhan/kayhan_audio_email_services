@@ -17,7 +17,7 @@ type LeadFollowUp = {
   isActiveCustomer: string;
 };
 
-const leadStatusOptions = ["all","Today's  Follow up", "New","first Follow up", "second Follow up","third Follow up",   "Sale done","Sale not done"] as const;
+const leadStatusOptions = ["all","Today's  Follow up", "New","First Follow up", "Second Follow up","Third Follow up",   "Sale done","Sale not done"] as const;
 
 const LeadFollowUpPage = () => {
   const [page, setPage] = useState(1);
