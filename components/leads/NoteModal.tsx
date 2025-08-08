@@ -14,32 +14,30 @@ type Props = {
   notes: Note[];
   setNotes: (notes: Note[]) => void;
   leadId: string;
+  refetch : any
 };
 
-export default function NoteModal({ isOpen, onClose, notes, setNotes, leadId }: Props) {
+export default function NoteModal({ isOpen, onClose, notes, setNotes, leadId ,refetch}: Props) {
   const [note, setNote] = useState("");
   const [addNotes, { isLoading }] = useAddNotesMutation();
 
   const handleAdd = async () => {
-    const trimmedNote = note.trim();
-    if (!trimmedNote) return;
+  const trimmedNote = note.trim();
+  if (!trimmedNote) return;
 
-    try {
-        console.log(note)
-        const data = {
-            id : leadId,
-            note : note
-        }
-      const res = await addNotes(data).unwrap();
-
-      setNotes([...notes, { id: res.id || Date.now(), content: trimmedNote }]);
-      setNote("");
-      onClose();
-    } catch (error) {
-      console.error("Failed to add note:", error);
-      // Optionally show error to user
-    }
-  };
+  try {
+    const data = {
+      id: leadId,
+      note: trimmedNote,
+    };
+    await addNotes(data).unwrap();
+    await refetch(); // await this to ensure data is fresh before next render
+    setNote("");
+    onClose();
+  } catch (error) {
+    console.error("Failed to add note:", error);
+  }
+};
 
   if (!isOpen) return null;
 
