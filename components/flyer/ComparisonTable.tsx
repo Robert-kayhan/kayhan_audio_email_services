@@ -1,138 +1,160 @@
 "use client";
 
-import React from "react";
-import parse from "html-react-parser";
+import React, { useEffect, useState } from "react";
+import { useGetAllProductSpecificationsQuery } from "@/store/api/flyer/productSpecificationApi";
 
-const specData = [
-  {
-    feature: "Processor",
-    version6: "Qualcomm QCM6125 Octa-Core Kryo 260 (2.0 GHz + 1.8 GHz)",
-    linux: "Sunplus SPHE8368-U",
-  },
-  {
-    feature: "Operating System",
-    version6: "Android 13",
-    linux: "Linux OS with Kernel 4.9 and SDL",
-  },
-  {
-    feature: "Memory",
-    version6: "8 GB LPDDR4X + 256 GB UFS",
-    linux: "Optimized performance architecture",
-  },
-  {
-    feature: "Wireless CarPlay/Android Auto",
-    version6: "Built-in Wireless CarPlay and Wireless Android Auto",
-    linux: "Built-in Wireless CarPlay and Wireless Android Auto",
-  },
-  {
-    feature: "Audio / Video Output",
-    version6: "5.1 Channel Output (4VRMS) with 48-band EQ, DSP, and DTS Sound, Coaxial, Optical Digital Outputs",
-    linux: "4.2-Channel RCA (2 Sub-Out, 4 RCA) with Digital Sound Processor (DSP)",
-  },
-  {
-    feature: "Amplifier",
-    version6: "TDA7808 75W x 4",
-    linux: "55W x 4 Power Amplifier",
-  },
-  {
-    feature: "Camera Inputs",
-    version6: "Compatible with Reverse and Front Cameras, Built-in 360° Camera Chip (Camera Sold Separately)",
-    linux: "Dedicated Front and Reverse Camera Inputs",
-  },
-  {
-    feature: "Microphone",
-    version6: "Background Noise Cancelling Microphone for Enhanced Call Quality",
-    linux: "Microphone for Clear Calls",
-  },
-  {
-    feature: "Bluetooth",
-    version6: "Version 5.0 LE",
-    linux: "Bluetooth 5.0",
-  },
-  {
-    feature: "USB Ports",
-    version6: "3 USB 2.0 Ports",
-    linux: "2 Rear USB Ports",
-  },
-  {
-    feature: "Steering Wheel & AC Controls",
-    version6: "Fully Compatible",
-    linux: "Fully Compatible",
-  },
-  {
-    feature: "Factory Reversing Camera",
-    version6: "Compatible (Adaptor plug Sold Separately)",
-    linux: "Compatible (Adaptor plug Sold Separately)",
-  },
-  {
-    feature: "Audio and Video Features",
-    version6: "Advanced DSP with Coaxial, Optical Digital Outputs",
-    linux: "video out capabilities",
-  },
-  {
-    feature: "Radio Tuner",
-    version6: "Digital Radio (DAB) with RDS and RBDS",
-    linux: "FM Radio with RDS and AM Radio with RX3356 Chip",
-  },
-  {
-    feature: "Google Play Store",
-    version6: "Compatible",
-    linux: "Not Compatible",
-  },
-  {
-    feature: "Netflix",
-    version6: "Compatible",
-    linux: "Not Compatible",
-  },
-  {
-    feature: "Disney+",
-    version6: "Compatible",
-    linux: "Not Compatible",
-  },
-  {
-    feature: "Foxtel",
-    version6: "Compatible",
-    linux: "Not Compatible",
-  },
-  {
-    feature: "APPs",
-    version6: "Compatible with Tons of Apps",
-    linux: "Not Compatible",
-  },
-  {
-    feature: "Online Videos",
-    version6: "Compatible",
-    linux: "Not Compatible",
-  },
-];
+// Convert camelCase or mixedCase keys into human-readable labels
+function formatFeatureName(key: string) {
+  return key
+    .replace(/([A-Z])/g, " $1") // add space before capital letters
+    .replace(/^./, (str) => str.toUpperCase()); // capitalize first letter
+}
 
-export default function ComparisonTable() {
+// Group specifications by product name
+function groupByProduct(specs: any[]) {
+  const grouped: Record<
+    string,
+    { id: string; name: string; specs: { feature: string; value: string }[] }
+  > = {};
+
+  specs.forEach((spec) => {
+    const productName = spec.name || "Unknown Product";
+    if (!grouped[productName]) {
+      grouped[productName] = { id: spec.id?.toString() || "", name: productName, specs: [] };
+    }
+
+    // Loop through each property except metadata fields
+    Object.entries(spec).forEach(([key, value]) => {
+      if (["id", "name", "createdAt", "updatedAt"].includes(key)) return;
+      grouped[productName].specs.push({
+        feature: formatFeatureName(key),
+        value: value as string,
+      });
+    });
+  });
+
+  return grouped;
+}
+
+type ComparisonTableProps = {
+  firstProductId: (id: string) => void;
+  secondProductId: (id: string) => void;
+};
+
+export default function ComparisonTable({ firstProductId, secondProductId }: ComparisonTableProps) {
+  const { data, isLoading, isError } = useGetAllProductSpecificationsQuery({});
+  const [product1, setProduct1] = useState<string>("");
+  const [product2, setProduct2] = useState<string>("");
+
+  const specs = data?.data || [];
+  const products = groupByProduct(specs);
+
+  // Notify parent of selected product IDs
+  useEffect(() => {
+    firstProductId(products[product1]?.id || "");
+  }, [product1, products, firstProductId]);
+
+  useEffect(() => {
+    secondProductId(products[product2]?.id || "");
+  }, [product2, products, secondProductId]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-40">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (isError || !specs.length) {
+    return <p className="p-4 text-red-500">Failed to load specifications.</p>;
+  }
+
+  const allFeatures =
+    product1 && product2
+      ? [
+          ...new Set([
+            ...products[product1]?.specs.map((s) => s.feature),
+            ...products[product2]?.specs.map((s) => s.feature),
+          ]),
+        ]
+      : [];
+
   return (
-    <div className="p-4 overflow-x-auto bg-white text-sm text-gray-900">
-      <table className="w-full border border-gray-300 text-left">
-        <thead>
-          <tr className="bg-gray-100 text-gray-800">
-            <th className="p-3 border border-gray-300">Feature</th>
-            <th className="p-3 border border-gray-300">Version 6 Head Unit</th>
-            <th className="p-3 border border-gray-300">Linux Head Unit</th>
-          </tr>
-        </thead>
-        <tbody>
-          {specData.map((item, index) => (
-            <tr key={index} className="hover:bg-gray-50">
-              <td className="p-3 border border-gray-300 font-medium">
-                {parse(item.feature)}
-              </td>
-              <td className="p-3 border border-gray-300">
-                {parse(item.version6)}
-              </td>
-              <td className="p-3 border border-gray-300">
-                {parse(item.linux)}
-              </td>
+    <div className="p-4 overflow-x-auto bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100">
+      {/* Product Selectors */}
+      <div className="flex justify-between gap-4 mb-4">
+        {/* Product 1 */}
+        <div>
+          <label className="block font-medium mb-1">Product 1</label>
+          <select
+            value={product1}
+            onChange={(e) => setProduct1(e.target.value)}
+            className="border border-gray-300 dark:border-gray-700 rounded px-3 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+          >
+            <option value="">Select Product</option>
+            {Object.entries(products).map(([key, prod]) => (
+              <option key={key} value={key}>
+                {prod.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Product 2 */}
+        <div>
+          <label className="block font-medium mb-1">Product 2</label>
+          <select
+            value={product2}
+            onChange={(e) => setProduct2(e.target.value)}
+            className="border border-gray-300 dark:border-gray-700 rounded px-3 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+            disabled={!product1}
+          >
+            <option value="">Select Product</option>
+            {Object.entries(products)
+              .filter(([key]) => key !== product1)
+              .map(([key, prod]) => (
+                <option key={key} value={key}>
+                  {prod.name}
+                </option>
+              ))}
+          </select>
+        </div>
+      </div>
+
+      {/* Comparison Table */}
+      {product1 && product2 && (
+        <table className="w-full border border-gray-300 dark:border-gray-700 text-left">
+          <thead>
+            <tr className="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200">
+              <th className="p-3 border border-gray-300 dark:border-gray-700">Feature</th>
+              <th className="p-3 border border-gray-300 dark:border-gray-700">
+                {products[product1].name}
+              </th>
+              <th className="p-3 border border-gray-300 dark:border-gray-700">
+                {products[product2].name}
+              </th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {allFeatures.map((feature, index) => {
+              const val1 =
+                products[product1].specs.find((s) => s.feature === feature)?.value || "-";
+              const val2 =
+                products[product2].specs.find((s) => s.feature === feature)?.value || "-";
+              return (
+                <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                  <td className="p-3 border border-gray-300 dark:border-gray-700 font-medium">
+                    {feature}
+                  </td>
+                  <td className="p-3 border border-gray-300 dark:border-gray-700">{val1}</td>
+                  <td className="p-3 border border-gray-300 dark:border-gray-700">{val2}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 }
