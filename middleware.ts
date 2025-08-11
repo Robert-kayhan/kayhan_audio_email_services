@@ -6,16 +6,16 @@ export function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
   // console.log(req.cookies)
   // ✅ Redirect authenticated users away from auth pages
-  // if (token && (pathname === "/sign-in" || pathname === "/sign-up")) {
-  //   url.pathname = "/dashboard/campaign";
-  //   return NextResponse.redirect(url);
-  // }
+  if (token && (pathname === "/sign-in" || pathname === "/sign-up")) {
+    url.pathname = "/dashboard/";
+    return NextResponse.redirect(url);
+  }
 
   // ✅ Redirect unauthenticated users away from protected routes
-  // if (!token && pathname.startsWith("/dashboard")) {
-  //   url.pathname = "/sign-in";
-  //   return NextResponse.redirect(url);
-  // }
+  if (!token && pathname.startsWith("/dashboard")) {
+    url.pathname = "/sign-in";
+    return NextResponse.redirect(url);
+  }
 
   return NextResponse.next();
 }
