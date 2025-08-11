@@ -1,3 +1,4 @@
+import Image from "next/image";
 import React, { useState } from "react";
 
 type Product = {
@@ -44,7 +45,7 @@ export default function ProductSearch({ onSelect }: { onSelect: (product: any) =
               setResults([]);
             }}
           >
-            <img src={item.thumbnail} alt={item.name} className="w-12 inline-block mr-2" />
+            <Image src={item.thumbnail} alt={item.name} className="w-12 inline-block mr-2" />
             {item.name}
           </li>
         ))}

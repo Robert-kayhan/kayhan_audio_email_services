@@ -7,6 +7,7 @@ import { useCreateFlyerMutation } from "@/store/api/flyer/FlyerApi";
 import ComparisonTable from "@/components/flyer/ComparisonTable";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import Image from "next/image";
 
 type ProductOption = {
   label: string;
@@ -215,7 +216,7 @@ export default function FlyerPage() {
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b pb-4">
-          <img src="/logo.webp" alt="Kayhan Logo" className="min-h-28" />
+          <Image src="/logo.webp" alt="Kayhan Logo" className="min-h-28" />
           <div className="grid grid-cols-2 gap-2 text-sm">
             <input
               placeholder="Customer Name"
