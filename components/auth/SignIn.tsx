@@ -29,7 +29,7 @@ const LoginPage = () => {
    const res = await login(formData).unwrap();
       toast.success("User login successfully!");
       console.log("user login succesffuly",res)
-      router.push("/dashboard/template")
+      router.push("/dashboard/")
     } catch (error) {
       toast.error( "Invalid credentials");
       console.log(error)

@@ -57,7 +57,7 @@ const Navigation = () => {
           { icon: PhoneCall, label: "CRM", href: "/dashboard/lead-folow-up" },
           {
             icon: Settings,
-            label: "Flyer",
+            label: "Product specifications",
             href: "/dashboard/product-specifications",
           },
           { icon: Album, label: "Flyer", href: "/dashboard/flyer/" },
