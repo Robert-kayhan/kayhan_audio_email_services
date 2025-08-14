@@ -106,7 +106,8 @@ export default function LeadsDashboard() {
           <option value="all">All Users</option>
           <option value="kayhanaudio@gmail.com">Kayhan Audio</option>
           <option value="robertsmith12358@gmail.com">Robart</option>
-          <option value="Adamsure123@gmail.com">Adam</option>
+          <option value="bendordevic1998@hotmail.com">Ben</option>
+          <option value="sales@kayhanaudio.com.au">Ahmed</option>
         </select>
 
         <div className="flex gap-2">
