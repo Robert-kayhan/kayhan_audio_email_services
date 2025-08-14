@@ -13,7 +13,7 @@ import {
   User,
   LogOutIcon,
   PhoneCall,
-  Album
+  Album,
 } from "lucide-react";
 import { useLogoutMutation } from "@/store/api/AuthApi";
 
@@ -49,10 +49,18 @@ const Navigation = () => {
           { icon: FileText, label: "Templates", href: "/dashboard/template" },
           { icon: User, label: "User", href: "/dashboard/user" },
           { icon: Users, label: "Leads Group", href: "/dashboard/lead-group" },
-          { icon: LucideListOrdered, label: "Match Order", href: "/dashboard/macth-with-orders" },
+          {
+            icon: LucideListOrdered,
+            label: "Match Order",
+            href: "/dashboard/macth-with-orders",
+          },
           { icon: PhoneCall, label: "CRM", href: "/dashboard/lead-folow-up" },
+          {
+            icon: Settings,
+            label: "Flyer",
+            href: "/dashboard/product-specifications",
+          },
           { icon: Album, label: "Flyer", href: "/dashboard/flyer/" },
-
         ].map(({ icon: Icon, label, href }, i) => (
           <Link
             key={i}
