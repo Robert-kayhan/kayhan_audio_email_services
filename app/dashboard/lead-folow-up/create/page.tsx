@@ -5,17 +5,16 @@ import {
   FileText,
   DollarSign,
   ShoppingCart,
-  ClipboardList,
   ArrowRight,
 } from "lucide-react";
 import { useCreateLeadMutation } from "@/store/api/lead/leadFollowApi";
 import { useRouter } from "next/navigation";
+
 const steps = [
   { title: "Contact Info", icon: User },
   { title: "Lead Details", icon: FileText },
   { title: "Sales Tracking", icon: DollarSign },
   { title: "Customer Status", icon: ShoppingCart },
-  { title: "Communication", icon: ClipboardList },
 ];
 
 const LeadCustomerDetail = () => {
@@ -31,18 +30,13 @@ const LeadCustomerDetail = () => {
     address: "",
     leadSource: "",
     interest: "",
-    // leadStatus: "",
-    saleStatus : "",
+    saleStatus: "",
     quoteGiven: "",
     expectedValue: "",
     expectedCloseDate: "",
     isActiveCustomer: "",
     purchaseHistory: "",
     supportNotes: "",
-    communicationType: "",
-    communicationDate: "",
-    followUpDate: "",
-    communicationNotes: "",
   });
 
   const handleChange = (field: string, value: string) => {
@@ -59,17 +53,11 @@ const LeadCustomerDetail = () => {
           formData.email
         );
       case 1:
-        return formData.leadSource && formData.interest ;
+        return formData.leadSource && formData.interest;
       case 2:
-        return (
-          formData.quoteGiven &&
-          formData.expectedValue 
-          // formData.expectedCloseDate
-        );
+        return formData.quoteGiven && formData.expectedValue;
       case 3:
         return formData.isActiveCustomer && formData.purchaseHistory;
-      case 4:
-        return formData.communicationType && formData.communicationDate;
       default:
         return false;
     }
@@ -90,18 +78,20 @@ const LeadCustomerDetail = () => {
       alert("Please fill required fields.");
     }
   };
+
   const [createLead, { isLoading }] = useCreateLeadMutation();
-  const router = useRouter()
+  const router = useRouter();
+
   const handleSubmit = async () => {
     try {
       const payload = {
         ...formData,
-        expectedValue: parseFloat(formData.expectedValue), // ensure number
+        expectedValue: parseFloat(formData.expectedValue),
       };
 
       await createLead(payload).unwrap();
       alert("Lead submitted successfully!");
-      router.push("/dashboard/lead-folow-up")
+      router.push("/dashboard/lead-folow-up");
     } catch (error: any) {
       console.error("Lead creation failed:", error);
       alert("Failed to submit lead. Please check all inputs and try again.");
@@ -109,7 +99,7 @@ const LeadCustomerDetail = () => {
   };
 
   return (
-    <div className=" h-screen bg-black overflow-x-hidden w-full text-white flex flex-col">
+    <div className="h-screen bg-black overflow-x-hidden w-full text-white flex flex-col">
       {/* Step Navigation */}
       <div className="flex overflow-auto justify-center border-b border-gray-700">
         {steps.map((step, index) => {
@@ -155,8 +145,8 @@ const LeadCustomerDetail = () => {
               />
               <Input
                 label="Email"
+                type="email"
                 value={formData.email}
-                type ={"email"}
                 onChange={(val: any) => handleChange("email", val)}
               />
               <Input
@@ -172,7 +162,16 @@ const LeadCustomerDetail = () => {
               <Select
                 label="Lead Source"
                 value={formData.leadSource}
-                options={["Website", "FaceBook","tik tok", "Instagram", "YouTube", "Walk-in", "Referral","Call"]}
+                options={[
+                  "Website",
+                  "FaceBook",
+                  "tik tok",
+                  "Instagram",
+                  "YouTube",
+                  "Walk-in",
+                  "Referral",
+                  "Call",
+                ]}
                 onChange={(val: any) => handleChange("leadSource", val)}
               />
               <Input
@@ -180,12 +179,6 @@ const LeadCustomerDetail = () => {
                 value={formData.interest}
                 onChange={(val: any) => handleChange("interest", val)}
               />
-              {/* <Select
-                label="Lead Status"
-                value={formData.leadStatus}
-                options={["New", "In Progress", "Won", "Lost"]}
-                onChange={(val: any) => handleChange("leadStatus", val)}
-              /> */}
             </div>
           )}
 
@@ -203,12 +196,6 @@ const LeadCustomerDetail = () => {
                 value={formData.expectedValue}
                 onChange={(val: any) => handleChange("expectedValue", val)}
               />
-              {/* <Input
-                label="Expected Close Date"
-                type="date"
-                value={formData.expectedCloseDate}
-                onChange={(val: any) => handleChange("expectedCloseDate", val)}
-              /> */}
             </div>
           )}
 
@@ -234,46 +221,6 @@ const LeadCustomerDetail = () => {
               />
             </>
           )}
-
-          {currentStep === 4 && (
-            <>
-              <div className="grid md:grid-cols-2 gap-4">
-                <Select
-                  label="Communication Type"
-                  value={formData.communicationType}
-                  options={["Call", "Email", "In-Person"]}
-                  onChange={(val: any) =>
-                    handleChange("communicationType", val)
-                  }
-                />
-                <Input
-                  label="Date"
-                  type="date"
-                  value={formData.communicationDate}
-                  onChange={(val: any) =>
-                    handleChange("communicationDate", val)
-                  }
-                />
-                 <Select
-                label="Sale Status"
-                value={formData.saleStatus}
-                options={["Sale done" , "Sale not done"]}
-                onChange={(val: any) => handleChange("saleStatus", val)}
-              />
-                {formData.saleStatus === "Sale not done" &&<Input
-                  label="Next Follow-up Date"
-                  type="date"
-                  value={formData.followUpDate}
-                  onChange={(val: any) => handleChange("followUpDate", val)}
-                />}
-              </div>
-              <Textarea
-                label="Notes / Summary"
-                value={formData.communicationNotes}
-                onChange={(val: any) => handleChange("communicationNotes", val)}
-              />
-            </>
-          )}
         </form>
 
         {/* Sticky Button Area */}
@@ -282,13 +229,15 @@ const LeadCustomerDetail = () => {
             type="button"
             onClick={handleNext}
             disabled={isLoading}
-            className={`bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md flex items-center gap-2 ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+            className={`bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md flex items-center gap-2 ${
+              isLoading ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           >
             {currentStep < steps.length - 1
               ? "Next"
               : isLoading
-                ? "Submitting..."
-                : "Submit"}
+              ? "Submitting..."
+              : "Submit"}
             <ArrowRight size={16} />
           </button>
         </div>
@@ -300,7 +249,7 @@ const LeadCustomerDetail = () => {
 // Reusable Components
 const Input = ({ label, value, onChange, type = "text" }: any) => (
   <div>
-    <label className="text-sm text-white  block mb-1">{label}</label>
+    <label className="text-sm text-white block mb-1">{label}</label>
     <input
       type={type}
       value={value}

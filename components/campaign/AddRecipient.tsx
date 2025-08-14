@@ -9,8 +9,8 @@ import { CheckSquare, Square } from "lucide-react";
 
 interface Props {
   selectedUserIds: any;
-  setSelectedUserIds: (ids: any) => void;
-  onNext: () => void;
+  setSelectedUserIds: any;
+  onNext: any;
 }
 
 export default function AddRecipients({
@@ -20,78 +20,77 @@ export default function AddRecipients({
 }: Props) {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(25);
-  const [selectData , setSelectData] = useState<any>()
-    const [search, setSearch] = useState("");
-  
+  const [search, setSearch] = useState("");
+
   const { data, isLoading } = useGetAllUserQuery({
     page: currentPage,
     limit,
-    search
+    search,
   });
-  console.log(data , "this is data")
+
   const users: User[] = data?.data || [];
   const pagination = data?.pagination || {};
   const totalItems = pagination.totalItems || 0;
   const totalPages = pagination.totalPages || 1;
   const showPagination = Array.from({ length: totalPages }, (_, i) => i + 1);
 
-  const isUserSelected = (id: number) => selectedUserIds.includes(id);
   const allUserIdsOnCurrentPage = users.map((user) => user.id);
+
+  const isUserSelected = (id: number) => selectedUserIds.includes(id);
+
   const toggleUser = (id: number) => {
-    setSelectedUserIds((prev: any) =>
-      prev.includes(id) ? prev.filter((uid: any) => uid !== id) : [...prev, id]
+    setSelectedUserIds((prev:any) =>
+      prev.includes(id) ? prev.filter((uid:any) => uid !== id) : [...prev, id]
     );
   };
-  
+
   const toggleSelectAllCurrentPage = () => {
     const areAllSelected = allUserIdsOnCurrentPage.every((id) =>
       selectedUserIds.includes(id)
     );
-    const allData = [...data]
-    setSelectData(allData)
-    console.log(selectData , "this is data")
+
     if (areAllSelected) {
-      setSelectedUserIds((prev: number[]) =>
-        prev.filter((id: any) => !allUserIdsOnCurrentPage.includes(id))
+      // Unselect all users from the current page
+      setSelectedUserIds((prev:any) =>
+        prev.filter((id:any) => !allUserIdsOnCurrentPage.includes(id))
       );
     } else {
-      const newSelected = Array.from(
-        new Set([...selectedUserIds, ...allUserIdsOnCurrentPage])
-      );
-      setSelectedUserIds(newSelected);
+      // Select all users from the current page
+      setSelectedUserIds((prev:any) => [
+        ...new Set([...prev, ...allUserIdsOnCurrentPage]),
+      ]);
     }
   };
 
- const columns: Column<User>[] = [
-  {
-    header: (
-      <button onClick={toggleSelectAllCurrentPage}>
-        {allUserIdsOnCurrentPage.every((id) => selectedUserIds.includes(id)) ? (
-          <CheckSquare className="text-blue-500" size={18} />
-        ) : (
-          <Square className="text-gray-400 dark:text-gray-500" size={18} />
-        )}
-      </button>
-    ),
-    accessor: "id",
-    render: (_, row: any) => (
-      <button
-        onClick={() => toggleUser(row.id)}
-        className="flex items-center"
-      >
-        {isUserSelected(row.id) ? (
-          <CheckSquare className="text-blue-500" size={18} />
-        ) : (
-          <Square className="text-gray-400 dark:text-gray-500" size={18} />
-        )}
-      </button>
-    ),
-  },
-  { header: "ID", accessor: "id" },
-  { header: "Name", accessor: "name" },
-  { header: "Email", accessor: "email" },
-];
-
+  const columns: Column<User>[] = [
+    {
+      header: (
+        <button onClick={toggleSelectAllCurrentPage}>
+          {allUserIdsOnCurrentPage.length > 0 &&
+          allUserIdsOnCurrentPage.every((id) =>
+            selectedUserIds.includes(id)
+          ) ? (
+            <CheckSquare className="text-blue-500" size={18} />
+          ) : (
+            <Square className="text-gray-400 dark:text-gray-500" size={18} />
+          )}
+        </button>
+      ),
+      accessor: "id",
+      render: (_, row:any) => (
+        <button onClick={() => toggleUser(row.id)} className="flex items-center">
+          {isUserSelected(row.id) ? (
+            <CheckSquare className="text-blue-500" size={18} />
+          ) : (
+            <Square className="text-gray-400 dark:text-gray-500" size={18} />
+          )}
+        </button>
+      ),
+    },
+    { header: "ID", accessor: "id" },
+    { header: "Name", accessor: "name" },
+    { header: "Email", accessor: "email" },
+  ];
 
   return (
     <div className="p-6 min-h-screen rounded-lg shadow bg-white text-black dark:bg-gray-950 dark:text-white">
@@ -105,45 +104,36 @@ export default function AddRecipients({
             setCurrentPage(1);
           }}
         >
-          {[5, 10, 25, 50].map((size) => (
+          {[5, 10, 25, 50,100,200,500].map((size) => (
             <option key={size} value={size}>
               Show {size}
             </option>
           ))}
         </select>
       </div>
-        {/* <div className="mb-4 flex flex-wrap gap-2 justify-between items-center"> */}
-        {/* 🔍 Search Input */}
-        <div className="flex gap-2 items-center">
-          <input
-            type="text"
-            placeholder="Search users..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="px-3 py-1 rounded-md border bg-black text-white border-gray-700 text-sm focus:outline-none"
-          />
-          {search && (
-            <button
-              onClick={() => setSearch("")}
-              className="text-red-400 text-sm hover:underline"
-            >
-              Clear
-            </button>
-          )}
-        </div>
+
+      <div className="flex gap-2 items-center mb-4">
+        <input
+          type="text"
+          placeholder="Search users..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="px-3 py-1 rounded-md border bg-white text-black border-gray-300 dark:bg-black dark:text-white dark:border-gray-700 text-sm focus:outline-none"
+        />
+        {search && (
+          <button
+            onClick={() => setSearch("")}
+            className="text-red-400 text-sm hover:underline"
+          >
+            Clear
+          </button>
+        )}
+      </div>
 
       {isLoading ? (
         <p>Loading users...</p>
       ) : (
-        <div>
-          <button
-            className="border-b border-gray-300 dark:border-gray-700 my-2 text-black dark:text-white"
-            onClick={toggleSelectAllCurrentPage}
-          >
-            Select All Users
-          </button>
-          <CustomTable columns={columns} data={users} pageSize={limit} />
-        </div>
+        <CustomTable columns={columns} data={users} pageSize={limit} />
       )}
 
       <Pagination

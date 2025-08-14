@@ -1,67 +1,76 @@
 "use client";
 import React, { useState } from "react";
 import dynamic from "next/dynamic";
-
+import { ApexOptions } from "apexcharts";
+import { useGetDashboardStatsQuery } from "@/store/api/dashBoradAPi";
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
 export default function LeadsDashboard() {
   const [selectedUser, setSelectedUser] = useState("all");
   const [timeRange, setTimeRange] = useState("today");
-  const [chartType, setChartType] = useState("bar");
+  const [chartType, setChartType] = useState<"bar" | "line" | "pie">("bar");
 
-  // Dummy stats data
-  const stats = {
-    totalLeads: 120,
-    salesDone: 50,
-    salesNotDone: 40,
-    quotations: 30,
-    leadProgress: 60,
+  const { data, isLoading, isError } = useGetDashboardStatsQuery({
+    userId: selectedUser,
+    timeRange,
+  });
+
+  const stats = data?.data?.stats || {
+    totalLeads: 0,
+    salesDone: 0,
+    salesNotDone: 0,
+    quotations: 0,
+    leadProgress: 0,
   };
 
-  // Dummy channel data
-  const channelData = [
-    { name: "Facebook", value: 40 },
-    { name: "Website", value: 30 },
-    { name: "Instagram", value: 20 },
-    { name: "Other", value: 10 },
-  ];
+  const channelData =
+    data?.data?.channels || [
+      // fallback example if API has no data
+      { name: "Website", value: 0 },
+      { name: "Facebook", value: 0 },
+      { name: "TikTok", value: 0 },
+      { name: "Instagram", value: 0 },
+      { name: "YouTube", value: 0 },
+      { name: "Walk-in", value: 0 },
+      { name: "Referral", value: 0 },
+      { name: "Call", value: 0 },
+    ];
 
   const channelChart = {
-  options: {
-    labels: channelData.map((c) => c.name),
-    theme: { mode: "dark" },
-    dataLabels: {
-      enabled: true,
-      formatter: function (val:any, opts:any) {
-        const seriesIndex = opts.seriesIndex;
-        const total = opts.w.globals.seriesTotals.reduce((a:any, b:any) => a + b, 0);
-        const value = opts.w.config.series[seriesIndex];
-        return `${value} (${val.toFixed(1)}%)`;
-      },
-      style: {
-        colors: ['#fff'],
-        fontSize: '14px',
-        fontWeight: 'bold',
-      },
-    },
-    tooltip: {
-      y: {
-        formatter: function (val:any) {
-          return `${val} leads`;
+    options: {
+      chart: { type: "donut" },
+      labels: channelData.map((c: any) => c.name),
+      theme: { mode: "dark" },
+      dataLabels: {
+        enabled: true,
+        formatter: function (val: number, opts: any) {
+          const seriesIndex = opts.seriesIndex;
+          const value = opts.w.globals.series[seriesIndex];
+          return `${value} (${val.toFixed(1)}%)`;
+        },
+        style: {
+          colors: ["#fff"],
+          fontSize: "14px",
+          fontWeight: "bold",
         },
       },
-    },
-  },
-  series: channelData.map((c) => c.value),
-};
-
+      tooltip: {
+        y: {
+          formatter: function (val: number) {
+            return `${val} leads`;
+          },
+        },
+      },
+    } as ApexOptions,
+    series: channelData.map((c: any) => c.value),
+  };
 
   const salesChart = {
     options: {
       chart: { type: chartType },
       xaxis: { categories: ["Sales Done", "Sales Not Done", "Quotations"] },
       theme: { mode: "dark" },
-    },
+    } as ApexOptions,
     series: [
       {
         name: "Count",
@@ -70,13 +79,20 @@ export default function LeadsDashboard() {
     ],
   };
 
-  // Button labels and values
   const dateButtons = [
     { label: "Today", value: "today" },
     { label: "Yesterday", value: "yesterday" },
     { label: "This Month", value: "month" },
     { label: "Last Month", value: "last_month" },
   ];
+
+  if (isLoading) {
+    return <div className="p-6 text-white">Loading...</div>;
+  }
+
+  if (isError) {
+    return <div className="p-6 text-red-500">Error loading data</div>;
+  }
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-6">
@@ -88,11 +104,11 @@ export default function LeadsDashboard() {
           onChange={(e) => setSelectedUser(e.target.value)}
         >
           <option value="all">All Users</option>
-          <option value="1">John Doe</option>
-          <option value="2">Jane Smith</option>
+          <option value="kayhanaudio@gmail.com">Kayhan Audio</option>
+          <option value="robertsmith12358@gmail.com">Robart</option>
+          <option value="Adamsure123@gmail.com">Adam</option>
         </select>
 
-        {/* Date Filter Buttons */}
         <div className="flex gap-2">
           {dateButtons.map((btn) => (
             <button
@@ -112,7 +128,9 @@ export default function LeadsDashboard() {
         <select
           className="bg-gray-800 p-2 rounded"
           value={chartType}
-          onChange={(e) => setChartType(e.target.value)}
+          onChange={(e) =>
+            setChartType(e.target.value as "bar" | "line" | "pie")
+          }
         >
           <option value="bar">Bar</option>
           <option value="line">Line</option>
@@ -146,26 +164,37 @@ export default function LeadsDashboard() {
         </div>
       </div>
 
+      {/* Channel Stats */}
+      {channelData.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+          {channelData.map((ch: any) => (
+            <div key={ch.name} className="bg-gray-800 p-4 rounded-lg shadow">
+              <p className="text-sm text-gray-400">{ch.name}</p>
+              <h2 className="text-2xl font-bold">{ch.value}</h2>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-gray-800 p-4 rounded-lg shadow">
           <h3 className="text-lg font-semibold mb-4">Sales Overview</h3>
-          {/* <Chart
-          width={}
+          <Chart
             options={salesChart.options}
             series={salesChart.series}
             type={chartType}
             height={300}
-          /> */}
+          />
         </div>
         <div className="bg-gray-800 p-4 rounded-lg shadow">
           <h3 className="text-lg font-semibold mb-4">Leads by Channel</h3>
-          {/* <Chart
+          <Chart
             options={channelChart.options}
             series={channelChart.series}
             type="donut"
             height={300}
-          /> */}
+          />
         </div>
       </div>
     </div>

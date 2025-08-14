@@ -9,7 +9,7 @@ interface PaginationProps {
   setCurrentPage: (page: number) => void;
   limit: number;
   showPagination: any;
-  tableDataLength: number;
+  tableDataLength: any;
 }
 
 export default function Pagination({

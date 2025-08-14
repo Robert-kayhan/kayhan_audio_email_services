@@ -8,7 +8,7 @@ import ComparisonTable from "@/components/flyer/ComparisonTable";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import Image from "next/image";
-
+import { useRouter } from "next/navigation";
 type ProductOption = {
   label: string;
   value: string;
@@ -57,7 +57,7 @@ export default function FlyerPage() {
 
   const [firstProduct, setFirstProduct] = useState<Product | null>(null);
   const [secondProduct, setSecondProduct] = useState<Product | null>(null);
-
+  const router = useRouter()
   // Customer form state
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
@@ -143,7 +143,10 @@ export default function FlyerPage() {
     : {};
 
   const allSpecKeys = Array.from(
-    new Set([...Object.keys(firstParsedSpecs), ...Object.keys(secondParsedSpecs)])
+    new Set([
+      ...Object.keys(firstParsedSpecs),
+      ...Object.keys(secondParsedSpecs),
+    ])
   );
 
   // Handle form submit
@@ -175,6 +178,7 @@ export default function FlyerPage() {
     try {
       await createFlyer(flyerPayload).unwrap();
       alert("Flyer created successfully!");
+      router.push("/dashboard/flyer")
       // Optionally clear form & selections here if you want
     } catch (err) {
       alert("Error creating flyer, please try again.");
@@ -216,7 +220,14 @@ export default function FlyerPage() {
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b pb-4">
-          <Image src="/logo.webp" alt="Kayhan Logo" className="min-h-28" />
+          <Image
+            src="/logo.webp"
+            alt="Kayhan Logo"
+            height={100}
+            width={100}
+            className="min-h-28"
+          />
+
           <div className="grid grid-cols-2 gap-2 text-sm">
             <input
               placeholder="Customer Name"
@@ -306,7 +317,9 @@ export default function FlyerPage() {
             <div className="grid grid-cols-2 gap-4 items-center text-center py-6">
               {[firstProduct, secondProduct].map((product) => (
                 <div key={product.id}>
-                  <img
+                  <Image
+                  height={200}
+                  width={200}
                     src={product.image}
                     alt={product.name}
                     className="h-32 mx-auto mb-2 object-contain border p-1"
@@ -342,8 +355,8 @@ export default function FlyerPage() {
         {/* Footer */}
         <div className="mt-6 text-center text-sm bg-purple-800 text-white p-4 rounded">
           <p className="mb-1">
-            Installation / Handouts on Display at: Unit 3/15 Darlot Rd, Landsdale
-            North VIC 3062, Australia
+            Installation / Handouts on Display at: Unit 3/15 Darlot Rd,
+            Landsdale North VIC 3062, Australia
           </p>
           <p>Email: support@kayhanaudio.com.au | Call Us: 1300 696 488</p>
         </div>
@@ -362,16 +375,19 @@ export default function FlyerPage() {
         {/* Feedback messages */}
         {isError && (
           <p className="text-red-600 mt-2 text-center">
-            Error saving flyer: {(error as any)?.data?.message || "Unknown error"}
+            Error saving flyer:{" "}
+            {(error as any)?.data?.message || "Unknown error"}
           </p>
         )}
         {isSuccess && (
-          <p className="text-green-600 mt-2 text-center">Flyer saved successfully!</p>
+          <p className="text-green-600 mt-2 text-center">
+            Flyer saved successfully!
+          </p>
         )}
       </form>
 
       {/* PDF Save Button */}
-      <div className="text-center mt-4">
+      {/* <div className="text-center mt-4">
         <button
           type="button"
           onClick={handleSavePDF}
@@ -379,7 +395,7 @@ export default function FlyerPage() {
         >
           Save as PDF
         </button>
-      </div>
+      </div> */}
     </>
   );
 }
