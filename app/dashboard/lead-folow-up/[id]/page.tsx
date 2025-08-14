@@ -168,12 +168,12 @@ const UpdateLeadBasic: React.FC = () => {
           <ReadOnly label="Support Notes" value={lead.supportNotes} multiline />
         </ViewSection>
 
-        <ViewSection title="Communication">
+        {/* <ViewSection title="Communication">
           <ReadOnly label="Type" value={lead.communicationType} />
           <ReadOnly label="Date" value={lead.communicationDate} />
           <ReadOnly label="Follow-up Date" value={lead.followUpDate} />
           <ReadOnly label="Notes" value={lead.communicationNotes} multiline />
-        </ViewSection>
+        </ViewSection> */}
 
         {/* Follow-Up Sections */}
         {lead.firstFollowUpDate &&
