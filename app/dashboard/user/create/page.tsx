@@ -79,6 +79,7 @@ const CreateUserPage = () => {
     try {
       const res = await createSingleUser(payload).unwrap();
       toast.success(res.message || "User created successfully");
+      router.push("/dashboard/user")
     } catch (err: any) {
       toast.error(err?.data?.message || "Failed to create user");
     }

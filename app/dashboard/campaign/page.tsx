@@ -19,7 +19,20 @@ type Campaign = {
 
 // Table columns
 const columns: Column<any>[] = [
-  { header: "Name", accessor: "campaignName", sortable: true },
+  { header: "id", accessor: "id" },
+  {
+    header: "Name",
+    accessor: "campaignName",
+    sortable: true,
+    render: (val, row) => (
+      <Link
+        href={`/dashboard/campaign/${row.id}`}
+        className="hover:underline"
+      >
+        {val}
+      </Link>
+    ),
+  },
   { header: "Subject", accessor: "campaignSubject", sortable: true },
   { header: "senderName", accessor: "senderName" },
   { header: "Created At", accessor: "createdAt" },
@@ -44,7 +57,7 @@ export default function CampaignsPage() {
     try {
       await deleteCampaign(row.id);
       toast.success(`Deleted "${row.campaignName}" successfully`);
-      refetch()
+      refetch();
     } catch (error) {
       console.log(error);
       toast.error(`Failed to delete "${row.campaignName}"`);
