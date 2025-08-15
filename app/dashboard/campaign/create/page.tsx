@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ClipboardList, Users, List, Send, Megaphone } from "lucide-react";
-
+import { useRouter } from "next/navigation";
 import ChooseTemplate from "@/components/campaign/ChooseTemplate";
 import AddRecipients from "@/components/campaign/AddRecipient";
 import AssociateList from "@/components/campaign/AssociateList";
@@ -40,7 +40,7 @@ const CampaignStepper = () => {
   const [selectedListId, setSelectedListId] = useState<string | null>(null);
   const [createCampaign] = useCreateCampaignMutation();
   const [sendComgain] = useSendComgainMutation();
-
+  const router = useRouter()
   const handleCreateComgain = async () => {
     try {
       if (
@@ -77,6 +77,7 @@ const CampaignStepper = () => {
   const handlesendComgain = async () => {
     try {
       const res = await sendComgain(campgainId).unwrap();
+      router.push("/dashboard/campaign")
       console.log(res);
     } catch (error) {
       console.log(error);
