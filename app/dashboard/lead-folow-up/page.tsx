@@ -13,7 +13,7 @@ type LeadFollowUp = {
   email: string;
   phone: string;
   leadStatus: string;
-  expectedCloseDate: string;
+  saleStatus: string;
   isActiveCustomer: string;
 };
 
@@ -28,6 +28,7 @@ const LeadFollowUpPage = () => {
     limit,
     ...(leadStatus !== "all" && { leadStatus }),
   });
+  console.log(data , "this is data")
   // Reset page to 1 when leadStatus changes
   useEffect(() => {
     setPage(1);
@@ -82,15 +83,15 @@ const LeadFollowUpPage = () => {
   {
     header: "Status",
     accessor: "leadStatus",
-    render: (val, row) => (
+    render: (val, row:any) => (
       <Link href={`/dashboard/lead-folow-up/${row.id}`} className="hover:underline">
-        {val}
+        {row.status}
       </Link>
     ),
   },
   {
-    header: "Expected Close",
-    accessor: "expectedCloseDate",
+    header: "Sale status",
+    accessor: "saleStatus",
     render: (val, row) => (
       <Link href={`/dashboard/lead-folow-up/${row.id}`} className="hover:underline">
         {val}
