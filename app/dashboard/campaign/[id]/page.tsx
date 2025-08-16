@@ -13,7 +13,7 @@ export default function EmailDashboard() {
   const { data, isLoading, isError } = useGetAllCampaignByidQuery(id as string);
   const [darkMode, setDarkMode] = useState(true);
   const [chartType, setChartType] = useState<"pie" | "donut">("pie");
-
+  console.log(data , "this is data ")
   if (isLoading) return <p className="text-center mt-10">Loading...</p>;
   if (isError || !data) return <p className="text-center mt-10 text-red-500">Error loading campaign</p>;
 
