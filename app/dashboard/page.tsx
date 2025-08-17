@@ -1,8 +1,10 @@
 "use client";
+
 import React, { useState } from "react";
 import dynamic from "next/dynamic";
 import { ApexOptions } from "apexcharts";
 import { useGetDashboardStatsQuery } from "@/store/api/dashBoradAPi";
+
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
 export default function LeadsDashboard() {
@@ -23,23 +25,48 @@ export default function LeadsDashboard() {
     leadProgress: 0,
   };
 
-  const channelData =
-    data?.data?.channels || [
-      // fallback example if API has no data
-      { name: "Website", value: 0 },
-      { name: "Facebook", value: 0 },
-      { name: "TikTok", value: 0 },
-      { name: "Instagram", value: 0 },
-      { name: "YouTube", value: 0 },
-      { name: "Walk-in", value: 0 },
-      { name: "Referral", value: 0 },
-      { name: "Call", value: 0 },
-    ];
+  // --- Default channels (always shown)
+  const defaultChannels = [
+    { name: "Facebook", value: 0 },
+    { name: "TikTok", value: 0 },
+    { name: "Walk-in", value: 0 },
+    { name: "Over the phone", value: 0 },
+    { name: "Email", value: 0 },
+    { name: "Google", value: 0 },
+    { name: "YouTube", value: 0 },
+    { name: "Instagram", value: 0 },
+    { name: "Referrals", value: 0 },
+  ];
+
+  // --- Map API names to your required names
+  const normalizeName = (name: string) => {
+    switch (name.toLowerCase()) {
+      case "call":
+        return "Over the phone";
+      case "referral":
+        return "Referrals";
+      default:
+        return name;
+    }
+  };
+
+  // --- Merge API data with defaults
+  const apiChannels = (data?.data?.channels || []).map((ch: any) => ({
+    name: normalizeName(ch.name),
+    value: ch.value,
+  }));
+
+  const channelData = defaultChannels.map((ch) => {
+    const found = apiChannels.find(
+      (a: any) => a.name.toLowerCase() === ch.name.toLowerCase()
+    );
+    return { ...ch, value: found ? found.value : 0 };
+  });
 
   const channelChart = {
     options: {
       chart: { type: "donut" },
-      labels: channelData.map((c: any) => c.name),
+      labels: channelData.map((c) => c.name),
       theme: { mode: "dark" },
       dataLabels: {
         enabled: true,
@@ -62,7 +89,7 @@ export default function LeadsDashboard() {
         },
       },
     } as ApexOptions,
-    series: channelData.map((c: any) => c.value),
+    series: channelData.map((c) => c.value),
   };
 
   const salesChart = {
