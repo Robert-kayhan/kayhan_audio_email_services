@@ -167,7 +167,7 @@ export default function LeadsDashboard() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         <div className="bg-gray-800 p-4 rounded-lg shadow">
           <p className="text-sm text-gray-400">Total Leads</p>
           <h2 className="text-2xl font-bold">{stats.totalLeads}</h2>
@@ -194,7 +194,7 @@ export default function LeadsDashboard() {
 
       {/* Channel Stats */}
       {channelData.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        <div className="grid grid-cols-2  lg:grid-cols-4 gap-6 mb-6">
           {channelData.map((ch: any) => (
             <div key={ch.name} className="bg-gray-800 p-4 rounded-lg shadow">
               <p className="text-sm text-gray-400">{ch.name}</p>
