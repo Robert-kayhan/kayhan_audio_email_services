@@ -45,7 +45,7 @@ export default function ComparisonTable({ firstProductId, secondProductId }: Com
   const { data, isLoading, isError } = useGetAllProductSpecificationsQuery({});
   const [product1, setProduct1] = useState<string>("");
   const [product2, setProduct2] = useState<string>("");
-
+  console.log(data , isError)
   const specs = data?.data || [];
   const products = groupByProduct(specs);
 

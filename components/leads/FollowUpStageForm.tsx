@@ -7,7 +7,6 @@ import {
 } from "@/store/api/lead/leadFollowApi";
 import { useRouter } from "next/navigation";
 
-
 type FollowUpProps = {
   stage: "first" | "second" | "third" | "final";
   leadId: string;
@@ -17,6 +16,10 @@ type FollowUpProps = {
     FollowUpNotes: string;
     NextFollowUpDate: string;
     SaleStatus: string;
+    QuotationNumber: string;
+    QuotationSentDate: string;
+    InvoiceNumber: string;
+    InvoiceSentDate: string;
   }>;
 };
 
@@ -31,7 +34,28 @@ const FollowUpStageForm: React.FC<FollowUpProps> = ({
   const [NextFollowUpDate, setNextDate] = useState(
     defaultData.NextFollowUpDate || ""
   );
+
   const [saleStatus, setSaleStatus] = useState(defaultData.SaleStatus || "");
+  const [quotationStatus, setQuotationStatus] = useState(
+    defaultData.QuotationSentDate ? "Sent" : "Not sent"
+  );
+  const [quotationNumber, setQuotationNumber] = useState(
+    defaultData.QuotationNumber || ""
+  );
+  const [quotationSentDate, setQuotationSentDate] = useState(
+    defaultData.QuotationSentDate || ""
+  );
+
+  const [invoiceStatus, setInvoiceStatus] = useState(
+    defaultData.InvoiceSentDate ? "Sent" : "Not sent"
+  );
+  const [invoiceNumber, setInvoiceNumber] = useState(
+    defaultData.InvoiceNumber || ""
+  );
+  const [invoiceSentDate, setInvoiceSentDate] = useState(
+    defaultData.InvoiceSentDate || ""
+  );
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
@@ -57,19 +81,23 @@ const FollowUpStageForm: React.FC<FollowUpProps> = ({
         data: payload,
       }).unwrap();
 
-      // 2. Sale status update (if selected)
-      // if (saleStatus) {
-      console.log(saleStatus , "this is salesstatus")
-      const data = {saleStatus: saleStatus}
-        await updateSaleStatus({
-          id: leadId,
-          data
-        }).unwrap();
-      // }
+      // 2. Sale status + quotation + invoice update
+      const salePayload = {
+        saleStatus,
+        quotationNumber: quotationNumber || null,
+        quotationSentDate:
+          quotationStatus === "Sent" ? quotationSentDate : null,
+        invoiceNumber: invoiceNumber || null,
+        invoiceSentDate: invoiceStatus === "Sent" ? invoiceSentDate : null,
+      };
 
-      alert(`${stage} follow-up updated`);
+      await updateSaleStatus({
+        id: leadId,
+        data: salePayload,
+      }).unwrap();
+
+      alert(`${stage} follow-up updated successfully`);
       router.push("/dashboard/lead-folow-up");
-
     } catch (err) {
       console.error(err);
       alert("Failed to update follow-up");
@@ -85,6 +113,7 @@ const FollowUpStageForm: React.FC<FollowUpProps> = ({
     >
       <h2 className="text-lg font-bold capitalize">{stage} Follow-Up</h2>
 
+      {/* Follow-Up Date */}
       <div>
         <label className="block text-sm text-gray-300">Follow-Up Date</label>
         <input
@@ -95,22 +124,22 @@ const FollowUpStageForm: React.FC<FollowUpProps> = ({
         />
       </div>
 
+      {/* Follow-Up Type */}
       <div>
         <label className="block text-sm text-gray-300">Follow-Up Type</label>
         <select
           value={FollowUpType}
           onChange={(e) => setType(e.target.value)}
-          
           className="w-full px-3 py-2 rounded bg-gray-800 border border-gray-600"
         >
           <option value="">Select Type</option>
-          <option value="Over the Phone">Over the Phone </option>
+          <option value="Over the Phone">Over the Phone</option>
           <option value="Email">Email</option>
           <option value="Visit">In Person</option>
-          {/* <option value="Meeting">Meeting</option> */}
         </select>
       </div>
 
+      {/* Follow-Up Notes */}
       <div>
         <label className="block text-sm text-gray-300">Follow-Up Notes</label>
         <textarea
@@ -120,27 +149,89 @@ const FollowUpStageForm: React.FC<FollowUpProps> = ({
           className="w-full px-3 py-2 rounded bg-gray-800 border border-gray-600"
         />
       </div>
-    <Select
+
+      {/* Sale Status */}
+      <Select
         label="Sale Status"
         value={saleStatus}
         options={["Sale done", "Sale not done"]}
-        onChange={(val: string) => setSaleStatus(val)}
+        onChange={setSaleStatus}
       />
 
-     {saleStatus !== "Sale done" && <div>
-        <label className="block text-sm text-gray-300">
-          Next Follow-Up Date
-        </label>
-        <input
-          type="date"
-          value={NextFollowUpDate}
-          onChange={(e) => setNextDate(e.target.value)}
-          className="w-full px-3 py-2 rounded bg-gray-800 border border-gray-600"
-        />
-      </div>}
+      {/* Next Follow-Up if sale not done */}
+      {saleStatus === "Sale not done" && (
+        <div>
+          <label className="block text-sm text-gray-300">
+            Next Follow-Up Date
+          </label>
+          <input
+          required
+            type="date"
+            value={NextFollowUpDate}
+            onChange={(e) => setNextDate(e.target.value)}
+            className="w-full px-3 py-2 rounded bg-gray-800 border border-gray-600"
+          />
+        </div>
+      )}
 
-  
+      {/* Quotation & Invoice if sale done */}
+      {saleStatus === "Sale not done" && (
+        <>
+          {/* Quotation */}
+          <Select
+            label="Quotation"
+            value={quotationStatus}
+            options={["Sent", "Not sent"]}
+            onChange={setQuotationStatus}
+          />
+          {quotationStatus === "Sent" && (
+            <>
+              <input
+              required
+                type="text"
+                placeholder="Quotation Number"
+                value={quotationNumber}
+                onChange={(e) => setQuotationNumber(e.target.value)}
+                className="w-full px-3 py-2 rounded bg-gray-800 border border-gray-600 mt-1"
+              />
+              {/* <input
+                type="date"
+                placeholder="Quotation Sent Date"
+                value={quotationSentDate}
+                onChange={(e) => setQuotationSentDate(e.target.value)}
+                className="w-full px-3 py-2 rounded bg-gray-800 border border-gray-600 mt-1"
+              /> */}
+            </>
+          )}
 
+          {/* Invoice */}
+        </>
+      )}
+      {saleStatus === "Sale done" && (
+        <>
+          {/* <Select
+            label="Invoice"
+            value={invoiceStatus}
+            options={["Sent", "Not sent"]}
+            onChange={setInvoiceStatus}
+          /> */}
+          <input
+          required
+            type="text"
+            placeholder="Invoice Number"
+            value={invoiceNumber}
+            onChange={(e) => setInvoiceNumber(e.target.value)}
+            className="w-full px-3 py-2 rounded bg-gray-800 border border-gray-600 mt-1"
+          />
+          {/* <input
+            type="date"
+            placeholder="Invoice Sent Date"
+            value={invoiceSentDate}
+            onChange={(e) => setInvoiceSentDate(e.target.value)}
+            className="w-full px-3 py-2 rounded bg-gray-800 border border-gray-600 mt-1"
+          /> */}
+        </>
+      )}
       <div className="text-right">
         <button
           type="submit"
@@ -156,17 +247,19 @@ const FollowUpStageForm: React.FC<FollowUpProps> = ({
 
 export default FollowUpStageForm;
 
-// Reusable select component
+// Reusable Select Component
 const Select = ({
   label,
   value,
   options,
   onChange,
+  // isRequired
 }: {
   label: string;
   value: string;
   options: string[];
   onChange: (val: string) => void;
+  // isRequired : boolean
 }) => (
   <div>
     <label className="text-sm text-gray-300 block mb-1">{label}</label>

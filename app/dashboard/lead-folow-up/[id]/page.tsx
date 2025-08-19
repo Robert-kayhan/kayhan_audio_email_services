@@ -235,11 +235,11 @@ const UpdateLeadBasic: React.FC = () => {
             ) : null}
 
             {lead.firstFollowUpType &&
-            // lead.firstFollowUpNotes &&
             !lead.secondFollowUpType &&
             !lead.secondFollowUpNotes ? (
               <FollowUpStageForm
                 stage="second"
+                
                 leadId={id as string}
                 defaultData={{
                   FollowUpDate: lead.secondFollowUpDate,
@@ -251,7 +251,6 @@ const UpdateLeadBasic: React.FC = () => {
             ) : null}
 
             {lead.secondFollowUpType &&
-            // lead.secondFollowUpNotes &&
             !lead.thirdFollowUpType &&
             !lead.thirdFollowUpNotes ? (
               <FollowUpStageForm
@@ -267,7 +266,6 @@ const UpdateLeadBasic: React.FC = () => {
             ) : null}
 
             {lead.thirdFollowUpType &&
-            // lead.thirdFollowUpNotes &&
             !lead.finalFollowUpType &&
             !lead.finalFollowUpNotes ? (
               <FollowUpStageForm

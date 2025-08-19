@@ -184,11 +184,13 @@ export default function LeadsDashboard() {
           <p className="text-sm text-gray-400">Lead Progress</p>
           <div className="w-full bg-gray-700 rounded-full h-3 mt-2">
             <div
-              className="bg-green-500 h-3 rounded-full"
-              style={{ width: `${stats.leadProgress}%` }}
+              className="bg-green-500 h-3 rounded-full transition-all"
+              style={{ width: `${Math.min(stats.leadProgress, 100)}%` }}
             ></div>
           </div>
-          <p className="text-sm mt-1">{stats.leadProgress}%</p>
+          <p className="text-sm mt-1">
+            {stats.leadProgress > 100 ? "100%+" : `${stats.leadProgress}%`}
+          </p>
         </div>
       </div>
 
