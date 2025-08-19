@@ -171,6 +171,7 @@ const LeadCustomerDetail = () => {
                   "Walk-in",
                   "Referral",
                   "Call",
+                  "Email",
                 ]}
                 onChange={(val: any) => handleChange("leadSource", val)}
               />

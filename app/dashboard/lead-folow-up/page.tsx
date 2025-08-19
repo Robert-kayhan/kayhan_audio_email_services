@@ -14,110 +14,164 @@ type LeadFollowUp = {
   phone: string;
   leadStatus: string;
   saleStatus: string;
-  isActiveCustomer: string;
+  createdAt: string;
+  createdBy: string;
 };
 
-const leadStatusOptions = ["all","Today's  Follow up", "New","First Follow up", "Second Follow up","Third Follow up",   "Sale done","Sale not done"] as const;
+const leadStatusOptions = [
+  "all",
+  "Today's  Follow up",
+  "New",
+  "First Follow up",
+  "Second Follow up",
+  "Third Follow up",
+  "Sale done",
+  "Sale not done",
+] as const;
 
 const LeadFollowUpPage = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [leadStatus, setLeadStatus] = useState<"all" | string>("all");
- const { data, isLoading, isError ,refetch } = useGetAllLeadFollowUpQuery({
+  const { data, isLoading, isError, refetch } = useGetAllLeadFollowUpQuery({
     page,
     limit,
     ...(leadStatus !== "all" && { leadStatus }),
   });
-  console.log(data , "this is data")
+  console.log(data, "this is data");
   // Reset page to 1 when leadStatus changes
   useEffect(() => {
     setPage(1);
-    refetch()
-    
+    refetch();
   }, [leadStatus]);
-
- 
 
   const leads: LeadFollowUp[] = data?.data || [];
   const totalPages = data?.totalPages ?? 1;
   const showPagination = Array.from({ length: totalPages }, (_, i) => i + 1);
 
- const columns: Column<LeadFollowUp>[] = [
-  {
-    header: "ID",
-    accessor: "id",
-    sortable: true,
-    render: (_, row) => (
-      <Link href={`/dashboard/lead-folow-up/${row.id}`} className="text-green-600 hover:underline">
-        {row.id}
-      </Link>
-    ),
-  },
-  {
-    header: "Name",
-    accessor: "firstName",
-    render: (_, row) => (
-      <Link href={`/dashboard/lead-folow-up/${row.id}`} className="hover:underline">
-        {row.firstName} {row.lastName}
-      </Link>
-    ),
-  },
-  {
-    header: "Email",
-    accessor: "email",
-    render: (val, row) => (
-      <Link href={`/dashboard/lead-folow-up/${row.id}`} className="hover:underline">
-        {val}
-      </Link>
-    ),
-  },
-  {
-    header: "Phone",
-    accessor: "phone",
-    render: (val, row) => (
-      <Link href={`/dashboard/lead-folow-up/${row.id}`} className="hover:underline">
-        {val}
-      </Link>
-    ),
-  },
-  {
-    header: "Status",
-    accessor: "leadStatus",
-    render: (val, row:any) => (
-      <Link href={`/dashboard/lead-folow-up/${row.id}`} className="hover:underline">
-        {row.status}
-      </Link>
-    ),
-  },
-  {
-    header: "Sale status",
-    accessor: "saleStatus",
-    render: (val, row) => (
-      <Link href={`/dashboard/lead-folow-up/${row.id}`} className="hover:underline">
-        {val}
-      </Link>
-    ),
-  },
-  {
-    header: "Customer",
-    accessor: "isActiveCustomer",
-    render: (val, row) => (
-      <Link href={`/dashboard/lead-folow-up/${row.id}`} className="hover:underline">
-        {val === "yes" ? (
-          <span className="text-green-600">Yes</span>
-        ) : (
-          <span className="text-gray-400">No</span>
-        )}
-      </Link>
-    ),
-  },
-];
+  const columns: Column<LeadFollowUp>[] = [
+    {
+      header: "ID",
+      accessor: "id",
+      sortable: true,
+      render: (_, row) => (
+        <Link
+          href={`/dashboard/lead-folow-up/${row.id}`}
+          className="text-green-600 hover:underline"
+        >
+          {row.id}
+        </Link>
+      ),
+    },
+    {
+      header: "Name",
+      accessor: "firstName",
+      render: (_, row) => (
+        <Link
+          href={`/dashboard/lead-folow-up/${row.id}`}
+          className="hover:underline"
+        >
+          {row.firstName} {row.lastName}
+        </Link>
+      ),
+    },
+    {
+      header: "Email",
+      accessor: "email",
+      render: (val, row) => (
+        <Link
+          href={`/dashboard/lead-folow-up/${row.id}`}
+          className="hover:underline"
+        >
+          {val}
+        </Link>
+      ),
+    },
+    {
+      header: "Phone",
+      accessor: "phone",
+      render: (val, row) => (
+        <Link
+          href={`/dashboard/lead-folow-up/${row.id}`}
+          className="hover:underline"
+        >
+          {val}
+        </Link>
+      ),
+    },
+    {
+      header: "Status",
+      accessor: "leadStatus",
+      render: (val, row: any) => (
+        <Link
+          href={`/dashboard/lead-folow-up/${row.id}`}
+          className="hover:underline"
+        >
+          {row.status}
+        </Link>
+      ),
+    },
+    {
+      header: "Sale status",
+      accessor: "saleStatus",
+      render: (val, row) => (
+        <Link
+          href={`/dashboard/lead-folow-up/${row.id}`}
+          className="hover:underline"
+        >
+          {val}
+        </Link>
+      ),
+    },
+
+    {
+      header: "Created On", 
+      accessor: "createdAt",
+      render: (val, row) => {
+        // Format date for readability
+        const formattedDate = new Date(val).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+
+        return (
+          <Link
+            href={`/dashboard/lead-folow-up/${row.id}`}
+            className="hover:underline text-blue-600"
+          >
+            {formattedDate}
+          </Link>
+        );
+      },
+    },
+    {
+      header: "createdBy",
+      accessor: "createdBy",
+      render: (val, row) => (
+        <Link
+          href={`/dashboard/lead-folow-up/${row.id}`}
+          className="hover:underline"
+        >
+          {val}
+        </Link>
+      ),
+    },
+  ];
 
   return (
     <div className="p-6 mx-auto">
-      <div className="flex justify-between items-center" >
+      <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold mb-6">Lead Follow-Ups</h1>
-        <Link href="/dashboard/lead-folow-up/create" className="border-white border px-3  py-2 rounded-xl"> Create</Link>
+        <Link
+          href="/dashboard/lead-folow-up/create"
+          className="border-black dark:border-white border px-3  py-2 rounded-xl"
+        >
+          {" "}
+          Create
+        </Link>
       </div>
 
       {/* Lead Status Filters */}
