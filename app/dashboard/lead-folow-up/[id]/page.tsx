@@ -33,7 +33,7 @@ const UpdateLeadBasic: React.FC = () => {
   const router = useRouter();
   const [noteModalOpen, setNoteModalOpen] = useState(false);
   const [notes, setNotes] = useState<any[]>([]);
-  const { data: LeadData ,refetch : refecthNotes } = useGetNotesQuery(id);
+  const { data: LeadData, refetch: refecthNotes } = useGetNotesQuery(id);
   useEffect(() => {
     if (lead) {
       setFormData({
@@ -45,7 +45,7 @@ const UpdateLeadBasic: React.FC = () => {
       });
     }
     refetch();
-    refecthNotes()
+    refecthNotes();
   }, [lead, LeadData]);
 
   const handleChange = (key: string, value: string) => {
@@ -62,7 +62,7 @@ const UpdateLeadBasic: React.FC = () => {
       console.error("Failed to update sale status", error);
     }
   };
-  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -239,13 +239,14 @@ const UpdateLeadBasic: React.FC = () => {
             !lead.secondFollowUpNotes ? (
               <FollowUpStageForm
                 stage="second"
-                
                 leadId={id as string}
                 defaultData={{
                   FollowUpDate: lead.secondFollowUpDate,
                   FollowUpType: lead.secondFollowUpType,
                   FollowUpNotes: lead.secondFollowUpNotes,
                   NextFollowUpDate: lead.secondNextFollowUpDate,
+                  QuotationNumber: lead.quotation_number,
+                  InvoiceNumber : lead.quotation_number
                 }}
               />
             ) : null}

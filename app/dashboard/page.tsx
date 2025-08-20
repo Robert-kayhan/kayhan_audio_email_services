@@ -28,7 +28,8 @@ export default function LeadsDashboard() {
   // --- Default channels (always shown)
   const defaultChannels = [
     { name: "Facebook", value: 0 },
-    { name: "TikTok", value: 0 },
+    { name: "Website", value: 0 },
+    { name: "Tik Tok", value: 0 },
     { name: "Walk-in", value: 0 },
     { name: "Over the phone", value: 0 },
     { name: "Email", value: 0 },
@@ -95,13 +96,13 @@ export default function LeadsDashboard() {
   const salesChart = {
     options: {
       chart: { type: chartType },
-      xaxis: { categories: ["Sales Done", "Sales Not Done", "Quotations"] },
+      xaxis: { categories: ["Sales Done", "Sales Not Done", "Quotations" ,"invoices"] },
       theme: { mode: "dark" },
     } as ApexOptions,
     series: [
       {
         name: "Count",
-        data: [stats.salesDone, stats.salesNotDone, stats.quotations],
+        data: [stats.salesDone, stats.salesNotDone, stats.quotations ,stats.invoices],
       },
     ],
   };
@@ -109,8 +110,11 @@ export default function LeadsDashboard() {
   const dateButtons = [
     { label: "Today", value: "today" },
     { label: "Yesterday", value: "yesterday" },
+    { label: "This Week", value: "this_week" },
     { label: "This Month", value: "month" },
     { label: "Last Month", value: "last_month" },
+    { label: "This Year", value: "this_year" },
+    { label: "Last Year", value: "last_year" },
   ];
 
   if (isLoading) {
