@@ -20,6 +20,7 @@ type FollowUpProps = {
     QuotationSentDate: string;
     InvoiceNumber: string;
     InvoiceSentDate: string;
+
   }>;
 };
 
@@ -175,7 +176,7 @@ const FollowUpStageForm: React.FC<FollowUpProps> = ({
       )}
 
       {/* Quotation & Invoice if sale done */}
-      {saleStatus === "Sale not done" && (
+      {saleStatus === "Sale not done" && !defaultData.QuotationNumber && (
         <>
           {/* Quotation */}
           <Select
