@@ -134,9 +134,12 @@ const FollowUpStageForm: React.FC<FollowUpProps> = ({
           className="w-full px-3 py-2 rounded bg-gray-800 border border-gray-600"
         >
           <option value="">Select Type</option>
-          <option value="Over the Phone">Over the Phone</option>
+          <option value="Over the Phone">Call</option>
           <option value="Email">Email</option>
           <option value="Visit">In Person</option>
+          <option value="WhatsApp">WhatsApp</option>
+          <option value="Text Message">Text Message</option>
+
         </select>
       </div>
 
