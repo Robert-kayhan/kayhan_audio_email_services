@@ -63,7 +63,7 @@ const Navigation = () => {
       {/* Desktop Sidebar */}
       <div
         id="navigation-container"
-        className="group fixed z-50 h-screen bg-black text-white transition-all duration-300
+        className="group fixed z-50  bg-black text-white transition-all duration-300
                    w-[64px] hover:w-[240px] md:flex flex-col justify-between p-4 hidden"
       >
         <div className="flex flex-col space-y-4">
