@@ -33,17 +33,20 @@ const LeadFollowUpPage = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [leadStatus, setLeadStatus] = useState<"all" | string>("all");
+  const [search, setSearch] = useState(""); // New search state
+
   const { data, isLoading, isError, refetch } = useGetAllLeadFollowUpQuery({
     page,
     limit,
     ...(leadStatus !== "all" && { leadStatus }),
+    ...(search && { search }), // Pass search param to API
   });
-  console.log(data, "this is data");
-  // Reset page to 1 when leadStatus changes
+
+  // Reset page to 1 when leadStatus or search changes
   useEffect(() => {
     setPage(1);
     refetch();
-  }, [leadStatus]);
+  }, [leadStatus, search]);
 
   const leads: LeadFollowUp[] = data?.data || [];
   const totalPages = data?.totalPages ?? 1;
@@ -55,10 +58,7 @@ const LeadFollowUpPage = () => {
       accessor: "id",
       sortable: true,
       render: (_, row) => (
-        <Link
-          href={`/dashboard/lead-folow-up/${row.id}`}
-          className="text-green-600 hover:underline"
-        >
+        <Link href={`/dashboard/lead-folow-up/${row.id}`} className="text-green-600 hover:underline">
           {row.id}
         </Link>
       ),
@@ -67,10 +67,7 @@ const LeadFollowUpPage = () => {
       header: "Name",
       accessor: "firstName",
       render: (_, row) => (
-        <Link
-          href={`/dashboard/lead-folow-up/${row.id}`}
-          className="hover:underline"
-        >
+        <Link href={`/dashboard/lead-folow-up/${row.id}`} className="hover:underline">
           {row.firstName} {row.lastName}
         </Link>
       ),
@@ -79,10 +76,7 @@ const LeadFollowUpPage = () => {
       header: "Email",
       accessor: "email",
       render: (val, row) => (
-        <Link
-          href={`/dashboard/lead-folow-up/${row.id}`}
-          className="hover:underline"
-        >
+        <Link href={`/dashboard/lead-folow-up/${row.id}`} className="hover:underline">
           {val}
         </Link>
       ),
@@ -91,10 +85,7 @@ const LeadFollowUpPage = () => {
       header: "Phone",
       accessor: "phone",
       render: (val, row) => (
-        <Link
-          href={`/dashboard/lead-folow-up/${row.id}`}
-          className="hover:underline"
-        >
+        <Link href={`/dashboard/lead-folow-up/${row.id}`} className="hover:underline">
           {val}
         </Link>
       ),
@@ -103,10 +94,7 @@ const LeadFollowUpPage = () => {
       header: "Status",
       accessor: "leadStatus",
       render: (val, row: any) => (
-        <Link
-          href={`/dashboard/lead-folow-up/${row.id}`}
-          className="hover:underline"
-        >
+        <Link href={`/dashboard/lead-folow-up/${row.id}`} className="hover:underline">
           {row.status}
         </Link>
       ),
@@ -115,20 +103,15 @@ const LeadFollowUpPage = () => {
       header: "Sale status",
       accessor: "saleStatus",
       render: (val, row) => (
-        <Link
-          href={`/dashboard/lead-folow-up/${row.id}`}
-          className="hover:underline"
-        >
+        <Link href={`/dashboard/lead-folow-up/${row.id}`} className="hover:underline">
           {val}
         </Link>
       ),
     },
-
     {
-      header: "Created On", 
+      header: "Created On",
       accessor: "createdAt",
       render: (val, row) => {
-        // Format date for readability
         const formattedDate = new Date(val).toLocaleDateString("en-US", {
           year: "numeric",
           month: "short",
@@ -136,12 +119,8 @@ const LeadFollowUpPage = () => {
           hour: "2-digit",
           minute: "2-digit",
         });
-
         return (
-          <Link
-            href={`/dashboard/lead-folow-up/${row.id}`}
-            className="hover:underline text-blue-600"
-          >
+          <Link href={`/dashboard/lead-folow-up/${row.id}`} className="hover:underline text-blue-600">
             {formattedDate}
           </Link>
         );
@@ -151,10 +130,7 @@ const LeadFollowUpPage = () => {
       header: "createdBy",
       accessor: "createdBy",
       render: (val, row) => (
-        <Link
-          href={`/dashboard/lead-folow-up/${row.id}`}
-          className="hover:underline"
-        >
+        <Link href={`/dashboard/lead-folow-up/${row.id}`} className="hover:underline">
           {val}
         </Link>
       ),
@@ -163,19 +139,18 @@ const LeadFollowUpPage = () => {
 
   return (
     <div className="p-6 mx-auto">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold mb-6">Lead Follow-Ups</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Lead Follow-Ups</h1>
         <Link
           href="/dashboard/lead-folow-up/create"
-          className="border-black dark:border-white border px-3  py-2 rounded-xl"
+          className="border-black dark:border-white border px-3 py-2 rounded-xl"
         >
-          {" "}
           Create
         </Link>
       </div>
 
-      {/* Lead Status Filters */}
-      <div className="flex flex-wrap gap-3 mb-6">
+      {/* Filters and Search */}
+      <div className="flex flex-wrap gap-3 mb-6 items-center">
         {leadStatusOptions.map((status) => (
           <button
             key={status}
@@ -189,6 +164,15 @@ const LeadFollowUpPage = () => {
             {status === "all" ? "All" : status}
           </button>
         ))}
+
+        {/* Search Input */}
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search by name, email, phone..."
+          className="ml-4 px-3 py-2 rounded-md border dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
       </div>
 
       {/* Table */}
@@ -198,14 +182,7 @@ const LeadFollowUpPage = () => {
         <p className="text-red-500">Failed to fetch data</p>
       ) : (
         <>
-          <CustomTable<LeadFollowUp>
-            columns={columns}
-            data={leads}
-            // rowKey="id"
-            pageSize={limit}
-            showActions={false}
-          />
-
+          <CustomTable<LeadFollowUp> columns={columns} data={leads} pageSize={limit} showActions={false} />
           <Pagination
             currentPage={page}
             totalRecords={data?.total ?? leads.length}

@@ -3,27 +3,34 @@ import { apiSlice } from "../apiSlcie";
 export const leadFollowApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getAllLeadFollowUp: builder.query({
-      query: ({
-        page = 1,
-        limit = 10,
-        leadStatus,
-      }: {
-        page?: number;
-        limit?: number;
-        leadStatus?: string;
-      }) => {
-        let queryStr = `/api/lead-follow-up?page=${page}&limit=${limit}`;
+  query: ({
+    page = 1,
+    limit = 10,
+    leadStatus,
+    search, // add search parameter
+  }: {
+    page?: number;
+    limit?: number;
+    leadStatus?: string;
+    search?: string;
+  }) => {
+    let queryStr = `/api/lead-follow-up?page=${page}&limit=${limit}`;
 
-        if (leadStatus) {
-          queryStr += `&leadStatus=${encodeURIComponent(leadStatus)}`;
-        }
+    if (leadStatus) {
+      queryStr += `&leadStatus=${encodeURIComponent(leadStatus)}`;
+    }
 
-        return {
-          url: queryStr,
-          method: "GET",
-        };
-      },
-    }),
+    if (search) {
+      queryStr += `&search=${encodeURIComponent(search)}`; // append search query
+    }
+
+    return {
+      url: queryStr,
+      method: "GET",
+    };
+  },
+}),
+
 
     getLeadById: builder.query<any, string>({
       query: (id) => `/api/lead-follow-up/${id}`,
