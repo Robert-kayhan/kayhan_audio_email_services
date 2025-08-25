@@ -7,7 +7,10 @@ import {
   ShoppingCart,
   ArrowRight,
 } from "lucide-react";
-import { useCreateLeadMutation } from "@/store/api/lead/leadFollowApi";
+import {
+  useCreateLeadMutation,
+  useCheckEmailExistsQuery,
+} from "@/store/api/lead/leadFollowApi";
 import { useRouter } from "next/navigation";
 
 const steps = [
@@ -39,6 +42,14 @@ const LeadCustomerDetail = () => {
     supportNotes: "",
   });
 
+  // Email check query
+  const {
+    data: emailCheck,
+    isFetching: checkingEmail,
+  } = useCheckEmailExistsQuery(formData.email, {
+    skip: !formData.email || !formData.email.includes("@"), // avoid empty
+  });
+  console.log(emailCheck)
   const handleChange = (field: string, value: string) => {
     setFormData({ ...formData, [field]: value });
   };
@@ -50,7 +61,8 @@ const LeadCustomerDetail = () => {
           formData.firstName &&
           formData.lastName &&
           formData.phone &&
-          formData.email
+          formData.email &&
+          !emailCheck?.exists // 🚫 block duplicate email
         );
       case 1:
         return formData.leadSource && formData.interest;
@@ -75,7 +87,7 @@ const LeadCustomerDetail = () => {
         handleSubmit();
       }
     } else {
-      alert("Please fill required fields.");
+      alert("Please fix errors or fill required fields.");
     }
   };
 
@@ -143,12 +155,22 @@ const LeadCustomerDetail = () => {
                 value={formData.phone}
                 onChange={(val: any) => handleChange("phone", val)}
               />
-              <Input
-                label="Email"
-                type="email"
-                value={formData.email}
-                onChange={(val: any) => handleChange("email", val)}
-              />
+              <div>
+                <Input
+                  label="Email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(val: any) => handleChange("email", val)}
+                />
+                {checkingEmail && (
+                  <p className="text-yellow-400 text-sm">Checking email...</p>
+                )}
+                {emailCheck?.exists && (
+                  <p className="text-red-500 text-sm">
+                    This email already exists in leads.
+                  </p>
+                )}
+              </div>
               <Input
                 label="Address"
                 value={formData.address}
@@ -165,14 +187,14 @@ const LeadCustomerDetail = () => {
                 options={[
                   "Website",
                   "FaceBook",
-                  "tik tok",
+                  "TikTok",
                   "Instagram",
                   "YouTube",
                   "Walk-in",
                   "Referral",
                   "Call",
                   "Email",
-                  "Google"
+                  "Google",
                 ]}
                 onChange={(val: any) => handleChange("leadSource", val)}
               />
@@ -230,9 +252,11 @@ const LeadCustomerDetail = () => {
           <button
             type="button"
             onClick={handleNext}
-            disabled={isLoading}
+            disabled={isLoading || (currentStep === 0 && emailCheck?.exists)} // 🚫 disable Next if email exists
             className={`bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md flex items-center gap-2 ${
-              isLoading ? "opacity-50 cursor-not-allowed" : ""
+              isLoading || (currentStep === 0 && emailCheck?.exists)
+                ? "opacity-50 cursor-not-allowed"
+                : ""
             }`}
           >
             {currentStep < steps.length - 1

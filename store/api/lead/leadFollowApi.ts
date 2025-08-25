@@ -77,6 +77,11 @@ export const leadFollowApi = apiSlice.injectEndpoints({
         url: `/api/lead-follow-up/notes/${data}`,
       }),
     }),
+     checkEmailExists: builder.query({
+      query: (data) => ({
+        url: `/api/lead-follow-up/check-email/${data}`,
+      }),
+    }),
     addNotes: builder.mutation({
       query: (data ) => ({
         url: `/api/lead-follow-up/notes/${data.id}`,
@@ -98,5 +103,6 @@ export const {
   useUpdateFollowUpStageMutation,
   useUpdateSaleStatusMutation,
   useGetNotesQuery,
-  useAddNotesMutation
+  useAddNotesMutation,
+  useCheckEmailExistsQuery
 } = leadFollowApi;
