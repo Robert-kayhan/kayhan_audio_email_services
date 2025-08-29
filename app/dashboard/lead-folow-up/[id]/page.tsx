@@ -96,7 +96,8 @@ const UpdateLeadBasic: React.FC = () => {
       </button>
       <div className="flex justify-between">
         <h1 className="text-2xl font-bold">Update Lead </h1>
-        {!lead?.flyer?.CrmID && (
+        <div className="flex gap-2 flex-row-reverse" >
+          {lead?.flyer?.CrmID && (
           <select
             onChange={(e) => {
               if (e.target.value === "single") setShowModal(true);
@@ -111,7 +112,8 @@ const UpdateLeadBasic: React.FC = () => {
             <option value="single">Single Product</option>
             <option value="double">Double Product</option>
           </select>
-        )}
+          
+        ) }
         {lead?.flyer?.CrmID && (
           <div className="flex gap-3">
             <button
@@ -128,6 +130,8 @@ const UpdateLeadBasic: React.FC = () => {
             </Link>
           </div>
         )}
+        
+        </div>
         {showModal && (
           <FlyerModal
             userDetails={formData}

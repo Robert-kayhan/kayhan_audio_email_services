@@ -45,9 +45,7 @@ export default function EmailTemplateModal({
   // Bottom text states
   const [bottomText, setBottomText] = useState(initialBottomText);
   const [bottomSize, setBottomSize] = useState(18);
-  const [bottomAlign, setBottomAlign] = useState<"left" | "center" | "right">(
-    "center"
-  );
+  const [bottomAlign, setBottomAlign] = useState<"left" | "center" | "right">("left");
   const [bottomFont, setBottomFont] = useState(fonts[0]);
   const [bottomBold, setBottomBold] = useState(false);
   const [bottomItalic, setBottomItalic] = useState(false);
@@ -55,7 +53,8 @@ export default function EmailTemplateModal({
 
   const flyerRef = useRef<HTMLDivElement>(null);
   const [sendFlyer] = useSendFlyerMutation();
-  const router = useRouter()
+  const router = useRouter();
+
   useEffect(() => {
     setSubject(initialSubject);
     setTopText(initialTopText);
@@ -74,7 +73,8 @@ export default function EmailTemplateModal({
           font-weight:${topBold ? "bold" : "normal"};
           font-style:${topItalic ? "italic" : "normal"};
           color:${topColor};
-        ">${topText}</div>
+          white-space: pre-wrap;
+        ">${topText.replace(/\n/g, "<br />")}</div>
 
         ${flyer_image_url ? `<div style="text-align:center; margin:10px 0;">
           <img src="${flyer_image_url}" style="max-width:100%; height:auto;" />
@@ -87,7 +87,8 @@ export default function EmailTemplateModal({
           font-weight:${bottomBold ? "bold" : "normal"};
           font-style:${bottomItalic ? "italic" : "normal"};
           color:${bottomColor};
-        ">${bottomText}</div>
+          white-space: pre-wrap;
+        ">${bottomText.replace(/\n/g, "<br />")}</div>
       </div>
     `;
 
@@ -97,10 +98,11 @@ export default function EmailTemplateModal({
         combinedHtml,
         subject,
       });
-      router.push("/dashboard/lead-folow-up")
+      router.push("/dashboard/lead-folow-up");
     } catch (error) {
       console.error("Send flyer failed:", error);
     }
+
     console.log("Generated HTML:", combinedHtml);
   };
 
@@ -122,12 +124,12 @@ export default function EmailTemplateModal({
   ) => (
     <div className="mb-4 flex flex-col md:flex-row gap-2 items-center">
       <div className="flex-1">
-        <input
-          type="text"
+        <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
           className="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
           placeholder="Enter text..."
+          rows={3}
         />
       </div>
       <div>
@@ -260,6 +262,7 @@ export default function EmailTemplateModal({
                 fontStyle: topItalic ? "italic" : "normal",
                 color: topColor,
                 marginBottom: 10,
+                whiteSpace: "pre-wrap",
               }}
             >
               {topText}
@@ -284,6 +287,7 @@ export default function EmailTemplateModal({
                 fontStyle: bottomItalic ? "italic" : "normal",
                 color: bottomColor,
                 marginTop: 10,
+                whiteSpace: "pre-wrap",
               }}
             >
               {bottomText}
