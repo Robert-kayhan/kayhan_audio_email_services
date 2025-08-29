@@ -40,19 +40,26 @@ export const flyerApi = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
+    createSingleFlyer: builder.mutation<Flyer, Partial<Flyer>>({
+      query: (data) => ({
+        url: `${FLYERS_URL}/create-single`,
+        method: "POST",
+        body: data,
+      }),
+    }),
 
     // Get all with optional pagination (if backend supports it)
- getAllFlyers: builder.query<GetAllFlyersResponse, any>({
-  query: ({ page = 1, limit = 10, search } = {}) => ({
-    url: FLYERS_URL,
-    method: "GET",
-    params: {
-      page,
-      limit,
-      ...(search ? { search } : {}), // only send search if provided
-    },
-  }),
-}),
+    getAllFlyers: builder.query<GetAllFlyersResponse, any>({
+      query: ({ page = 1, limit = 10, search } = {}) => ({
+        url: FLYERS_URL,
+        method: "GET",
+        params: {
+          page,
+          limit,
+          ...(search ? { search } : {}), // only send search if provided
+        },
+      }),
+    }),
 
     // Get by ID
     getFlyerById: builder.query<Flyer, number>({
@@ -83,6 +90,7 @@ export const flyerApi = apiSlice.injectEndpoints({
 
 export const {
   useCreateFlyerMutation,
+  useCreateSingleFlyerMutation,
   useGetAllFlyersQuery,
   useGetFlyerByIdQuery,
   useUpdateFlyerMutation,

@@ -11,11 +11,16 @@ import {
 import FollowUpStageForm from "@/components/leads/FollowUpStageForm";
 import NoteModal from "@/components/leads/NoteModal";
 import { useGetNotesQuery } from "@/store/api/lead/leadFollowApi";
+import FlyerModal from "@/components/flyer/FlyerModal";
+import FlyerModelForTwoProducts from "@/components/flyer/FlyerModelForTwoProducts";
 const UpdateLeadBasic: React.FC = () => {
   const { id } = useParams();
   const { data: lead, isLoading, refetch } = useGetLeadByIdQuery(id as string);
   console.log(lead);
   const [updateLead, { isLoading: isUpdating }] = useUpdateLeadMutation();
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [showTwoProductModal, setShowTwoProductModal] =
+    useState<boolean>(false);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -88,6 +93,47 @@ const UpdateLeadBasic: React.FC = () => {
       </button>
       <div className="flex justify-between">
         <h1 className="text-2xl font-bold">Update Lead </h1>
+        <select
+          onChange={(e) => {
+            if (e.target.value === "single") setShowModal(true);
+            if (e.target.value === "double")
+              setShowTwoProductModal(true);
+          }}
+          defaultValue=""
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 transition cursor-pointer"
+        >
+          <option value="" disabled>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="1.5"
+              stroke="currentColor"
+              className="w-5 h-5 transform -rotate-45 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M6 12 3.269 3.125A59.769 59.769 0 0121.485 12 59.768 59.768 0 013.27 20.875L5.999 12Zm0 0h7.5"
+              />
+            </svg>
+            Send Flyer
+          </option>
+          <option value="single">Single Product</option>
+          <option value="double">Double Product</option>
+        </select>
+        {showModal && (
+          <FlyerModal
+            userDetails={formData}
+            open={showModal}
+            onClose={() => setShowModal(false)}
+          />
+        )}
+        {showTwoProductModal&& <FlyerModelForTwoProducts
+          userDetails={formData}
+          open={showTwoProductModal}
+          onClose={() => setNoteModalOpen(false)}
+        />}
       </div>
 
       {/* Editable Section */}
@@ -246,7 +292,7 @@ const UpdateLeadBasic: React.FC = () => {
                   FollowUpNotes: lead.secondFollowUpNotes,
                   NextFollowUpDate: lead.secondNextFollowUpDate,
                   QuotationNumber: lead.quotation_number,
-                  InvoiceNumber : lead.quotation_number
+                  InvoiceNumber: lead.quotation_number,
                 }}
               />
             ) : null}

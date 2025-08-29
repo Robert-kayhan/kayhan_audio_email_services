@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   useGetAllFlyersQuery,
@@ -8,11 +9,13 @@ import {
 } from "@/store/api/flyer/FlyerApi";
 import { Download, Eye, Pencil, Trash2, Sun, Moon } from "lucide-react";
 import Pagination from "@/components/global/Pagination";
+import FlyerModal from "@/components/flyer/FlyerModal"; // 👈 modal component for flyer creation
 
 export default function FlyersTable() {
   const [page, setPage] = useState(1);
   const limit = 10;
   const [darkMode, setDarkMode] = useState(true);
+  const [showModal, setShowModal] = useState<boolean>(false); 
 
   const { data, isLoading, isError, error, refetch } = useGetAllFlyersQuery({
     page,
@@ -47,12 +50,16 @@ export default function FlyersTable() {
       </div>
     );
   }
-
+  const router = useRouter();
   const flyers = data?.data;
   const pagination = (data as any).pagination;
 
   return (
-    <div className={`${darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"} min-h-screen p-4 transition-colors duration-300`}>
+    <div
+      className={`${
+        darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"
+      } min-h-screen p-4 transition-colors duration-300`}
+    >
       {/* Header */}
       <div className="mb-4 flex justify-between items-center">
         <h2 className="text-3xl font-medium font-serif">Flyers</h2>
@@ -63,37 +70,54 @@ export default function FlyersTable() {
           >
             {darkMode ? <Sun size={20} /> : <Moon size={20} />}
           </button>
-          <Link
-            href="/dashboard/flyer/create"
-            className="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+          <select
+            onChange={(e) => {
+              if (e.target.value === "single") setShowModal(true);
+              if (e.target.value === "double") router.push("/dashboard/flyer/create");
+            }}
+            defaultValue=""
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 transition cursor-pointer"
           >
-            + Create Flyer
-          </Link>
+            <option value="" disabled>
+              + Create Flyer
+            </option>
+            <option value="single">Single Product</option>
+            <option value="double">Double Product</option>
+          </select>
         </div>
       </div>
 
       {/* Table */}
       <div className="overflow-x-auto rounded-lg shadow">
-        <table className={`${darkMode ? "bg-gray-800" : "bg-white"} min-w-full border border-gray-300 dark:border-gray-700`}>
+        <table
+          className={`${
+            darkMode ? "bg-gray-800" : "bg-white"
+          } min-w-full border border-gray-300 dark:border-gray-700`}
+        >
           <thead className={`${darkMode ? "bg-gray-700" : "bg-gray-100"}`}>
             <tr>
-              <th className="px-4 py-2 border-b border-gray-300 dark:border-gray-600">ID</th>
-              <th className="px-4 py-2 border-b border-gray-300 dark:border-gray-600">Title</th>
-              <th className="px-4 py-2 border-b border-gray-300 dark:border-gray-600">Description</th>
-              <th className="px-4 py-2 border-b border-gray-300 dark:border-gray-600">Created At</th>
-              <th className="px-4 py-2 border-b border-gray-300 dark:border-gray-600">Actions</th>
+              <th className="px-4 py-2 border-b">ID</th>
+              <th className="px-4 py-2 border-b">Title</th>
+              <th className="px-4 py-2 border-b">Description</th>
+              <th className="px-4 py-2 border-b">Created At</th>
+              <th className="px-4 py-2 border-b">Actions</th>
             </tr>
           </thead>
           <tbody>
             {flyers?.map((flyer: any) => (
-              <tr key={flyer.id} className={`${darkMode ? "hover:bg-gray-700" : "hover:bg-gray-50"}`}>
-                <td className="px-4 py-2 border-b border-gray-300 dark:border-gray-600">{flyer.id}</td>
-                <td className="px-4 py-2 border-b border-gray-300 dark:border-gray-600">{flyer.title}</td>
-                <td className="px-4 py-2 border-b border-gray-300 dark:border-gray-600">{flyer.description}</td>
-                <td className="px-4 py-2 border-b border-gray-300 dark:border-gray-600">
+              <tr
+                key={flyer.id}
+                className={`${
+                  darkMode ? "hover:bg-gray-700" : "hover:bg-gray-50"
+                }`}
+              >
+                <td className="px-4 py-2 border-b">{flyer.id}</td>
+                <td className="px-4 py-2 border-b">{flyer.title}</td>
+                <td className="px-4 py-2 border-b">{flyer.description}</td>
+                <td className="px-4 py-2 border-b">
                   {new Date(flyer.createdAt).toLocaleDateString()}
                 </td>
-                <td className="px-4 py-2 border-b border-gray-300 dark:border-gray-600 space-x-2 flex flex-wrap">
+                <td className="px-4 py-2 border-b space-x-2 flex flex-wrap">
                   {/* View */}
                   <a
                     href={flyer.flyer_url}
@@ -114,12 +138,6 @@ export default function FlyersTable() {
                   </a>
 
                   {/* Edit */}
-                  <Link
-                    href={`/dashboard/flyer/edit/${flyer.id}`}
-                    className="inline-flex items-center bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 transition text-sm"
-                  >
-                    <Pencil size={16} className="mr-1" /> Edit
-                  </Link>
 
                   {/* Delete */}
                   <button
@@ -148,6 +166,11 @@ export default function FlyersTable() {
             showPagination={true}
           />
         </div>
+      )}
+
+      {/* Modals */}
+      {showModal === true && (
+        <FlyerModal open={showModal} onClose={() => setShowModal(false)} />
       )}
     </div>
   );
