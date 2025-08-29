@@ -47,7 +47,13 @@ export const flyerApi = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
-
+    sendFlyer: builder.mutation({
+      query: (data) => ({
+        url: `${FLYERS_URL}/send-flyer`,
+        method: "POST",
+        body: data,
+      }),
+    }),
     // Get all with optional pagination (if backend supports it)
     getAllFlyers: builder.query<GetAllFlyersResponse, any>({
       query: ({ page = 1, limit = 10, search } = {}) => ({
@@ -95,4 +101,5 @@ export const {
   useGetFlyerByIdQuery,
   useUpdateFlyerMutation,
   useDeleteFlyerMutation,
+  useSendFlyerMutation
 } = flyerApi;

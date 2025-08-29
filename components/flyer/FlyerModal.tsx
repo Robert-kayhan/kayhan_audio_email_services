@@ -5,7 +5,7 @@ import AsyncSelect from "react-select/async";
 // import { useCreateFlyerMutation } from "@/store/api/flyer/FlyerApi";
 import {useCreateSingleFlyerMutation} from "@/store/api/flyer/FlyerApi";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import ComparisonTable from "./ComparisonTable";
 
 type ProductOption = {
@@ -35,10 +35,11 @@ export default function FlyerModal({
 
   const [product, setProduct] = useState<Product | null>(null);
   const [productId, setProductId] = useState("");
+  const parms = useParams();
 
-  const [customerName, setCustomerName] = useState(userDetails.firstName);
-  const [customerPhone, setCustomerPhone] = useState(userDetails.phone);
-  const [customerEmail, setCustomerEmail] = useState(userDetails.email);
+  const [customerName, setCustomerName] = useState(userDetails?.firstName);
+  const [customerPhone, setCustomerPhone] = useState(userDetails?.phone);
+  const [customerEmail, setCustomerEmail] = useState(userDetails?.email);
   const [installationFees, setInstallationFees] = useState("");
   const [deliveryFees, setDeliveryFees] = useState("");
   const [quotationNumber, setQuotationNumber] = useState("");
@@ -115,13 +116,14 @@ export default function FlyerModal({
       deliveryFees,
       quotationNumber,
       validationTime,
+      CrmID : parms.id
     };
 
     try {
       await createSingleFlyer(flyerPayload).unwrap();
       alert("Flyer created successfully!");
       onClose();
-      router.push("/dashboard/flyer");
+      router.push("/dashboard/lead-folow-up");
     } catch (err) {
       alert("Error creating flyer, please try again.");
     }

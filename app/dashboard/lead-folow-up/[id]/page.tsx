@@ -8,17 +8,20 @@ import {
   useUpdateLeadMutation,
   useUpdateSaleStatusMutation,
 } from "@/store/api/lead/leadFollowApi";
+import EmailTemplateModal from "@/components/flyer/EmailTemplateManager";
 import FollowUpStageForm from "@/components/leads/FollowUpStageForm";
 import NoteModal from "@/components/leads/NoteModal";
 import { useGetNotesQuery } from "@/store/api/lead/leadFollowApi";
 import FlyerModal from "@/components/flyer/FlyerModal";
 import FlyerModelForTwoProducts from "@/components/flyer/FlyerModelForTwoProducts";
+import Link from "next/link";
 const UpdateLeadBasic: React.FC = () => {
   const { id } = useParams();
   const { data: lead, isLoading, refetch } = useGetLeadByIdQuery(id as string);
   console.log(lead);
   const [updateLead, { isLoading: isUpdating }] = useUpdateLeadMutation();
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [showEmailModal, setShowEmailModal] = useState<boolean>(false);
   const [showTwoProductModal, setShowTwoProductModal] =
     useState<boolean>(false);
 
@@ -84,7 +87,7 @@ const UpdateLeadBasic: React.FC = () => {
   if (!lead) return <div className="p-6 text-white">No data found</div>;
   console.log(LeadData, "this is ");
   return (
-    <div className="p-6 max-w-4xl mx-auto text-white space-y-8">
+    <div className="p-6 max-w-4xl mx-auto bg-black text-white space-y-8">
       <button
         onClick={() => router.back()}
         className="inline-flex items-center px-4 py-2 rounded-md bg-gray-800 hover:bg-gray-700 text-white text-sm font-medium transition"
@@ -93,35 +96,38 @@ const UpdateLeadBasic: React.FC = () => {
       </button>
       <div className="flex justify-between">
         <h1 className="text-2xl font-bold">Update Lead </h1>
-        <select
-          onChange={(e) => {
-            if (e.target.value === "single") setShowModal(true);
-            if (e.target.value === "double")
-              setShowTwoProductModal(true);
-          }}
-          defaultValue=""
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 transition cursor-pointer"
-        >
-          <option value="" disabled>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-              className="w-5 h-5 transform -rotate-45 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1"
+        {!lead?.flyer?.CrmID && (
+          <select
+            onChange={(e) => {
+              if (e.target.value === "single") setShowModal(true);
+              if (e.target.value === "double") setShowTwoProductModal(true);
+            }}
+            defaultValue=""
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 transition cursor-pointer"
+          >
+            <option value="" disabled>
+              Create flyer
+            </option>
+            <option value="single">Single Product</option>
+            <option value="double">Double Product</option>
+          </select>
+        )}
+        {lead?.flyer?.CrmID && (
+          <div className="flex gap-3">
+            <button
+              onClick={() => setShowEmailModal(true)}
+              className="px-4 py-2 rounded-2xl bg-blue-600 text-white font-medium shadow hover:bg-blue-700 transition"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M6 12 3.269 3.125A59.769 59.769 0 0121.485 12 59.768 59.768 0 013.27 20.875L5.999 12Zm0 0h7.5"
-              />
-            </svg>
-            Send Flyer
-          </option>
-          <option value="single">Single Product</option>
-          <option value="double">Double Product</option>
-        </select>
+              Send Email
+            </button>
+            <Link
+              href={`${lead?.flyer?.flyer_url}`}
+              className="px-4 py-2 rounded-2xl bg-gray-100 text-gray-700 font-medium shadow hover:bg-gray-200 transition"
+            >
+              View flyer
+            </Link>
+          </div>
+        )}
         {showModal && (
           <FlyerModal
             userDetails={formData}
@@ -129,11 +135,21 @@ const UpdateLeadBasic: React.FC = () => {
             onClose={() => setShowModal(false)}
           />
         )}
-        {showTwoProductModal&& <FlyerModelForTwoProducts
-          userDetails={formData}
-          open={showTwoProductModal}
-          onClose={() => setNoteModalOpen(false)}
-        />}
+        {showTwoProductModal && (
+          <FlyerModelForTwoProducts
+            userDetails={formData}
+            open={showTwoProductModal}
+            onClose={() => setShowTwoProductModal(false)}
+          />
+        )}
+        {showEmailModal && (
+          <EmailTemplateModal
+            userData={formData}
+            flyer_image_url={lead?.flyer?.flyer_image_url}
+            open={showEmailModal}
+            setOpen={() => setShowEmailModal(!showEmailModal)}
+          />
+        )}
       </div>
 
       {/* Editable Section */}

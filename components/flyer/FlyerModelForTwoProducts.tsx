@@ -7,6 +7,7 @@ import { useCreateFlyerMutation } from "@/store/api/flyer/FlyerApi";
 import ComparisonTable from "@/components/flyer/ComparisonTable";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 
 type ProductOption = {
   label: string;
@@ -62,7 +63,8 @@ export default function FlyerModelForTwoProducts({
 }) {
   const flyerRef = useRef<HTMLFormElement>(null);
   const router = useRouter();
-
+  const parms = useParams();
+  console.log(parms , "this is parms")
   const [firstProduct, setFirstProduct] = useState<Product | null>(null);
   const [secondProduct, setSecondProduct] = useState<Product | null>(null);
 
@@ -163,13 +165,14 @@ export default function FlyerModelForTwoProducts({
       deliveryFees,
       quotationNumber,
       validationTime,
+      CrmID : parms.id
     };
 
     try {
       await createFlyer(flyerPayload).unwrap();
       alert("Flyer created successfully!");
       onClose();
-      router.push("/dashboard/flyer");
+      router.push("/dashboard/lead-folow-up");
     } catch (err) {
       alert("Error creating flyer, please try again.");
     }

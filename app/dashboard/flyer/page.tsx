@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -170,7 +170,9 @@ export default function FlyersTable() {
 
       {/* Modals */}
       {showModal === true && (
-        <FlyerModal open={showModal} onClose={() => setShowModal(false)} />
+         <Suspense fallback={<div className="text-center p-4">Loading Flyer...</div>}>
+           <FlyerModal open={showModal} onClose={() => setShowModal(false)} />
+         </Suspense>
       )}
     </div>
   );
