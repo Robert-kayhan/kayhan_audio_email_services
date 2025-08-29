@@ -7,7 +7,7 @@ import Pagination from "@/components/global/Pagination";
 import { User } from "@/util/interface";
 import { CheckSquare, Square } from "lucide-react";
 import { useCreateLeadGroupMutation } from "@/store/api/lead/leadAPi";
-
+import FlyerModal from "@/components/flyer/FlyerModal";
 export default function CreateLeadGroupPage() {
   const [groupName, setGroupName] = useState("");
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);

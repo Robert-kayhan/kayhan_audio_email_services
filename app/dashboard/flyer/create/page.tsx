@@ -57,7 +57,7 @@ export default function FlyerPage() {
 
   const [firstProduct, setFirstProduct] = useState<Product | null>(null);
   const [secondProduct, setSecondProduct] = useState<Product | null>(null);
-  const router = useRouter()
+  const router = useRouter();
   // Customer form state
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
@@ -178,7 +178,7 @@ export default function FlyerPage() {
     try {
       await createFlyer(flyerPayload).unwrap();
       alert("Flyer created successfully!");
-      router.push("/dashboard/flyer")
+      router.push("/dashboard/flyer");
       // Optionally clear form & selections here if you want
     } catch (err) {
       alert("Error creating flyer, please try again.");
@@ -318,8 +318,8 @@ export default function FlyerPage() {
               {[firstProduct, secondProduct].map((product) => (
                 <div key={product.id}>
                   <Image
-                  height={200}
-                  width={200}
+                    height={200}
+                    width={200}
                     src={product.image}
                     alt={product.name}
                     className="h-32 mx-auto mb-2 object-contain border p-1"
@@ -345,6 +345,7 @@ export default function FlyerPage() {
                 Specification Comparison Table
               </h3>
               <ComparisonTable
+                mode="double"
                 firstProductId={setFirstProductId}
                 secondProductId={setSecondProductId}
               />
