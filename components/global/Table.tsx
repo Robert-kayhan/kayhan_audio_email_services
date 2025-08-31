@@ -3,7 +3,7 @@ import React, { useState } from "react";
 
 export type Column<T> = {
   header: any;
-  accessor: keyof T;
+  accessor: any;
   sortable?: boolean;
   render?: (value: any, row: T) => React.ReactNode;
 };
@@ -102,7 +102,7 @@ export default function CustomTable<T>({
           </tr>
         </thead>
         <tbody>
-          {paginatedData.map((row, index) => {
+          {paginatedData.map((row:any, index) => {
             const key = rowKey ? rowKey(row, index) : index;
             return (
               <tr
