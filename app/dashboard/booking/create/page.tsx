@@ -10,6 +10,7 @@ import BookingStep from "@/components/booking/BookingStep";
 import MobileDetailsStep from "@/components/booking/MobileDetailsStep";
 import VehicleStep from "@/components/booking/VehicleStep";
 import { ItemsStep } from "@/components/booking/ItemsStep";
+import { useRouter } from "next/navigation";
 
 // Step Definitions
 const steps = [
@@ -50,6 +51,7 @@ export default function BookingForm() {
       duration: "",
       pickupLocation: { lat: 30.6565217, lng: 76.5649627 },
       dropLocation: { lat: null, lng: null },
+      routePolyline: "",
     },
   });
 
@@ -65,6 +67,7 @@ export default function BookingForm() {
   const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 0));
 
   const [createBooking, { isLoading }] = useCreateBookingMutation();
+    const router = useRouter();
 
   const handleSubmit = async () => {
     try {
@@ -102,6 +105,7 @@ export default function BookingForm() {
         },
         items: { list: [], newItem: "" },
         mobileDetails: {
+          routePolyline: "",
           parking: "",
           powerAccess: "",
           instructions: "",
@@ -115,7 +119,7 @@ export default function BookingForm() {
           // routeDistance : {}
         },
       });
-      setCurrentStep(0);
+      router.push("/dashboard/booking")
     } catch (err) {
       console.error("Booking failed:", err);
       alert("Booking creation failed");

@@ -109,7 +109,7 @@ const Navigation = () => {
       </div>
 
       {/* Mobile Navbar */}
-      <div className="md:hidden fixed top-0 left-0 w-full bg-black text-white flex items-center justify-between p-4 z-50">
+      <div className="md:hidden  top-0 left-0 w-full bg-black text-white flex items-center justify-between p-4 z-50">
         <span className="font-semibold">Kayhan Audio</span>
         <button onClick={() => setMenuOpen(!menuOpen)}>
           {menuOpen ? <X size={24} /> : <Menu size={24} />}

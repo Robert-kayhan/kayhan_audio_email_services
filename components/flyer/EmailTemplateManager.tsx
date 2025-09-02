@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useSendFlyerMutation } from "@/store/api/flyer/FlyerApi";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 interface EmailTemplateModalProps {
   open: boolean;
@@ -270,7 +271,9 @@ export default function EmailTemplateModal({
 
             {flyer_image_url && (
               <div className="flex justify-center">
-                <img
+                <Image 
+                height={300}
+                width={300}
                   src={flyer_image_url}
                   alt="Flyer"
                   className="max-w-full h-auto rounded-lg shadow-md"
