@@ -1,3 +1,4 @@
+import Image from "next/image";
 import React, { useState } from "react";
 
 interface VehicleStepProps {
@@ -5,7 +6,10 @@ interface VehicleStepProps {
   handleChange: (section: string, key: string, value: any) => void;
 }
 
-const VehicleStep: React.FC<VehicleStepProps> = ({ formData, handleChange }) => {
+const VehicleStep: React.FC<VehicleStepProps> = ({
+  formData,
+  handleChange,
+}) => {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
   const classes =
@@ -90,9 +94,18 @@ const VehicleStep: React.FC<VehicleStepProps> = ({ formData, handleChange }) => 
       {uploadError && <p className="text-sm text-red-400">{uploadError}</p>}
 
       {formData.vehicle.dashPhotosUrl && !uploading && !uploadError && (
-        <p className="mt-2 text-sm text-green-400">
-          Uploaded image URL: {formData.vehicle.dashPhotosUrl}
-        </p>
+        <>
+          <Image
+            src={formData.vehicle.dashPhotosUrl}
+            alt="this is image"
+            height={100}
+            width={100}
+          />
+
+          <p className="mt-2 text-sm text-green-400">
+            Uploaded image URL: {formData.vehicle.dashPhotosUrl}
+          </p>
+        </>
       )}
     </>
   );

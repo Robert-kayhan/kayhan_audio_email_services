@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   GoogleMap,
   Autocomplete,
   DirectionsRenderer,
+  Polyline,
   useLoadScript,
 } from "@react-google-maps/api";
 
@@ -13,18 +14,48 @@ const containerStyle = {
   height: "300px",
 };
 
-const defaultCenter = { lat: 30.6565217, lng: 76.5649627 };
+const defaultCenter = { lat: -37.8284, lng: 144.784 };
 
 interface MobileDetailsStepProps {
   formData: any;
   handleChange: (section: string, field: string, value: any) => void;
 }
 
-const libraries:any
-//  (
-//   "places" | "drawing" | "geometry" | "localContext" | "visualization"
-// )[]
- = ["places"];
+const libraries: any = ["places"];
+
+// ✅ Helper: decode Google encoded polyline
+function decodePolyline(encoded: string): { lat: number; lng: number }[] {
+  let index = 0,
+    lat = 0,
+    lng = 0,
+    coordinates = [];
+
+  while (index < encoded.length) {
+    let b,
+      shift = 0,
+      result = 0;
+    do {
+      b = encoded.charCodeAt(index++) - 63;
+      result |= (b & 0x1f) << shift;
+      shift += 5;
+    } while (b >= 0x20);
+    const dlat = result & 1 ? ~(result >> 1) : result >> 1;
+    lat += dlat;
+
+    shift = 0;
+    result = 0;
+    do {
+      b = encoded.charCodeAt(index++) - 63;
+      result |= (b & 0x1f) << shift;
+      shift += 5;
+    } while (b >= 0x20);
+    const dlng = result & 1 ? ~(result >> 1) : result >> 1;
+    lng += dlng;
+
+    coordinates.push({ lat: lat / 1e5, lng: lng / 1e5 });
+  }
+  return coordinates;
+}
 
 const MobileDetailsStep: React.FC<MobileDetailsStepProps> = ({
   formData,
@@ -44,13 +75,55 @@ const MobileDetailsStep: React.FC<MobileDetailsStepProps> = ({
     useState<google.maps.places.Autocomplete | null>(null);
   const [directions, setDirections] =
     useState<google.maps.DirectionsResult | null>(null);
+  const [decodedPolyline, setDecodedPolyline] = useState<
+    { lat: number; lng: number }[]
+  >([]);
 
-  // ✅ Calculate route safely
+  // ✅ 1. If booking already has polyline → decode & draw
+  useEffect(() => {
+    if (formData.mobileDetails?.routePolyline) {
+      const coords = decodePolyline(formData.mobileDetails.routePolyline);
+      setDecodedPolyline(coords);
+    }
+  }, [formData.mobileDetails?.routePolyline]);
+
+  // ✅ 2. If booking has lat/lng → fetch route
+  useEffect(() => {
+    if (
+      formData.mobileDetails?.pickupLocation?.lat &&
+      formData.mobileDetails?.pickupLocation?.lng &&
+      formData.mobileDetails?.dropLocation?.lat &&
+      formData.mobileDetails?.dropLocation?.lng &&
+      !formData.mobileDetails?.routePolyline // only if polyline not stored
+    ) {
+      const directionsService = new google.maps.DirectionsService();
+      directionsService.route(
+        {
+          origin: {
+            lat: formData.mobileDetails.pickupLocation.lat,
+            lng: formData.mobileDetails.pickupLocation.lng,
+          },
+          destination: {
+            lat: formData.mobileDetails.dropLocation.lat,
+            lng: formData.mobileDetails.dropLocation.lng,
+          },
+          travelMode: google.maps.TravelMode.DRIVING,
+        },
+        (result, status) => {
+          if (status === "OK" && result) {
+            setDirections(result);
+          }
+        }
+      );
+    }
+  }, [formData.mobileDetails]);
+
+  // ✅ 3. When user picks new route
   const calculateRoute = () => {
     if (!pickupAuto || !dropAuto) return;
 
-    const pickupPlace : any = pickupAuto.getPlace();
-    const dropPlace:any = dropAuto.getPlace();
+    const pickupPlace: any = pickupAuto.getPlace();
+    const dropPlace: any = dropAuto.getPlace();
 
     if (pickupPlace?.geometry?.location && dropPlace?.geometry?.location) {
       const directionsService = new google.maps.DirectionsService();
@@ -67,6 +140,7 @@ const MobileDetailsStep: React.FC<MobileDetailsStepProps> = ({
 
             const leg = result.routes[0].legs[0];
 
+            // ✅ Save booking details
             handleChange(
               "mobileDetails",
               "pickup",
@@ -88,6 +162,11 @@ const MobileDetailsStep: React.FC<MobileDetailsStepProps> = ({
               lat: dropPlace.geometry.location.lat(),
               lng: dropPlace.geometry.location.lng(),
             });
+
+            // ✅ Save polyline (must use .points)
+            const polyline = result.routes[0].overview_polyline || "";
+            handleChange("mobileDetails", "routePolyline", polyline);
+            setDecodedPolyline(decodePolyline(polyline));
           } else {
             console.error("Error fetching directions:", status);
           }
@@ -99,12 +178,20 @@ const MobileDetailsStep: React.FC<MobileDetailsStepProps> = ({
   if (loadError) return <p className="text-red-500">Error loading maps</p>;
   if (!isLoaded) return <p className="text-gray-400">Loading map…</p>;
 
+  const mapUrl =
+    formData.mobileDetails?.pickupLocation?.lat &&
+    formData.mobileDetails?.dropLocation?.lat
+      ? `https://www.google.com/maps/dir/?api=1&origin=${formData.mobileDetails.pickupLocation.lat},${formData.mobileDetails.pickupLocation.lng}&destination=${formData.mobileDetails.dropLocation.lat},${formData.mobileDetails.dropLocation.lng}&travelmode=driving`
+      : "";
+
+  console.log(mapUrl, "this is map url");
+
   return (
     <div className="space-y-4">
       {/* Parking Restrictions */}
       <input
         placeholder="Parking Restrictions"
-        value={formData.mobileDetails.parking}
+        value={formData.mobileDetails?.parking || ""}
         onChange={(e) =>
           handleChange("mobileDetails", "parking", e.target.value)
         }
@@ -114,7 +201,7 @@ const MobileDetailsStep: React.FC<MobileDetailsStepProps> = ({
       {/* Power Access */}
       <input
         placeholder="Power Access"
-        value={formData.mobileDetails.powerAccess}
+        value={formData.mobileDetails.powerAccess || ""}
         onChange={(e) =>
           handleChange("mobileDetails", "powerAccess", e.target.value)
         }
@@ -124,7 +211,7 @@ const MobileDetailsStep: React.FC<MobileDetailsStepProps> = ({
       {/* Special Instructions */}
       <textarea
         placeholder="Special Instructions"
-        value={formData.mobileDetails.instructions}
+        value={formData.mobileDetails.instructions || ""}
         onChange={(e) =>
           handleChange("mobileDetails", "instructions", e.target.value)
         }
@@ -133,36 +220,98 @@ const MobileDetailsStep: React.FC<MobileDetailsStepProps> = ({
 
       {/* Google Map Route Picker */}
       <div className="flex gap-2 mb-4">
-        <Autocomplete onLoad={setPickupAuto}>
+        <Autocomplete
+          onLoad={setPickupAuto}
+          onPlaceChanged={() => {
+            if (!pickupAuto) return;
+            const place = pickupAuto.getPlace();
+            if (place?.geometry?.location) {
+              handleChange(
+                "mobileDetails",
+                "pickup",
+                place.formatted_address || ""
+              );
+              handleChange("mobileDetails", "pickupLocation", {
+                lat: place.geometry.location.lat(),
+                lng: place.geometry.location.lng(),
+              });
+            }
+          }}
+        >
           <input
             type="text"
+            value={formData.mobileDetails.pickup || ""}
+            onChange={(e) =>
+              handleChange("mobileDetails", "pickup", e.target.value)
+            }
             placeholder="Pickup address"
             className="w-full p-2 border rounded"
           />
         </Autocomplete>
 
-        <Autocomplete onLoad={setDropAuto}>
+        <Autocomplete
+          onLoad={setDropAuto}
+          onPlaceChanged={() => {
+            if (!dropAuto) return;
+            const place = dropAuto.getPlace();
+            if (place?.geometry?.location) {
+              handleChange(
+                "mobileDetails",
+                "drop",
+                place.formatted_address || ""
+              );
+              handleChange("mobileDetails", "dropLocation", {
+                lat: place.geometry.location.lat(),
+                lng: place.geometry.location.lng(),
+              });
+            }
+          }}
+        >
           <input
             type="text"
+            value={formData.mobileDetails.drop || ""}
+            onChange={(e) =>
+              handleChange("mobileDetails", "drop", e.target.value)
+            }
             placeholder="Drop address"
             className="w-full p-2 border rounded"
           />
         </Autocomplete>
 
         <button
+          type="button"
           onClick={calculateRoute}
           className="px-4 py-2 bg-green-600 text-white rounded"
         >
-          Show Route
+          Check route
         </button>
       </div>
 
       <GoogleMap
         mapContainerStyle={containerStyle}
-        center={defaultCenter}
+        center={
+          decodedPolyline.length > 0
+            ? decodedPolyline[0]
+            : formData.mobileDetails?.pickupLocation?.lat
+            ? {
+                lat: formData.mobileDetails.pickupLocation.lat,
+                lng: formData.mobileDetails.pickupLocation.lng,
+              }
+            : defaultCenter
+        }
         zoom={12}
       >
         {directions && <DirectionsRenderer directions={directions} />}
+        {decodedPolyline.length > 0 && (
+          <Polyline
+            path={decodedPolyline}
+            options={{
+              strokeColor: "#00FF00",
+              strokeOpacity: 0.8,
+              strokeWeight: 4,
+            }}
+          />
+        )}
       </GoogleMap>
 
       {/* Distance + Duration Preview */}
