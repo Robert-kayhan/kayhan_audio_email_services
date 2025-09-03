@@ -49,7 +49,8 @@ export default function FlyersTable() {
         Error loading flyers: {error?.toString() || "Unknown error"}
       </div>
     );
-  }
+  } 
+  console.log(error)
   const router = useRouter();
   const flyers = data?.data;
   const pagination = (data as any).pagination;
