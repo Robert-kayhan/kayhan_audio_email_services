@@ -19,9 +19,7 @@ interface Props {
 const CampaignDetailsForm = ({ details, setDetails, onNext }: Props) => {
   const [error, setError] = useState("");
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleChange = (e: any) => {
     const { name, value } = e.target;
     setDetails({ ...details, [name]: value });
   };
@@ -71,13 +69,23 @@ const CampaignDetailsForm = ({ details, setDetails, onNext }: Props) => {
 
         <div>
           <label className="block mb-1 text-sm">From Email *</label>
-          <input
-            type="email"
+          <select
             name="fromEmail"
             value={details.fromEmail}
             onChange={handleChange}
             className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 p-2 rounded text-gray-900 dark:text-white"
-          />
+          >
+            <option value="">Select Email</option>
+            <option value="newsletter@mailer.kayhanaudio.com.au">
+              newsletter@mailer.kayhanaudio.com.au
+            </option>
+            <option value="support@mailer.kayhanaudio.com.au">
+              support@mailer.kayhanaudio.com.au
+            </option>
+            <option value="sales@mailer.kayhanaudio.com.au">
+              sales@mailer.kayhanaudio.com.au
+            </option>
+          </select>
         </div>
 
         <div>

@@ -83,12 +83,42 @@ const VehicleStep: React.FC<VehicleStepProps> = ({
       />
 
       {/* File input for image */}
-      <input
-        type="file"
-        accept="image/*"
-        onChange={handleFileChange}
-        className="mt-2 text-white"
-      />
+      <div className="mt-4">
+        <label
+          htmlFor="fileUpload"
+          className="group flex flex-col items-center justify-center w-full p-6 border-2 border-dashed border-gray-500 rounded-xl cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all duration-200"
+        >
+          <svg
+            className="w-12 h-12 mb-2 text-gray-400 group-hover:text-blue-500 transition-colors duration-200"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M7 16V4h10v12m-5 4v-4m-4 4h8"
+            />
+          </svg>
+          <span className="text-gray-400 group-hover:text-blue-600 text-center font-medium">
+            Upload there Dashboard picture
+          </span>
+          <input
+            id="fileUpload"
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            className="hidden"
+          />
+        </label>
+
+        {formData.fileName && (
+          <p className="mt-2 text-sm text-gray-300 text-center">
+            {formData.fileName}
+          </p>
+        )}
+      </div>
 
       {uploading && <p className="text-sm text-yellow-400">Uploading...</p>}
       {uploadError && <p className="text-sm text-red-400">{uploadError}</p>}
