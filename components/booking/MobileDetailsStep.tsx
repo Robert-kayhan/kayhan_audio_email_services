@@ -178,13 +178,13 @@ const MobileDetailsStep: React.FC<MobileDetailsStepProps> = ({
   if (loadError) return <p className="text-red-500">Error loading maps</p>;
   if (!isLoaded) return <p className="text-gray-400">Loading map…</p>;
 
-  const mapUrl =
-    formData.mobileDetails?.pickupLocation?.lat &&
-    formData.mobileDetails?.dropLocation?.lat
-      ? `https://www.google.com/maps/dir/?api=1&origin=${formData.mobileDetails.pickupLocation.lat},${formData.mobileDetails.pickupLocation.lng}&destination=${formData.mobileDetails.dropLocation.lat},${formData.mobileDetails.dropLocation.lng}&travelmode=driving`
-      : "";
+  // const mapUrl =
+  //   formData.mobileDetails?.pickupLocation?.lat &&
+  //   formData.mobileDetails?.dropLocation?.lat
+  //     ? `https://www.google.com/maps/dir/?api=1&origin=${formData.mobileDetails.pickupLocation.lat},${formData.mobileDetails.pickupLocation.lng}&destination=${formData.mobileDetails.dropLocation.lat},${formData.mobileDetails.dropLocation.lng}&travelmode=driving`
+  //     : "";
 
-  console.log(mapUrl, "this is map url");
+  // console.log(mapUrl, "this is map url");
 
   return (
     <div className="space-y-4">

@@ -45,7 +45,7 @@ export default function BookingForm() {
       parking: "",
       powerAccess: "",
       instructions: "",
-      pickup: "Unit 3/151 Dohertys Rd, Laverton North VIC 3026, Australia",
+      pickup: "",
       drop: "",
       distance: "",
       duration: "",
@@ -62,12 +62,119 @@ export default function BookingForm() {
     }));
   };
 
-  const nextStep = () =>
-    setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
-  const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 0));
+  // Step-wise validation before moving forward
+  const validateStep = () => {
+    switch (currentStep) {
+      case 0: // User Info
+        if (!formData.userInfo.firstname?.trim()) {
+          alert("First name is required");
+          return false;
+        }
+        if (!formData.userInfo.lastname?.trim()) {
+          alert("Last name is required");
+          return false;
+        }
+        if (!formData.userInfo.email?.trim()) {
+          alert("Email is required");
+          return false;
+        }
+        if (
+          formData.userInfo.email &&
+          !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.userInfo.email)
+        ) {
+          alert("Enter a valid email");
+          return false;
+        }
+        if (!formData.userInfo.phone?.trim()) {
+          alert("Phone number is required");
+          return false;
+        }
+        return true;
+
+      case 1: // Vehicle
+        if (!formData.vehicle.make?.trim()) {
+          alert("Vehicle make is required");
+          return false;
+        }
+        if (!formData.vehicle.model?.trim()) {
+          alert("Vehicle model is required");
+          return false;
+        }
+        if (!formData.vehicle.year?.trim()) {
+          alert("Vehicle year is required");
+          return false;
+        }
+        if (isNaN(Number(formData.vehicle.year))) {
+          alert("Vehicle year must be a number");
+          return false;
+        }
+        return true;
+
+      case 2: // Booking
+        if (!formData.booking.type?.trim()) {
+          alert("Booking type is required");
+          return false;
+        }
+        if (!formData.booking.date?.trim()) {
+          alert("Booking date is required");
+          return false;
+        }
+        if (!formData.booking.time?.trim()) {
+          alert("Booking time is required");
+          return false;
+        }
+        return true;
+
+      case 3: // Items
+        if (!formData.items.list.length) {
+          alert("Add at least one item");
+          return false;
+        }
+        return true;
+
+      case 4: // Mobile Details
+        if (!formData.mobileDetails.pickup?.trim()) {
+          alert("Pickup location is required");
+          return false;
+        }
+        if (!formData.mobileDetails.drop?.trim()) {
+          alert("Drop location is required");
+          return false;
+        }
+        if (
+          !formData.mobileDetails.pickupLocation?.lat ||
+          !formData.mobileDetails.pickupLocation?.lng
+        ) {
+          alert("Pickup coordinates are missing");
+          return false;
+        }
+        if (
+          !formData.mobileDetails.dropLocation?.lat ||
+          !formData.mobileDetails.dropLocation?.lng
+        ) {
+          alert("Drop coordinates are missing");
+          return false;
+        }
+        return true;
+
+      default:
+        return true;
+    }
+  };
+
+  // --- Updated Step Navigation ---
+  const nextStep = () => {
+    if (validateStep()) {
+      setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
+    }
+  };
+
+  const prevStep = () => {
+    setCurrentStep((prev) => Math.max(prev - 1, 0));
+  };
 
   const [createBooking, { isLoading }] = useCreateBookingMutation();
-    const router = useRouter();
+  const router = useRouter();
 
   const handleSubmit = async () => {
     try {
@@ -119,7 +226,7 @@ export default function BookingForm() {
           // routeDistance : {}
         },
       });
-      router.push("/dashboard/booking")
+      router.push("/dashboard/booking");
     } catch (err) {
       console.error("Booking failed:", err);
       alert("Booking creation failed");
