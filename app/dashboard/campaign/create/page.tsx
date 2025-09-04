@@ -39,7 +39,7 @@ const CampaignStepper = () => {
   const [campgainId, setCampgainId] = useState<any>(null);
   const [selectedListId, setSelectedListId] = useState<string | null>(null);
   const [createCampaign] = useCreateCampaignMutation();
-  const [sendComgain] = useSendComgainMutation();
+  const [sendComgain , {isLoading}] = useSendComgainMutation();
   const router = useRouter()
   const handleCreateComgain = async () => {
     try {
@@ -151,10 +151,11 @@ const CampaignStepper = () => {
             <h3 className="text-lg font-semibold">Send Campaign</h3>
             <p>📬 Campaign will be sent using selected settings.</p>
             <button
+            disabled={isLoading}
               className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
               onClick={handlesendComgain}
             >
-              Send Campaign
+            {isLoading? "Processing":  "Send Campaign"}
             </button>
           </div>
         );

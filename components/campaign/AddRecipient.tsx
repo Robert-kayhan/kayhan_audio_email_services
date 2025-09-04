@@ -96,6 +96,7 @@ export default function AddRecipients({
     <div className="p-6 min-h-screen rounded-lg shadow bg-white text-black dark:bg-gray-950 dark:text-white">
       <div className="mb-4 flex justify-between items-center">
         <h2 className="text-lg font-semibold">Select Recipients</h2>
+        
         <select
           className="text-sm px-3 py-1 rounded-md border focus:outline-none bg-white text-black border-gray-300 dark:bg-black dark:text-white dark:border-gray-700"
           value={limit}

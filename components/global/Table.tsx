@@ -16,7 +16,7 @@ type CustomAction<T> = {
 
 type TableProps<T> = {
   columns: Column<T>[];
-  data: T[];
+  data: any;
   onEdit?: (row: T) => void;
   onDelete?: (row: T) => void;
   customActions?: CustomAction<T>[];
@@ -102,7 +102,7 @@ export default function CustomTable<T>({
           </tr>
         </thead>
         <tbody>
-          {paginatedData.map((row:any, index) => {
+          {paginatedData.map((row:any, index:any) => {
             const key = rowKey ? rowKey(row, index) : index;
             return (
               <tr
