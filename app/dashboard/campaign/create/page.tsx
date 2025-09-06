@@ -26,7 +26,7 @@ const steps = [
 const CampaignStepper = () => {
   const [currentStep, setCurrentStep] = useState("form");
   const [completedStepIndex, setCompletedStepIndex] = useState(0);
-
+  const [sendComgains, setSendComgains] = useState(false);
   const [campaignDetails, setCampaignDetails] = useState<CampaignDetails>({
     campaignName: "",
     subject: "",
@@ -76,6 +76,7 @@ const CampaignStepper = () => {
 
   const handlesendComgain = async () => {
     try {
+      setSendComgains(true)
       const res = await sendComgain(campgainId).unwrap();
       router.push("/dashboard/campaign")
       console.log(res);
@@ -146,7 +147,11 @@ const CampaignStepper = () => {
           </div>
         );
       case "send":
-        return (
+        return sendComgains ? <>
+        <div className="mt-2 p-2 bg-green-100 text-green-800 rounded">
+          ✅ Campaign is sent!
+        </div>
+        </>: (
           <div className="p-4 dark:text-gray-100 space-y-4">
             <h3 className="text-lg font-semibold">Send Campaign</h3>
             <p>📬 Campaign will be sent using selected settings.</p>
