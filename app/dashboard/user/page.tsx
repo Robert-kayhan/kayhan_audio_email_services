@@ -75,6 +75,7 @@ export default function TablePage() {
       email: row.email,
       phone: row.phone,
       address: row.address || "",
+      isSubscribed : row.isSubscribed || true
     });
     setUpdateuserShowModal(true);
   };

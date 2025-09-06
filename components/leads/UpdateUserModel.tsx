@@ -9,10 +9,10 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   user: any;
-  refetch:any // should contain id, firstname, lastname, etc.
+  refetch: any; // should contain id, firstname, lastname, etc.
 }
 
-const UserForUpdate: React.FC<Props> = ({ isOpen, onClose, user ,refetch}) => {
+const UserForUpdate: React.FC<Props> = ({ isOpen, onClose, user, refetch }) => {
   const [formData, setFormData] = useState({
     id: undefined,
     firstname: "",
@@ -20,10 +20,11 @@ const UserForUpdate: React.FC<Props> = ({ isOpen, onClose, user ,refetch}) => {
     email: "",
     phone: "",
     address: "",
+    isSubscribed: true, 
   });
 
   const [updateUser] = useUpdateUserMutation();
-
+  console.log(user , "this is user")
   // ✅ Populate form data from the `user` prop
   useEffect(() => {
     if (user) {
@@ -34,41 +35,46 @@ const UserForUpdate: React.FC<Props> = ({ isOpen, onClose, user ,refetch}) => {
         email: user.email || "",
         phone: user.phone || "",
         address: user.address || "",
+        isSubscribed: user.isSubscribed || false,
       });
     }
   }, [user]);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: any
   ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const {  firstname, lastname, email, phone, address } = formData;
+    const { firstname, lastname, email, phone, address } = formData;
+
     // ✅ Validation
-    if (!firstname.trim()) return toast.error("First name is required");
-    if (!lastname.trim()) return toast.error("Last name is required");
-    if (!email.trim()) return toast.error("Email is required");
-    if (!/^\S+@\S+\.\S+$/.test(email))
-      return toast.error("Invalid email format");
-    if (!phone.trim()) return toast.error("Phone number is required");
-    if (!/^\d{10,15}$/.test(phone)) return toast.error("Invalid phone number");
-    if (!address.trim()) return toast.error("Address is required");
+    // if (!firstname.trim()) return toast.error("First name is required");
+    // if (!lastname.trim()) return toast.error("Last name is required");
+    // if (!email.trim()) return toast.error("Email is required");
+    // if (!/^\S+@\S+\.\S+$/.test(email))
+    //   return toast.error("Invalid email format");
+    // if (!phone.trim()) return toast.error("Phone number is required");
+    // if (!/^\d{10,15}$/.test(phone)) return toast.error("Invalid phone number");
+    // if (!address.trim()) return toast.error("Address is required");
 
     try {
-      const res = await updateUser({id :user.email,data :formData}).unwrap(); 
+      const res = await updateUser({ id: user.id, data: formData }).unwrap();
       toast.success(res.message || "User updated successfully");
-      refetch()
+      refetch();
       onClose();
     } catch (error) {
       toast.error(
         (error as any)?.data?.message ||
-        (error as any)?.message ||
-        "Something went wrong"
+          (error as any)?.message ||
+          "Something went wrong"
       );
     }
   };
@@ -100,7 +106,7 @@ const UserForUpdate: React.FC<Props> = ({ isOpen, onClose, user ,refetch}) => {
             <label className="block mb-1 text-sm font-medium">First Name</label>
             <input
               name="firstname"
-              required
+              // required
               value={formData.firstname}
               onChange={handleChange}
               placeholder="Enter first name"
@@ -112,7 +118,7 @@ const UserForUpdate: React.FC<Props> = ({ isOpen, onClose, user ,refetch}) => {
             <label className="block mb-1 text-sm font-medium">Last Name</label>
             <input
               name="lastname"
-              required
+              // required
               value={formData.lastname}
               onChange={handleChange}
               placeholder="Enter last name"
@@ -125,7 +131,7 @@ const UserForUpdate: React.FC<Props> = ({ isOpen, onClose, user ,refetch}) => {
             <input
               type="email"
               name="email"
-              required
+              // required
               value={formData.email}
               onChange={handleChange}
               placeholder="Enter email address"
@@ -137,7 +143,7 @@ const UserForUpdate: React.FC<Props> = ({ isOpen, onClose, user ,refetch}) => {
             <label className="block mb-1 text-sm font-medium">Phone</label>
             <input
               name="phone"
-              required
+              // required
               value={formData.phone}
               onChange={handleChange}
               placeholder="Enter phone number"
@@ -149,13 +155,31 @@ const UserForUpdate: React.FC<Props> = ({ isOpen, onClose, user ,refetch}) => {
             <label className="block mb-1 text-sm font-medium">Address</label>
             <textarea
               name="address"
-              required
+              // required
               rows={3}
               value={formData.address}
               onChange={handleChange}
               placeholder="Enter address"
               className="w-full px-4 py-2 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
             />
+          </div>
+
+          {/* ✅ Subscribe Option */}
+          <div className="md:col-span-2 flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="isSubscribed"
+              name="isSubscribed"
+              checked={formData.isSubscribed}
+              onChange={handleChange}
+              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            />
+            <label
+              htmlFor="isSubscribed"
+              className="text-sm text-gray-700 dark:text-gray-300"
+            >
+              Subscribe to newsletter / updates
+            </label>
           </div>
 
           <div className="md:col-span-2 text-right">
