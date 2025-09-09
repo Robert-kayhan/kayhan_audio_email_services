@@ -155,6 +155,8 @@ export default function FlyerModelForTwoProducts({
       title: `Flyer for ${customerName || "Customer"}`,
       description: `Quotation #${quotationNumber}`,
       prodcutoneimageUrl: firstProduct.image,
+      productOnePrice:firstProduct.price ,
+      productTwoPrice:secondProduct.price ,
       prodcutwoimageUrl: secondProduct.image,
       productSpecificationId: firstProductId,
       productSpecificationIdtwo: secondProductId,

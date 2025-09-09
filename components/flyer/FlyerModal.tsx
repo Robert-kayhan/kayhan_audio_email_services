@@ -3,7 +3,7 @@
 import React, { useState, useRef } from "react";
 import AsyncSelect from "react-select/async";
 // import { useCreateFlyerMutation } from "@/store/api/flyer/FlyerApi";
-import {useCreateSingleFlyerMutation} from "@/store/api/flyer/FlyerApi";
+import { useCreateSingleFlyerMutation } from "@/store/api/flyer/FlyerApi";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import ComparisonTable from "./ComparisonTable";
@@ -24,11 +24,11 @@ type Product = {
 export default function FlyerModal({
   open,
   onClose,
-  userDetails
+  userDetails,
 }: {
   open: boolean;
   onClose: () => void;
-  userDetails? : any
+  userDetails?: any;
 }) {
   const flyerRef = useRef<HTMLFormElement>(null);
   const router = useRouter();
@@ -108,6 +108,7 @@ export default function FlyerModal({
       title: `Flyer for ${customerName || "Customer"}`,
       description: `Quotation #${quotationNumber}`,
       prodcutoneimageUrl: product.image,
+      productOnePrice: product.price,
       productSpecificationId: productId,
       customerName,
       customerPhone,
@@ -116,7 +117,7 @@ export default function FlyerModal({
       deliveryFees,
       quotationNumber,
       validationTime,
-      CrmID : parms.id
+      CrmID: parms.id,
     };
 
     try {
@@ -136,7 +137,9 @@ export default function FlyerModal({
       <div className="bg-white h-[70vh] overflow-y-auto text-gray-900 w-full max-w-4xl rounded-2xl shadow-xl overflow-hidden">
         {/* Header */}
         <div className="flex justify-between items-center border-b px-6 py-4">
-          <h2 className="text-lg font-semibold">Create Flyer (Single Product)</h2>
+          <h2 className="text-lg font-semibold">
+            Create Flyer (Single Product)
+          </h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600"
@@ -205,7 +208,9 @@ export default function FlyerModal({
               defaultOptions
               isClearable
               onChange={handleProductChange}
-              value={product ? { label: product.name, value: product.id } : null}
+              value={
+                product ? { label: product.name, value: product.id } : null
+              }
               className="text-sm"
             />
           </div>
@@ -220,7 +225,9 @@ export default function FlyerModal({
                 width={180}
                 className="mx-auto mb-3 object-contain rounded"
               />
-              <div className="text-xl font-bold text-red-600">{product.price}</div>
+              <div className="text-xl font-bold text-red-600">
+                {product.price}
+              </div>
               <div className="text-gray-800 font-medium">{product.name}</div>
             </div>
           )}

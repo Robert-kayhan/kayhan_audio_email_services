@@ -116,6 +116,7 @@ export default function FlyerPage() {
   const handleFirstProductChange = async (option: ProductOption | null) => {
     if (option) {
       const product = await fetchProductBySlug(option.value);
+      console.log(product , "this is product")
       setFirstProduct(product);
       setFirstProductId(product?.id || "");
     } else {
@@ -163,7 +164,9 @@ export default function FlyerPage() {
       title: `Flyer for ${customerName || "Customer"}`,
       description: `Quotation #${quotationNumber}`,
       prodcutoneimageUrl: firstProduct.image,
+      productOnePrice : firstProduct.price ,
       prodcutwoimageUrl: secondProduct.image,
+      productTwoPrice : secondProduct.price,
       productSpecificationId: firstProductId,
       productSpecificationIdtwo: secondProductId,
       customerName,
