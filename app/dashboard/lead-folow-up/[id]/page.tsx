@@ -378,7 +378,7 @@ const UpdateLeadBasic: React.FC = () => {
 
         {Array.isArray(LeadData) && LeadData.length > 0 && (
           <ul className="space-y-2">
-            {LeadData.map(({ id, note }: any) => (
+            {LeadData?.map(({ id, note }: any) => (
               <li
                 key={id}
                 className="bg-gray-800 border border-gray-700 p-3 rounded text-white"
