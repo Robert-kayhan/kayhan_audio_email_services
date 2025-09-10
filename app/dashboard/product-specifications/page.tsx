@@ -1,23 +1,49 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import {
   useGetAllProductSpecificationsQuery,
   useDeleteProductSpecificationMutation,
+  useUpdateProductSpecificationMutation,
 } from "@/store/api/flyer/productSpecificationApi";
 import Link from "next/link";
 
 export default function SpecificationsListPage() {
-  const { data, isLoading, isError , refetch } = useGetAllProductSpecificationsQuery({});
+  const { data, isLoading, isError, refetch } =
+    useGetAllProductSpecificationsQuery({});
   const [deleteSpecification] = useDeleteProductSpecificationMutation();
+  const [updateSpecification] = useUpdateProductSpecificationMutation();
+
+  const [editingSpec, setEditingSpec] = useState<any>(null);
+  const [newName, setNewName] = useState("");
 
   const handleDelete = async (id: number) => {
     if (!confirm("Are you sure you want to delete this specification?")) return;
     try {
       await deleteSpecification(id).unwrap();
-      refetch()
+      refetch();
     } catch (err) {
       console.error("Error deleting specification:", err);
+    }
+  };
+
+  const handleEdit = (spec: any) => {
+    setEditingSpec(spec);
+    setNewName(spec.name);
+  };
+
+  const handleUpdate = async () => {
+    if (!newName.trim()) return alert("Name cannot be empty");
+    try {
+      await updateSpecification({
+        id: editingSpec.id,
+        name: newName,
+      }).unwrap();
+      setEditingSpec(null);
+      setNewName("");
+      refetch();
+    } catch (err) {
+      console.error("Error updating specification:", err);
     }
   };
 
@@ -32,7 +58,6 @@ export default function SpecificationsListPage() {
     return <p className="p-4 text-red-500">Failed to load specifications.</p>;
 
   const specs = data?.data || [];
-  console.log(specs , "this is data")
 
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white dark:bg-gray-900 shadow-lg rounded-xl">
@@ -41,9 +66,8 @@ export default function SpecificationsListPage() {
           Product Specifications
         </h1>
         <Link
-        href="/dashboard/product-specifications/new"
+          href="/dashboard/product-specifications/new"
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow transition"
-          
         >
           + Add Specification
         </Link>
@@ -59,16 +83,16 @@ export default function SpecificationsListPage() {
             <thead className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-gray-800 dark:to-gray-700 border-b border-gray-200 dark:border-gray-700">
               <tr>
                 <th className="p-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">
+                  ID
+                </th>
+                <th className="p-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">
                   Specification Name
                 </th>
                 <th className="p-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">
                   Created At
                 </th>
                 <th className="p-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">
-                  Created at
-                </th>
-                 <th className="p-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">
-                  update at
+                  Updated At
                 </th>
                 <th className="p-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">
                   Actions
@@ -86,8 +110,7 @@ export default function SpecificationsListPage() {
                   } hover:bg-blue-50 dark:hover:bg-gray-700 transition`}
                 >
                   <td className="p-3 text-gray-900 dark:text-gray-100">
-                    {spec.id
-}
+                    {spec.id}
                   </td>
                   <td className="p-3 text-gray-900 dark:text-gray-100">
                     {spec.name}
@@ -96,9 +119,15 @@ export default function SpecificationsListPage() {
                     {spec.createdAt}
                   </td>
                   <td className="p-3 text-gray-900 dark:text-gray-100">
-                    {spec.createdAt}
+                    {spec.updatedAt}
                   </td>
-                  <td className="p-3">
+                  <td className="p-3 flex gap-2">
+                    <button
+                      onClick={() => handleEdit(spec)}
+                      className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded shadow-sm transition"
+                    >
+                      Edit
+                    </button>
                     <button
                       onClick={() => handleDelete(spec.id)}
                       className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded shadow-sm transition"
@@ -110,6 +139,38 @@ export default function SpecificationsListPage() {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {editingSpec && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-40">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-96">
+            <h2 className="text-lg font-bold mb-4 text-gray-900 dark:text-gray-100">
+              Edit Specification
+            </h2>
+            <input
+              type="text"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              className="w-full border rounded px-3 py-2 mb-4 dark:bg-gray-700 dark:text-white"
+              placeholder="Enter new name"
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setEditingSpec(null)}
+                className="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUpdate}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded"
+              >
+                Save
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
