@@ -5,8 +5,12 @@ import CustomTable, { Column } from "@/components/global/Table";
 import Pagination from "@/components/global/Pagination";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { useGetAllBookingQuery ,useDeleteBookingMutation } from "@/store/api/booking/BookingApi";
+import {
+  useGetAllBookingQuery,
+  useDeleteBookingMutation,
+} from "@/store/api/booking/BookingApi";
 import Link from "next/link";
+import JobReportModal from "@/components/booking/JobReportDetail"; // ✅ use the modal
 
 const columns: Column<any>[] = [
   { header: "ID", accessor: "id", sortable: true },
@@ -41,13 +45,15 @@ const columns: Column<any>[] = [
 export default function BookingTablePage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(25);
+  const [showJobReportModal, setShowJobReportModal] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<any>(null);
+
   const router = useRouter();
 
   const { data, isLoading, isError, refetch } = useGetAllBookingQuery({
     page: currentPage,
     limit,
   });
-  console.log(data, "This is data");
   const bookings = data?.bookings ?? [];
   const pagination = data?.pagination ?? {
     total: 0,
@@ -62,17 +68,28 @@ export default function BookingTablePage() {
     router.push(`/dashboard/booking/edit/${row.id}`);
   };
 
-  const [deleteBooking] = useDeleteBookingMutation()
-  // For now no delete API — but keeping hook ready
+  const [deleteBooking] = useDeleteBookingMutation();
   const handleDelete = async (row: any) => {
     try {
-      await deleteBooking(row.id).unwrap(); // <- implement in BookingApi if needed
+      await deleteBooking(row.id).unwrap();
       toast.success("Booking deleted successfully");
       refetch();
     } catch (error) {
       toast.error("Failed to delete booking");
       console.error(error);
     }
+  };
+
+  // ✅ Handle opening JobReport modal
+  const handleJobReport = (row: any) => {
+    setSelectedBooking(row);
+    setShowJobReportModal(true);
+  };
+
+  const handleJobReportSubmit = (data: any) => {
+    console.log("Job Report submitted:", data, "for booking:", selectedBooking);
+    toast.success("Job Report saved!");
+    // TODO: call API to save job report here
   };
 
   return (
@@ -98,7 +115,7 @@ export default function BookingTablePage() {
             ))}
           </select>
 
-          {/* Create Button */}
+          {/* Create Booking Button */}
           <Link
             href="/dashboard/booking/create"
             className="bg-blue-600 text-white px-4 py-2 rounded-md flex items-center gap-1 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-400"
@@ -127,6 +144,8 @@ export default function BookingTablePage() {
             showActions
             onEdit={handleEdit}
             onDelete={handleDelete}
+            // ✅ Add custom JobReport button
+           
           />
           <Pagination
             currentPage={currentPage}
@@ -138,6 +157,15 @@ export default function BookingTablePage() {
             tableDataLength={bookings.length}
           />
         </>
+      )}
+
+      {/* ✅ Job Report Modal */}
+      {showJobReportModal && (
+        <JobReportModal
+          isOpen={showJobReportModal}
+          onClose={() => setShowJobReportModal(false)}
+          onSubmit={handleJobReportSubmit}
+        />
       )}
     </div>
   );
