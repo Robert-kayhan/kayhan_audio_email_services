@@ -10,11 +10,34 @@ const bookingApi = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
-    getAllBooking: builder.query({
-      query: ({ page = 1, limit = 10 }) => ({
-        url: `${BOOKING_URL}?page=${page}&limit=${limit}`,
-        method: "GET",
-      }),
+  getAllBooking: builder.query({
+      query: ({
+        page = 1,
+        limit = 10,
+        search = '',
+        status = '',
+        type = '',
+        paymentStatus = '',
+        startDate = '',
+        endDate = '',
+      }) => {
+        const params = new URLSearchParams({
+          page: page.toString(),
+          limit: limit.toString(),
+        });
+
+        if (search) params.append('search', search);
+        if (status) params.append('status', status);
+        if (type) params.append('type', type);
+        if (paymentStatus) params.append('paymentStatus', paymentStatus);
+        if (startDate) params.append('startDate', startDate);
+        if (endDate) params.append('endDate', endDate);
+
+        return {
+          url: `${BOOKING_URL}?${params.toString()}`,
+          method: 'GET',
+        };
+      },
     }),
     deleteBooking: builder.mutation({
       query: (id) => ({

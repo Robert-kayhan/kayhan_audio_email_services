@@ -1,0 +1,45 @@
+import { apiSlice } from "../apiSlcie";
+import { JOBREPORT_URL } from "@/store/constant";
+export const JobReportApi = apiSlice.injectEndpoints({
+  endpoints: (builder) => ({
+    // ✅ Create Job Report
+    createJob: builder.mutation({
+      query: (data) => ({
+        url: JOBREPORT_URL,
+        method: "POST",
+        body: data,
+      }),
+    }),
+
+    // ✅ Cancel Job
+    cancelJob: builder.mutation({
+      query: ({ id, cancelReason }) => ({
+        url: `${JOBREPORT_URL}/cancel/${id}`,
+        method: "PUT",
+        body: { cancelReason },
+      }),
+    }),
+    getJobByBookingId: builder.query({
+      query: (bookingId) => `${JOBREPORT_URL}/${bookingId}`,
+
+    }),
+
+    // ✅ Reschedule Job
+    rescheduleJob: builder.mutation({
+      query: ({ id, rescheduleTime }) => ({
+        url: `${JOBREPORT_URL}/${id}`,
+        method: "PUT",
+        body: { rescheduleTime },
+      }),
+    }),
+
+    // ✅ Get All Job Reports (optional filters)
+  }),
+});
+
+export const {
+  useCreateJobMutation,
+  useCancelJobMutation,
+  useRescheduleJobMutation,
+  useGetJobByBookingIdQuery
+} = JobReportApi;
