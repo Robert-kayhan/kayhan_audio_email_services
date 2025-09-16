@@ -11,14 +11,14 @@ import MobileDetailsStep from "@/components/booking/MobileDetailsStep";
 import VehicleStep from "@/components/booking/VehicleStep";
 import { ItemsStep } from "@/components/booking/ItemsStep";
 import { useRouter } from "next/navigation";
-
+import { PaymentStep } from "@/components/booking/PaymentStep";
 // Step Definitions
 const steps = [
   { title: "User Info", icon: User },
   { title: "Vehicle", icon: Car },
   { title: "Booking", icon: ClipboardList },
   { title: "Items", icon: Package },
-  // { title: "Mobile Details", icon: MapPinHouse },
+  { title: "PaymentStep", icon: MapPinHouse },
 ];
 
 export default function BookingForm() {
@@ -40,7 +40,16 @@ export default function BookingForm() {
       time: "",
       notes: "",
     },
-    items: { list: [], newItem: "" },
+    items: {
+      list: [], // added items
+      newItem: "", // current input for item name
+      newCharge: "", // current input for item charge
+      discountType: "amount", // or "percentage"
+      discountValue: 0, // current discount value
+      totalAmount: 0, // total after discount
+      discountAmount: 0, // calculated discount amount
+    },
+
     mobileDetails: {
       parking: "",
       powerAccess: "",
@@ -52,6 +61,12 @@ export default function BookingForm() {
       pickupLocation: { lat: 30.6565217, lng: 76.5649627 },
       dropLocation: { lat: null, lng: null },
       routePolyline: "",
+    },
+    payment: {
+      category: "Instant",
+      methods: [],
+      type: "Full",
+      partialAmount: "",
     },
   });
 
@@ -189,6 +204,8 @@ export default function BookingForm() {
         booking: formData.booking,
         items: formData.items.list,
         mobileDetails: formData.mobileDetails,
+        paymentDetails: formData.payment,
+        totalAmount : formData.items
       };
 
       await createBooking(payload).unwrap();
@@ -210,7 +227,17 @@ export default function BookingForm() {
           time: "",
           notes: "",
         },
-        items: { list: [], newItem: "" },
+        items: {
+          list: [], // added items
+          newItem: "", // current input for item name
+          newCharge: "", // current input for item charge
+          discountType: "amount", // or "percentage"
+          discountValue: 0, // current discount value
+          totalAmount: 0, // total after discount
+          discountAmount: 0, // calculated discount amount
+        },
+
+        // items: { list: [], newItem: "" ,},
         mobileDetails: {
           routePolyline: "",
           parking: "",
@@ -225,6 +252,13 @@ export default function BookingForm() {
           dropLocation: { lat: null, lng: null },
           // routeDistance : {}
         },
+        payment: {
+          category: "Instant",
+          methods: [],
+          type: "Full",
+          partialAmount: "",
+        },
+       
       });
       router.push("/dashboard/booking");
     } catch (err) {
@@ -267,9 +301,9 @@ export default function BookingForm() {
             setItems={(data: any) => setFormData({ ...formData, items: data })}
           />
         )}
-        {/* {currentStep === 4 && (
-          <MobileDetailsStep formData={formData} handleChange={handleChange} />
-        )} */}
+        {currentStep === 4 && (
+          <PaymentStep formData={formData} handleChange={handleChange} />
+        )}
 
         {/* Navigation */}
         <div className="flex justify-between mt-8">
