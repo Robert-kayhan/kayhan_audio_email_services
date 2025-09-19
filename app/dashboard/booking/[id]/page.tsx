@@ -112,7 +112,7 @@ const BookingDetailsPage = () => {
     toast.success("Update payment clicked!");
     // Implement your payment update logic here
   };
-
+  console.log(booking?.reports[0]?.status == "In Progress")
   // ---------- JSX ----------
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white p-6">
@@ -125,22 +125,28 @@ const BookingDetailsPage = () => {
         {/* Action Panel */}
         {/* Action Panel */}
         <div className="flex flex-wrap justify-center gap-4 p-6 bg-gray-900/40 backdrop-blur-xl rounded-3xl shadow-xl">
-          {booking?.reports?.length == 0 && <button onClick={() => setShowJobReportModal(true)}>
-            Add Job Report
-          </button>}
+          {booking?.reports?.length == 0 && (
+            <button className="flex items-center gap-2 px-6 py-3 font-semibold text-white rounded-full bg-gradient-to-r from-green-400 to-green-600 shadow-lg hover:scale-105 hover:shadow-2xl transition-all duration-300" onClick={() => setShowJobReportModal(true)}>
+              Add Job Report
+            </button>
+          )}
 
-          {booking?.reports?.length == 2 && <Link
-          href={`/dashboard/booking/job/update/${id}`}
-            className="flex items-center gap-2 px-6 py-3 font-semibold text-white rounded-full bg-gradient-to-r from-green-400 to-green-600 shadow-lg hover:scale-105 hover:shadow-2xl transition-all duration-300"
-          >
-            <Check size={20} /> Complete Job
-          </Link>}
-           {booking?.reports?.length == 1 && <Link
-          href={`/dashboard/booking/job/${id}`}
-            className="flex items-center gap-2 px-6 py-3 font-semibold text-white rounded-full bg-gradient-to-r from-green-400 to-green-600 shadow-lg hover:scale-105 hover:shadow-2xl transition-all duration-300"
-          >
-            <View size={20} /> View  Job
-          </Link>}
+          {booking?.reports[0]?.status == "In Progress" && (
+            <Link
+              href={`/dashboard/booking/job/update/${id}`}
+              className="flex items-center gap-2 px-6 py-3 font-semibold text-white rounded-full bg-gradient-to-r from-green-400 to-green-600 shadow-lg hover:scale-105 hover:shadow-2xl transition-all duration-300"
+            >
+              <Check size={20} /> Complete Job
+            </Link>
+          )}
+          {booking?.reports[0]?.status !== "In Progress" && (
+            <Link
+              href={`/dashboard/booking/job/${id}`}
+              className="flex items-center gap-2 px-6 py-3 font-semibold text-white rounded-full bg-gradient-to-r from-green-400 to-green-600 shadow-lg hover:scale-105 hover:shadow-2xl transition-all duration-300"
+            >
+              <View size={20} /> View Job
+            </Link>
+          )}
 
           <button
             onClick={() => setShowRescheduleModal(true)}
@@ -156,12 +162,13 @@ const BookingDetailsPage = () => {
             <X size={20} /> Cancel Booking
           </button>
 
-          <button
+         {booking?.payment?.status !== "Completed"
+ && <button
             onClick={() => setIsPaymentUpdate(!false)}
             className="flex items-center gap-2 px-6 py-3 font-semibold text-white rounded-full bg-gradient-to-r from-blue-400 to-blue-600 shadow-lg hover:scale-105 hover:shadow-2xl transition-all duration-300"
           >
             <CreditCard size={20} /> Update Payment
-          </button>
+          </button>}
         </div>
 
         {/* Booking & Customer */}

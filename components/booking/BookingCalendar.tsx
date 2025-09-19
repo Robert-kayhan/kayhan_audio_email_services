@@ -13,7 +13,7 @@ const BookingCalendar = () => {
     page: 1,
     limit: 10000,
   });
-
+  console.log(data, "this is data");
   // keep full booking object so nested data exists
   const bookings = useMemo(() => {
     if (!data?.bookings) return [];
@@ -42,40 +42,41 @@ const BookingCalendar = () => {
   const getTileClassName = ({ date, view }: { date: Date; view: string }) => {
     if (view !== "month") return "";
 
-    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(
-      date.getDate()
-    ).padStart(2, "0")}`;
+    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+      2,
+      "0"
+    )}-${String(date.getDate()).padStart(2, "0")}`;
     const dayBookings = bookingsByDate[key];
     if (!dayBookings) return "";
 
-    // If more than 2 bookings, mark as red
-    if (dayBookings.length >= 2) return "bg-red-600 text-white";
-
-    // Otherwise, mark based on status
-    if (dayBookings.some((b) => b.status === "Cancelled"))
-      return "bg-gray-400 text-white";
-    if (dayBookings.some((b) => b.status === "Pending"))
-      return "bg-yellow-500 text-black";
-    if (dayBookings.some((b) => b.status === "Rescheduled"))
-      return "bg-blue-500 text-white";
+    if (dayBookings.length >= 2) {
+      // red for 2+ bookings
+      return "bg-red-500 text-white rounded-full w-full h-full";
+    }
+    if (dayBookings.length === 1) {
+      // orange for 1 booking
+      return "bg-orange-500 text-white rounded-full w-full h-full";
+    }
 
     return "";
   };
 
   const tileContent = ({ date, view }: { date: Date; view: string }) => {
     if (view !== "month") return null;
-    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(
-      date.getDate()
-    ).padStart(2, "0")}`;
+    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
     const dayBookings = bookingsByDate[key];
-    if (dayBookings) {
-      return (
-        <div className="text-xs mt-1">
-          {dayBookings.length} booking{dayBookings.length > 1 ? "s" : ""}
-        </div>
-      );
-    }
-    return null;
+    if (!dayBookings) return null;
+
+    let color = "";
+    if (dayBookings.length >= 2) color = "bg-red-500";
+    else if (dayBookings.length === 1) color = "bg-orange-500";
+
+    return (
+      <div className="flex justify-center mt-1">
+        <span className={`inline-block w-2 h-2 rounded-full ${color}`}></span>
+        <span className="ml-1 text-xs">{dayBookings.length}</span>
+      </div>
+    );
   };
 
   if (isLoading)
@@ -104,7 +105,7 @@ const BookingCalendar = () => {
         value={selectedDate}
         tileContent={tileContent}
         tileClassName={getTileClassName}
-        className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg"
+        className="bg-black border border-gray-300 dark:border-gray-700 rounded-lg"
       />
 
       {selectedDate && (
@@ -144,9 +145,7 @@ const BookingCalendar = () => {
                       {b.Vehicle.year} {b.Vehicle.make} {b.Vehicle.model}
                     </p>
                     <p>VIN: {b.Vehicle.vinNumber}</p>
-                    <p>
-                      Current Stereo: {b.Vehicle.currentStereo || "N/A"}
-                    </p>
+                    <p>Current Stereo: {b.Vehicle.currentStereo || "N/A"}</p>
                   </div>
                 )}
 
@@ -176,7 +175,6 @@ const BookingCalendar = () => {
                 )}
 
                 {/* Payment */}
-                
               </li>
             ))}
           </ul>
