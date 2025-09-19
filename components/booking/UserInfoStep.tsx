@@ -1,7 +1,7 @@
 // import { userInfo } from "os";
 
 const UserInfoStep = ({ formData, handleChange }: any) => {
-    const classes = "w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:border-green-500"
+    const classes = "w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:border-green-500 my-1"
     return(
     
   <>

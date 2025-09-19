@@ -206,7 +206,7 @@ export default function BookingForm() {
         items: formData.items.list,
         mobileDetails: formData.mobileDetails,
         paymentDetails: formData.payment,
-        totalAmount : formData.items
+        totalAmount: formData.items,
       };
 
       await createBooking(payload).unwrap();
@@ -259,7 +259,6 @@ export default function BookingForm() {
           type: "Full",
           partialAmount: "",
         },
-       
       });
       router.push("/dashboard/booking");
     } catch (err) {
@@ -269,79 +268,98 @@ export default function BookingForm() {
   };
 
   return (
-    <>
-    <div className="fixed top-4 right-4 z-50 shadow-lg bg-gray-900 rounded-xl p-4 w-[450px]">
-  <BookingCalendar />
-</div>
-
-    <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 to-black text-white">
       {/* Progress */}
-     
-      <ProgressBar currentStep={currentStep} steps={steps} />
+      <div className="max-w-6xl mx-auto px-4 pt-6">
+        <ProgressBar currentStep={currentStep} steps={steps} />
+      </div>
 
-      <div className="relative w-full max-w-4xl bg-gray-900 rounded-2xl shadow-lg p-8 space-y-4">
-        {/* <BookingCalendar /> */}
-        <h2 className="text-2xl font-bold mb-6 text-green-400 flex items-center justify-center gap-2">
-          {steps[currentStep].title}
-        </h2>
+      {/* Main content */}
+      <div className="max-w-6xl mx-auto px-4 pb-6 grid grid-cols-1 lg:grid-cols-[1fr_350px] gap-6">
+        {/* Form column */}
+        <div className="bg-gray-900/80 backdrop-blur rounded-2xl shadow-xl p-6">
+          <h2 className="text-xl sm:text-2xl font-bold mb-6 text-green-400 flex items-center justify-center gap-4">
+            {steps[currentStep].title}
+          </h2>
 
-        {/* Step Content */}
-        {currentStep === 0 && (
-          <UserInfoStep formData={formData} handleChange={handleChange} />
-        )}
-        {currentStep === 1 && (
-          <VehicleStep formData={formData} handleChange={handleChange} />
-        )}
-        {currentStep === 2 && (
-          <>
-            <BookingStep formData={formData} handleChange={handleChange} />
-            {formData.booking.type === "Mobile" && (
-              <MobileDetailsStep
-                formData={formData}
-                handleChange={handleChange}
-              />
-            )}
-          </>
-        )}
-        {currentStep === 3 && (
-          <ItemsStep
-            items={formData.items}
-            setItems={(data: any) => setFormData({ ...formData, items: data })}
-          />
-        )}
-        {currentStep === 4 && (
-          <PaymentStep formData={formData} handleChange={handleChange} />
-        )}
-
-        {/* Navigation */}
-        <div className="flex justify-between mt-8">
-          <button
-            onClick={prevStep}
-            disabled={currentStep === 0}
-            className="px-6 py-2 bg-gray-700 rounded-lg disabled:opacity-50"
-          >
-            Back
-          </button>
-          {currentStep < steps.length - 1 ? (
-            <button
-              onClick={nextStep}
-              className="px-6 py-2 bg-green-600 rounded-lg"
-            >
-              Next
-            </button>
-          ) : (
-            <button
-              onClick={handleSubmit}
-              disabled={isLoading}
-              className="px-6 py-2 bg-green-600 rounded-lg"
-            >
-            {isLoading ? "Creating": "Submit"}
-            </button>
+          {/* Step Content */}
+          {currentStep === 0 && (
+            <UserInfoStep formData={formData} handleChange={handleChange} />
           )}
+          {currentStep === 1 && (
+            <VehicleStep formData={formData} handleChange={handleChange} />
+          )}
+          {currentStep === 2 && (
+            <>
+              <BookingStep formData={formData} handleChange={handleChange} />
+              {formData.booking.type === "Mobile" && (
+                <MobileDetailsStep
+                  formData={formData}
+                  handleChange={handleChange}
+                />
+              )}
+            </>
+          )}
+          {currentStep === 3 && (
+            <ItemsStep
+              items={formData.items}
+              setItems={(data: any) =>
+                setFormData({ ...formData, items: data })
+              }
+            />
+          )}
+          {currentStep === 4 && (
+            <PaymentStep formData={formData} handleChange={handleChange} />
+          )}
+
+          {/* Navigation */}
+          <div className="flex flex-col sm:flex-row justify-between gap-4 mt-8">
+            <button
+              onClick={prevStep}
+              disabled={currentStep === 0}
+              className="flex-1 sm:flex-none px-6 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg disabled:opacity-50"
+            >
+              Back
+            </button>
+            {currentStep < steps.length - 1 ? (
+              <button
+                onClick={nextStep}
+                className="flex-1 sm:flex-none px-6 py-2 bg-green-600 hover:bg-green-500 rounded-lg"
+              >
+                Next
+              </button>
+            ) : (
+              <button
+                onClick={handleSubmit}
+                disabled={isLoading}
+                className="flex-1 sm:flex-none px-6 py-2 bg-green-600 hover:bg-green-500 rounded-lg"
+              >
+                {isLoading ? "Creating…" : "Submit"}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Calendar column (hidden below on mobile) */}
+        <aside className="hidden lg:block">
+          <div className="bg-gray-900/80 backdrop-blur rounded-2xl shadow-xl p-4">
+            <h3 className="text-lg font-semibold mb-4 text-green-400">
+              Booking Calendar
+            </h3>
+            <BookingCalendar />
+          </div>
+        </aside>
+      </div>
+
+      {/* Mobile calendar below form */}
+      <div className="block lg:hidden max-w-6xl mx-auto px-4 pb-6">
+        <div className="bg-gray-900/80 backdrop-blur rounded-2xl shadow-xl p-4">
+          <h3 className="text-lg font-semibold mb-4 text-green-400">
+            Booking Calendar
+          </h3>
+          <BookingCalendar />
         </div>
       </div>
     </div>
-    </>
   );
 }
-
