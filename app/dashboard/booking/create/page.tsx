@@ -12,6 +12,7 @@ import VehicleStep from "@/components/booking/VehicleStep";
 import { ItemsStep } from "@/components/booking/ItemsStep";
 import { useRouter } from "next/navigation";
 import { PaymentStep } from "@/components/booking/PaymentStep";
+import BookingCalendar from "@/components/booking/BookingCalendar";
 // Step Definitions
 const steps = [
   { title: "User Info", icon: User },
@@ -268,11 +269,18 @@ export default function BookingForm() {
   };
 
   return (
+    <>
+    <div className="fixed top-4 right-4 z-50 shadow-lg bg-gray-900 rounded-xl p-4 w-[450px]">
+  <BookingCalendar />
+</div>
+
     <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-8">
       {/* Progress */}
+     
       <ProgressBar currentStep={currentStep} steps={steps} />
 
       <div className="relative w-full max-w-4xl bg-gray-900 rounded-2xl shadow-lg p-8 space-y-4">
+        {/* <BookingCalendar /> */}
         <h2 className="text-2xl font-bold mb-6 text-green-400 flex items-center justify-center gap-2">
           {steps[currentStep].title}
         </h2>
@@ -327,13 +335,13 @@ export default function BookingForm() {
               disabled={isLoading}
               className="px-6 py-2 bg-green-600 rounded-lg"
             >
-              Submit
+            {isLoading ? "Creating": "Submit"}
             </button>
           )}
         </div>
       </div>
     </div>
+    </>
   );
 }
 
-// -------------------- Other Step Components ---------------

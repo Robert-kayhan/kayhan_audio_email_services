@@ -47,9 +47,12 @@ export const ItemsStep: React.FC<Props> = ({ items, setItems }) => {
 
   // Remove item
   const removeItem = (index: number) => {
-    const updatedList = items.list.filter((_:any, i:any) => i !== index);
+    const updatedList = items.list.filter((_: any, i: any) => i !== index);
 
-    const subtotal = updatedList.reduce((sum:any, item:any) => sum + item.charge, 0);
+    const subtotal = updatedList.reduce(
+      (sum: any, item: any) => sum + item.charge,
+      0
+    );
     const discountAmount =
       items.discountType === "amount"
         ? items.discountValue
@@ -66,9 +69,11 @@ export const ItemsStep: React.FC<Props> = ({ items, setItems }) => {
 
   // Update discount
   const updateDiscount = (value: number, type: "amount" | "percentage") => {
-    const subtotal = items.list.reduce((sum:any, item:any) => sum + item.charge, 0);
-    const discountAmount =
-      type === "amount" ? value : (subtotal * value) / 100;
+    const subtotal = items.list.reduce(
+      (sum: any, item: any) => sum + item.charge,
+      0
+    );
+    const discountAmount = type === "amount" ? value : (subtotal * value) / 100;
     const total = Math.max(subtotal - discountAmount, 0);
 
     setItems({
@@ -118,7 +123,7 @@ export const ItemsStep: React.FC<Props> = ({ items, setItems }) => {
             </tr>
           </thead>
           <tbody>
-            {items.list.map((item:any, index:any) => (
+            {items.list.map((item: any, index: any) => (
               <tr key={index} className="hover:bg-gray-700 transition">
                 <td className="p-3 border-b border-gray-700">{index + 1}</td>
                 <td className="p-3 border-b border-gray-700">{item.name}</td>
@@ -151,7 +156,10 @@ export const ItemsStep: React.FC<Props> = ({ items, setItems }) => {
         <div className="flex justify-between text-gray-300">
           <span>Subtotal:</span>
           <span className="text-green-400 font-semibold">
-            ${items.list.reduce((sum:any, item:any) => sum + item.charge, 0).toFixed(2)}
+            $
+            {items.list
+              .reduce((sum: any, item: any) => sum + item.charge, 0)
+              .toFixed(2)}
           </span>
         </div>
 
@@ -161,16 +169,23 @@ export const ItemsStep: React.FC<Props> = ({ items, setItems }) => {
             type="number"
             className="w-full md:w-32 p-2 rounded-lg bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-green-500"
             min={0}
-            value={items.discountValue}
-            onChange={(e) =>
-              updateDiscount(Math.max(parseFloat(e.target.value), 0), items.discountType)
-            }
+            value={items.discountValue === 0 ? "" : items.discountValue}
+            onChange={(e) => {
+              const val = e.target.value;
+              // Allow blank field but treat it as 0 internally
+              const parsed = val === "" ? 0 : Math.max(parseFloat(val), 0);
+              updateDiscount(parsed, items.discountType);
+            }}
           />
+
           <select
             className="p-2 rounded-lg bg-gray-800 border border-gray-700 text-white"
             value={items.discountType}
             onChange={(e) =>
-              updateDiscount(items.discountValue, e.target.value as "amount" | "percentage")
+              updateDiscount(
+                items.discountValue,
+                e.target.value as "amount" | "percentage"
+              )
             }
           >
             <option value="amount">Dollar ($)</option>
