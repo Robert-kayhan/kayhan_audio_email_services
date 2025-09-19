@@ -69,7 +69,7 @@ const VehicleStep: React.FC<VehicleStepProps> = ({
       />
       <input
         className={classes}
-        placeholder="VIN Number"
+        placeholder="Registration Number"
         value={formData.vehicle.vin}
         onChange={(e: any) => handleChange("vehicle", "vin", e.target.value)}
       />
@@ -83,7 +83,7 @@ const VehicleStep: React.FC<VehicleStepProps> = ({
       />
 
       {/* File input for image */}
-      <div className="mt-4">
+      {/* <div className="mt-4">
         <label
           htmlFor="fileUpload"
           className="group flex flex-col items-center justify-center w-full p-6 border-2 border-dashed border-gray-500 rounded-xl cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all duration-200"
@@ -121,9 +121,9 @@ const VehicleStep: React.FC<VehicleStepProps> = ({
       </div>
 
       {uploading && <p className="text-sm text-yellow-400">Uploading...</p>}
-      {uploadError && <p className="text-sm text-red-400">{uploadError}</p>}
+      {uploadError && <p className="text-sm text-red-400">{uploadError}</p>} */}
 
-      {formData.vehicle.dashPhotosUrl && !uploading && !uploadError && (
+      {/* {formData.vehicle.dashPhotosUrl && !uploading && !uploadError && (
         <>
           <Image
             src={formData.vehicle.dashPhotosUrl}
@@ -136,7 +136,7 @@ const VehicleStep: React.FC<VehicleStepProps> = ({
             Uploaded image URL: {formData.vehicle.dashPhotosUrl}
           </p>
         </>
-      )}
+      )} */}
     </>
   );
 };

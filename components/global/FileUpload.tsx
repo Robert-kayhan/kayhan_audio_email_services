@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import React, { useState } from "react";
 
 type FileUploadProps = {
@@ -60,7 +61,9 @@ const FileUpload: React.FC<FileUploadProps> = ({ files, setFiles }) => {
               key={index}
               className="relative group border border-gray-600 rounded-lg overflow-hidden"
             >
-              <img
+              <Image 
+              height={100}
+              width={200}
                 src={url}
                 alt={`uploaded-${index}`}
                 className="object-cover w-full h-32"

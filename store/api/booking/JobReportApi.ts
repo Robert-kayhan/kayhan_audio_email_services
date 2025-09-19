@@ -10,7 +10,13 @@ export const JobReportApi = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
-
+    updateJob: builder.mutation({
+      query: ({ id, data }) => ({
+        url: `${JOBREPORT_URL}/job-report/${id}`,
+        method: "PUT",
+        body: data,
+      }),
+    }),
     // ✅ Cancel Job
     cancelJob: builder.mutation({
       query: ({ id, cancelReason }) => ({
@@ -21,7 +27,6 @@ export const JobReportApi = apiSlice.injectEndpoints({
     }),
     getJobByBookingId: builder.query({
       query: (bookingId) => `${JOBREPORT_URL}/${bookingId}`,
-
     }),
 
     // ✅ Reschedule Job
@@ -41,5 +46,6 @@ export const {
   useCreateJobMutation,
   useCancelJobMutation,
   useRescheduleJobMutation,
-  useGetJobByBookingIdQuery
+  useGetJobByBookingIdQuery,
+  useUpdateJobMutation
 } = JobReportApi;

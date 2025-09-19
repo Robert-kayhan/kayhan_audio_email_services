@@ -1,332 +1,189 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { motion } from "framer-motion";
 import {
-  Upload,
-  Star,
   User,
   FileImage,
   Clock,
   CheckCircle,
   AlertCircle,
   Lightbulb,
+  Star,
+  ArrowLeft,
 } from "lucide-react";
-import FileUpload from "@/components/global/FileUpload";
-import {
-  useGetJobByBookingIdQuery,
-  useCreateJobMutation
-  // useUpdateJobMutation,
-  // useGetJobByBookingIdQuery,
-} from "@/store/api/booking/JobReportApi";
-import { useParams } from "next/navigation";
+import { useGetJobByBookingIdQuery } from "@/store/api/booking/JobReportApi";
+import { useParams, useRouter } from "next/navigation";
+import Image from "next/image";
 
-export default function JobReportPage() {
+export default function JobReportViewPage() {
   const { id } = useParams();
+  const router = useRouter();
+  const { data: existingJob, isLoading } = useGetJobByBookingIdQuery(id);
 
-  // get existing job by bookingId
-  const {
-    data: existingJob,
-    isLoading: isJobLoading,
-    refetch,
-  } = useGetJobByBookingIdQuery(id);
-  console.log(existingJob)
-  const [formData, setFormData] = useState({
-    bookingId: id,
-    techName: "",
-    beforePhotos: [] as string[],
-    afterPhotos: [] as string[],
-    notes: "",
-    tips: "",
-    difficulty: "",
-    customerRating: 0,
-    arrivalTime: "",
-    startTime: "",
-    completionTime: "",
-    totalDurationMins: 0,
-  });
+  const report = existingJob?.report;
 
-  // mutations
-  const [createJob, { isLoading: isCreating }] = useCreateJobMutation();
-  // const [updateJob, { isLoading: isUpdating }] = useUpdateJobMutation();
-
-  // preload when existing job arrives
-  useEffect(() => {
-    if (existingJob?.report) {
-      setFormData((prev) => ({
-        ...prev,
-        ...existingJob.report,
-      }));
-    }
-  }, [existingJob]);
-
-  // Auto-calc total duration
-  useEffect(() => {
-    if (formData.startTime && formData.completionTime) {
-      const start = new Date(formData.startTime);
-      const end = new Date(formData.completionTime);
-      if (end > start) {
-        const diffMins = Math.floor((end.getTime() - start.getTime()) / 60000);
-        setFormData((prev) => ({ ...prev, totalDurationMins: diffMins }));
-      } else {
-        setFormData((prev) => ({ ...prev, totalDurationMins: 0 }));
-      }
-    }
-  }, [formData.startTime, formData.completionTime]);
-
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleRating = (rating: number) => {
-    setFormData({ ...formData, customerRating: rating });
-  };
-
-  const handleSubmit = async () => {
-    try {
-      if (existingJob?.report) {
-        // await updateJob({ id: existingJob.report.id, ...formData }).unwrap();
-        alert("Job Report Updated Successfully!");
-      } else {
-        await createJob(formData).unwrap();
-        alert("Job Report Created Successfully!");
-      }
-      refetch();
-    } catch (err: any) {
-      console.error(err);
-      alert(
-        "Failed to save job report: " + (err?.data?.message || err.message)
-      );
-    }
-  };
-
-  if (isJobLoading) {
+  if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-white">
+      <div className="min-h-screen flex items-center justify-center text-gray-100">
         Loading job report...
       </div>
     );
   }
 
+  if (!report) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-gray-100">
+        No job report found.
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 p-6">
+    <div className="min-h-screen bg-gray-950 text-gray-100 p-6">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="max-w-5xl mx-auto bg-gray-800 p-6 rounded-2xl shadow-lg"
+        className="max-w-6xl mx-auto space-y-6"
       >
-        <div className="flex justify-between items-center border-b border-gray-700 pb-3 mb-6">
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <CheckCircle className="w-8 h-8 text-blue-500" /> Job Report
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold flex items-center gap-3">
+            <CheckCircle className="w-8 h-8 text-blue-500" />
+            Job Report
           </h1>
+          <button
+            onClick={() => router.back()}
+            className="flex items-center gap-1 px-3 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 border border-gray-700 text-sm"
+          >
+            <ArrowLeft className="w-4 h-4" /> Back
+          </button>
         </div>
 
-        <div className="space-y-6">
-          {/* Technician */}
+        {/* Technician */}
+        <section className="bg-gray-900/60 border border-gray-800 rounded-2xl p-6">
+          <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
+            <User className="w-5 h-5 text-blue-400" /> Technician
+          </h2>
+          <p className="text-gray-200">{report.techName || "—"}</p>
+        </section>
+
+        {/* Before / After Photos */}
+        <section className="bg-gray-900/60 border border-gray-800 rounded-2xl p-6 space-y-6">
           <div>
-            <label className="block text-sm mb-2 font-semibold flex items-center gap-2">
-              <User className="w-4 h-4 text-blue-400" /> Technician
-            </label>
-            <select
-              name="techName"
-              value={formData.techName}
-              onChange={handleChange}
-              className="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 focus:border-blue-500 outline-none"
-            >
-              <option value="">Select Technician</option>
-              <option value="John Doe">John Doe</option>
-              <option value="Jane Smith">Jane Smith</option>
-              <option value="Ali Khan">Ali Khan</option>
-            </select>
+            <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
+              <FileImage className="w-5 h-5 text-purple-400" /> Before Photos
+            </h2>
+            {report.beforePhotos?.length ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {report.beforePhotos.map((url: string, i: number) => (
+                  <Image
+                  height={100}
+                  width={200}
+                    key={i}
+                    src={url}
+                    alt={`before-${i}`}
+                    className="w-full h-40 object-cover rounded-xl shadow-md border border-gray-800"
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-400">No before photos</p>
+            )}
           </div>
 
-          {/* Before Photos */}
           <div>
-            <label className="block text-sm mb-2 font-semibold flex items-center gap-2">
-              <FileImage className="w-4 h-4 text-purple-400" /> Before Photos
-            </label>
-            <FileUpload
-              files={formData.beforePhotos}
-              setFiles={(urls) =>
-                setFormData({ ...formData, beforePhotos: urls })
-              }
-            />
+            <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
+              <FileImage className="w-5 h-5 text-green-400" /> After Photos
+            </h2>
+            {report.afterPhotos?.length ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {report.afterPhotos.map((url: string, i: number) => (
+                  <Image
+                  height={100}
+                  width={200}
+                    key={i}
+                    src={url}
+                    alt={`after-${i}`}
+                    className="w-full h-40 object-cover rounded-xl shadow-md border border-gray-800"
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-400">No after photos</p>
+            )}
           </div>
+        </section>
 
-          {/* After Photos */}
-          <div>
-            <label className="block text-sm mb-2 font-semibold flex items-center gap-2">
-              <FileImage className="w-4 h-4 text-green-400" /> After Photos
-            </label>
-            <FileUpload
-              files={formData.afterPhotos}
-              setFiles={(urls) =>
-                setFormData({ ...formData, afterPhotos: urls })
-              }
-            />
+        {/* Notes / Tips */}
+        <section className="grid md:grid-cols-2 gap-6">
+          <div className="bg-gray-900/60 border border-gray-800 rounded-2xl p-6">
+            <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
+              <AlertCircle className="w-5 h-5 text-yellow-400" /> Notes
+            </h2>
+            <p className="text-gray-200 whitespace-pre-line">
+              {report.notes || "—"}
+            </p>
           </div>
-
-          {/* Notes */}
-          <div>
-            <label className="block text-sm mb-2 font-semibold flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-yellow-400" /> Notes
-            </label>
-            <textarea
-              name="notes"
-              value={formData.notes}
-              onChange={handleChange}
-              className="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 focus:border-blue-500 outline-none"
-              rows={3}
-            />
+          <div className="bg-gray-900/60 border border-gray-800 rounded-2xl p-6">
+            <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
+              <Lightbulb className="w-5 h-5 text-amber-400" /> Tips & Tricks
+            </h2>
+            <p className="text-gray-200 whitespace-pre-line">
+              {report.tips || "—"}
+            </p>
           </div>
+        </section>
 
-          {/* Tips */}
-          <div>
-            <label className="block text-sm mb-2 font-semibold flex items-center gap-2">
-              <Lightbulb className="w-4 h-4 text-amber-400" /> Tips & Tricks
-            </label>
-            <textarea
-              name="tips"
-              value={formData.tips}
-              onChange={handleChange}
-              className="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 focus:border-blue-500 outline-none"
-              rows={2}
-            />
+        {/* Difficulty & Rating */}
+        <section className="grid md:grid-cols-2 gap-6">
+          <div className="bg-gray-900/60 border border-gray-800 rounded-2xl p-6">
+            <h2 className="text-lg font-semibold mb-3">Difficulty</h2>
+            <p className="text-gray-200">{report.difficulty || "—"}</p>
           </div>
-
-          {/* Difficulty */}
-          <div>
-            <label className="block text-sm mb-2 font-semibold">
-              Difficulty
-            </label>
-            <div className="flex flex-wrap gap-3">
-              {["Very Easy", "Easy", "Medium", "Hard", "Very Hard"].map(
-                (level) => (
-                  <motion.button
-                    key={level}
-                    type="button"
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() =>
-                      setFormData({ ...formData, difficulty: level })
-                    }
-                    className={`px-4 py-2 rounded-lg border text-sm transition ${
-                      formData.difficulty === level
-                        ? "bg-blue-600 border-blue-500"
-                        : "bg-gray-800 border-gray-700 hover:bg-gray-700"
-                    }`}
-                  >
-                    {level}
-                  </motion.button>
-                )
-              )}
-            </div>
-          </div>
-
-          {/* Rating */}
-          <div>
-            <label className="block text-sm mb-2 font-semibold">
-              Customer Rating
-            </label>
+          <div className="bg-gray-900/60 border border-gray-800 rounded-2xl p-6">
+            <h2 className="text-lg font-semibold mb-3">Customer Rating</h2>
             <div className="flex gap-2">
               {[1, 2, 3, 4, 5].map((n) => (
-                <motion.button
+                <Star
                   key={n}
-                  type="button"
-                  whileTap={{ scale: 0.9 }}
-                  onClick={() => handleRating(n)}
-                  className="w-10 h-10 flex items-center justify-center"
-                >
-                  <Star
-                    className={`w-8 h-8 cursor-pointer transition ${
-                      n <= formData.customerRating
-                        ? "text-yellow-400 fill-yellow-400"
-                        : "text-gray-500"
-                    }`}
-                  />
-                </motion.button>
+                  className={`w-8 h-8 ${
+                    n <= report.customerRating
+                      ? "text-yellow-400 fill-yellow-400"
+                      : "text-gray-600"
+                  }`}
+                />
               ))}
             </div>
           </div>
+        </section>
 
-          {/* Times */}
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm mb-2 font-semibold flex items-center gap-2">
-                <Clock className="w-4 h-4 text-cyan-400" /> Arrival Time
-              </label>
-              <input
-                type="datetime-local"
-                name="arrivalTime"
-                value={formData.arrivalTime}
-                onChange={handleChange}
-                className="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 focus:border-blue-500 outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-sm mb-2 font-semibold flex items-center gap-2">
-                <Clock className="w-4 h-4 text-cyan-400" /> Start Time
-              </label>
-              <input
-                type="datetime-local"
-                name="startTime"
-                value={formData.startTime}
-                onChange={handleChange}
-                className="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 focus:border-blue-500 outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-sm mb-2 font-semibold flex items-center gap-2">
-                <Clock className="w-4 h-4 text-cyan-400" /> Completion Time
-              </label>
-              <input
-                type="datetime-local"
-                name="completionTime"
-                value={formData.completionTime}
-                onChange={handleChange}
-                className="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 focus:border-blue-500 outline-none"
-              />
-            </div>
-          </div>
-
-          {/* Auto Duration */}
+        {/* Times */}
+        <section className="bg-gray-900/60 border border-gray-800 rounded-2xl p-6 grid md:grid-cols-4 gap-6">
           <div>
-            <label className="block text-sm mb-2 font-semibold">
-              Total Duration (mins)
-            </label>
-            <input
-              type="text"
-              value={formData.totalDurationMins || ""}
-              readOnly
-              className="w-full p-3 rounded-lg bg-gray-600 border border-gray-500 text-gray-300"
-            />
+            <h2 className="text-sm font-semibold mb-1 flex items-center gap-2">
+              <Clock className="w-4 h-4 text-cyan-400" /> Arrival Time
+            </h2>
+            <p className="text-gray-200">{report.arrivalTime || "—"}</p>
           </div>
-
-          {/* Submit */}
-          <div className="flex justify-end mt-6">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleSubmit}
-              disabled={isCreating }
-              className={`px-6 py-3 rounded-lg text-white font-semibold transition ${
-                isCreating 
-                  ? "bg-gray-600"
-                  : "bg-blue-600 hover:bg-blue-500"
-              }`}
-            >
-              {isCreating 
-                ? "Saving..."
-                : existingJob?.report
-                ? "Update Report"
-                : "Save Report"}
-            </motion.button>
+          <div>
+            <h2 className="text-sm font-semibold mb-1 flex items-center gap-2">
+              <Clock className="w-4 h-4 text-cyan-400" /> Start Time
+            </h2>
+            <p className="text-gray-200">{report.startTime || "—"}</p>
           </div>
-        </div>
+          <div>
+            <h2 className="text-sm font-semibold mb-1 flex items-center gap-2">
+              <Clock className="w-4 h-4 text-cyan-400" /> Completion Time
+            </h2>
+            <p className="text-gray-200">{report.completionTime || "—"}</p>
+          </div>
+          <div>
+            <h2 className="text-sm font-semibold mb-1">Total Duration (mins)</h2>
+            <p className="text-gray-200">{report.totalDurationMins || "—"}</p>
+          </div>
+        </section>
       </motion.div>
     </div>
   );

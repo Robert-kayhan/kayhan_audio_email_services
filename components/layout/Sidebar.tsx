@@ -16,7 +16,7 @@ import {
   Album,
   Menu,
   X,
-  BookKeyIcon
+  BookKeyIcon,ReceiptText 
 } from "lucide-react";
 import { useLogoutMutation } from "@/store/api/AuthApi";
 
@@ -43,6 +43,7 @@ const navItems = [
   },
   { icon: Album, label: "Flyer", href: "/dashboard/flyer/" },
   { icon: BookKeyIcon, label: "Booking", href: "/dashboard/booking/" },
+  { icon:ReceiptText , label: "Invoice", href: "/dashboard/invoice" },
 ];
 
 const Navigation = () => {

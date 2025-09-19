@@ -10,32 +10,32 @@ const bookingApi = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
-  getAllBooking: builder.query({
+    getAllBooking: builder.query({
       query: ({
         page = 1,
         limit = 10,
-        search = '',
-        status = '',
-        type = '',
-        paymentStatus = '',
-        startDate = '',
-        endDate = '',
+        search = "",
+        status = "",
+        type = "",
+        paymentStatus = "",
+        startDate = "",
+        endDate = "",
       }) => {
         const params = new URLSearchParams({
           page: page.toString(),
           limit: limit.toString(),
         });
 
-        if (search) params.append('search', search);
-        if (status) params.append('status', status);
-        if (type) params.append('type', type);
-        if (paymentStatus) params.append('paymentStatus', paymentStatus);
-        if (startDate) params.append('startDate', startDate);
-        if (endDate) params.append('endDate', endDate);
+        if (search) params.append("search", search);
+        if (status) params.append("status", status);
+        if (type) params.append("type", type);
+        if (paymentStatus) params.append("paymentStatus", paymentStatus);
+        if (startDate) params.append("startDate", startDate);
+        if (endDate) params.append("endDate", endDate);
 
         return {
           url: `${BOOKING_URL}?${params.toString()}`,
-          method: 'GET',
+          method: "GET",
         };
       },
     }),
@@ -58,6 +58,14 @@ const bookingApi = apiSlice.injectEndpoints({
         body,
       }),
     }),
+    updatePayment: builder.mutation({
+      query: ({ bookingId, data }) => ({
+        url: `${BOOKING_URL}/payment-update/${bookingId}`, // bookingId in URL
+        method: "PUT",
+        body: data, // category, methods, type, partialAmount, totalAmount, paidAmount, discountType, discountValue
+        
+      }),
+    }),
   }),
 });
 
@@ -67,4 +75,5 @@ export const {
   useDeleteBookingMutation,
   useGetBookingByIdQuery,
   useUpdateBookingMutation,
+  useUpdatePaymentMutation
 } = bookingApi;

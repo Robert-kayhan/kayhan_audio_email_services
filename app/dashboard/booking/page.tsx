@@ -22,10 +22,10 @@ const columns: Column<any>[] = [
     header: "Customer",
     accessor: "User",
     render: (_: any, row: any) => (
-      <div className="flex flex-col">
+      <Link href={`/dashboard/booking/${row.id}`} className="flex flex-col">
         <span className="font-medium">{`${row.User?.firstname || ""} ${row.User?.lastname || ""}`}</span>
         <span className="text-xs text-gray-400">{row.User?.email}</span>
-      </div>
+      </Link>
     ),
   },
   {
@@ -71,25 +71,36 @@ const columns: Column<any>[] = [
     header: "Payment status",
     accessor: "payment",
     render: (_: any, row: any) => {
-      const paymentStatus = row.payment?.status || "";
+      let paymentStatus = row.payment?.status || "";
 
       // assign classes based on status
-      const statusClasses =
-        paymentStatus === "Paid"
-          ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200"
-          : paymentStatus === "Pending"
-            ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200"
-            : paymentStatus === "Failed"
-              ? "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200"
-              : "bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-200";
+      let statusClasses = "";
+      switch (paymentStatus) {
+        case "Paid":
+        case "Completed":
+          statusClasses =
+            "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200";
+          break;
+        case "Pending":
+          statusClasses =
+            "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200";
+          break;
+        case "Failed":
+          statusClasses =
+            "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200";
+          break;
+        default:
+          statusClasses =
+            "bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-200";
+      }
 
       return (
         // <div className="flex flex-col">
-          <span
-            className={`px-2 py-1 rounded-full text-xs font-semibold ${statusClasses}`}
-          >
-            {paymentStatus}
-          </span>
+        <span
+          className={`px-2 py-1 rounded-full text-xs font-semibold ${statusClasses}`}
+        >
+          {paymentStatus}
+        </span>
         // </div>
       );
     },
@@ -336,33 +347,6 @@ export default function BookingTablePage() {
             showActions
             onEdit={handleEdit}
             onDelete={handleDelete}
-            customActions={[
-              {
-                label: "Finalize Job",
-                onClick: (row) => {
-                  router.push(`/dashboard/booking/job/${row.id}`);
-                },
-                className: "text-teal-600 hover:underline",
-              },
-              {
-                label: "Reschedule",
-                onClick: (row) => {
-                  setSelectedBooking(row);
-                  setRescheduleTime("");
-                  setShowRescheduleModal(true);
-                },
-                className: "text-orange-500 hover:underline",
-              },
-              {
-                label: "Cancel",
-                onClick: (row) => {
-                  setSelectedBooking(row);
-                  setCancelReason("");
-                  setShowCancelModal(true);
-                },
-                className: "text-red-600 hover:underline",
-              },
-            ]}
           />
           <Pagination
             currentPage={currentPage}

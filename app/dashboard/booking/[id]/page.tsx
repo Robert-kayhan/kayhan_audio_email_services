@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useParams } from "next/navigation";
 import { useGetBookingByIdQuery } from "@/store/api/booking/BookingApi";
 import {
@@ -9,19 +9,41 @@ import {
   Polyline,
   useLoadScript,
 } from "@react-google-maps/api";
+import { Check, Calendar, X, CreditCard, View } from "lucide-react";
+import toast from "react-hot-toast";
+import {
+  useCancelJobMutation,
+  useCreateJobMutation,
+  useRescheduleJobMutation,
+} from "@/store/api/booking/JobReportApi";
+import { PaymentModal } from "@/components/booking/PaymentModal";
+import FileUpload from "@/components/global/FileUpload";
+import Link from "next/link";
 
 const containerStyle = {
   width: "100%",
   height: "400px",
 };
-
 const BookingDetailsPage = () => {
   const { id } = useParams();
-  const { data, isLoading } = useGetBookingByIdQuery(id as string);
+  const { data, isLoading, refetch } = useGetBookingByIdQuery(id as string);
+  console.log(data, "this is dara ");
+  const [showRescheduleModal, setShowRescheduleModal] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<any>(null);
+  const [rescheduleTime, setRescheduleTime] = useState("");
+  const [cancelReason, setCancelReason] = useState("");
+  const [isRescheduling, setIsRescheduling] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [isPaymentUpdate, setIsPaymentUpdate] = useState(false);
+  const [showJobReportModal, setShowJobReportModal] = useState(false);
 
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY || "",
   });
+
+  const [rescheduleJob] = useRescheduleJobMutation();
+  const [cancelJob] = useCancelJobMutation();
 
   if (isLoading) return <p className="text-gray-300">Loading...</p>;
   if (!data?.booking) return <p className="text-gray-300">No booking found</p>;
@@ -38,12 +60,109 @@ const BookingDetailsPage = () => {
     ? decodePolyline(MobileInstallationDetail.routePolyline)
     : [];
 
+  // ---------- Handlers ----------
+  const handleRescheduleJob = async () => {
+    if (!rescheduleTime) return toast.error("Please select a date and time.");
+    if (!booking) return toast.error("No booking selected.");
+
+    setIsRescheduling(true);
+    try {
+      await rescheduleJob({
+        id: booking.id,
+        rescheduleTime,
+      }).unwrap();
+      toast.success("Booking rescheduled successfully");
+      setShowRescheduleModal(false);
+      refetch();
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to reschedule booking");
+    } finally {
+      setIsRescheduling(false);
+    }
+  };
+
+  const handleCancelJob = async () => {
+    if (!cancelReason) return toast.error("Please provide a reason.");
+    if (!booking) return toast.error("No booking selected.");
+
+    setIsCancelling(true);
+    try {
+      await cancelJob({
+        id: booking.id,
+        cancelReason,
+      }).unwrap();
+      toast.success("Booking cancelled successfully");
+      setShowCancelModal(false);
+      refetch();
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to cancel booking");
+    } finally {
+      setIsCancelling(false);
+    }
+  };
+
+  const handleCompleteJob = () => {
+    toast.success("Job marked as completed!");
+    // Implement your API logic here if needed
+  };
+
+  const handleUpdatePayment = () => {
+    toast.success("Update payment clicked!");
+    // Implement your payment update logic here
+  };
+
+  // ---------- JSX ----------
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white p-6">
       <div className="max-w-6xl mx-auto space-y-6">
-        <h1 className="text-3xl font-bold text-center mb-6 bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">
+        {/* Heading */}
+        <h1 className="text-4xl font-bold text-center bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">
           Booking Details
         </h1>
+
+        {/* Action Panel */}
+        {/* Action Panel */}
+        <div className="flex flex-wrap justify-center gap-4 p-6 bg-gray-900/40 backdrop-blur-xl rounded-3xl shadow-xl">
+          {booking?.reports?.length == 0 && <button onClick={() => setShowJobReportModal(true)}>
+            Add Job Report
+          </button>}
+
+          {booking?.reports?.length == 2 && <Link
+          href={`/dashboard/booking/job/update/${id}`}
+            className="flex items-center gap-2 px-6 py-3 font-semibold text-white rounded-full bg-gradient-to-r from-green-400 to-green-600 shadow-lg hover:scale-105 hover:shadow-2xl transition-all duration-300"
+          >
+            <Check size={20} /> Complete Job
+          </Link>}
+           {booking?.reports?.length == 1 && <Link
+          href={`/dashboard/booking/job/${id}`}
+            className="flex items-center gap-2 px-6 py-3 font-semibold text-white rounded-full bg-gradient-to-r from-green-400 to-green-600 shadow-lg hover:scale-105 hover:shadow-2xl transition-all duration-300"
+          >
+            <View size={20} /> View  Job
+          </Link>}
+
+          <button
+            onClick={() => setShowRescheduleModal(true)}
+            className="flex items-center gap-2 px-6 py-3 font-semibold text-white rounded-full bg-gradient-to-r from-yellow-400 to-yellow-600 shadow-lg hover:scale-105 hover:shadow-2xl transition-all duration-300"
+          >
+            <Calendar size={20} /> Reschedule Job
+          </button>
+
+          <button
+            onClick={() => setShowCancelModal(true)}
+            className="flex items-center gap-2 px-6 py-3 font-semibold text-white rounded-full bg-gradient-to-r from-red-400 to-red-600 shadow-lg hover:scale-105 hover:shadow-2xl transition-all duration-300"
+          >
+            <X size={20} /> Cancel Booking
+          </button>
+
+          <button
+            onClick={() => setIsPaymentUpdate(!false)}
+            className="flex items-center gap-2 px-6 py-3 font-semibold text-white rounded-full bg-gradient-to-r from-blue-400 to-blue-600 shadow-lg hover:scale-105 hover:shadow-2xl transition-all duration-300"
+          >
+            <CreditCard size={20} /> Update Payment
+          </button>
+        </div>
 
         {/* Booking & Customer */}
         <div className="grid md:grid-cols-2 gap-6">
@@ -84,7 +203,9 @@ const BookingDetailsPage = () => {
               </p>
             </section>
           </div>
-          {isLoaded && (
+
+          {/* Map */}
+          {isLoaded && booking?.type !== "In-Store" && (
             <GoogleMap
               mapContainerStyle={containerStyle}
               center={mapCenter}
@@ -92,15 +213,15 @@ const BookingDetailsPage = () => {
             >
               <Marker
                 position={{
-                  lat: MobileInstallationDetail.pickupLat,
-                  lng: MobileInstallationDetail.pickupLng,
+                  lat: MobileInstallationDetail?.pickupLat,
+                  lng: MobileInstallationDetail?.pickupLng,
                 }}
                 label="P"
               />
               <Marker
                 position={{
-                  lat: MobileInstallationDetail.dropoffLat,
-                  lng: MobileInstallationDetail.dropoffLng,
+                  lat: MobileInstallationDetail?.dropoffLat,
+                  lng: MobileInstallationDetail?.dropoffLng,
                 }}
                 label="D"
               />
@@ -152,7 +273,7 @@ const BookingDetailsPage = () => {
                 <p>
                   <b>Subtotal:</b> ₹
                   {parseFloat(payment.totalAmount) +
-                    parseFloat(payment.discountAmount)}{" "}
+                    parseFloat(payment.discountAmount)}
                 </p>
                 <p>
                   <b>Discount:</b>{" "}
@@ -211,18 +332,87 @@ const BookingDetailsPage = () => {
               <b>Special Instructions:</b>{" "}
               {MobileInstallationDetail.specialInstructions || "None"}
             </p>
-
-            {/* Map */}
           </section>
         )}
       </div>
+
+      {/* Reschedule Modal */}
+      {showRescheduleModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/70 z-50">
+          <div className="bg-gray-800 p-6 rounded-2xl max-w-md w-full">
+            <h2 className="text-xl font-bold mb-4">Reschedule Job</h2>
+            <input
+              type="datetime-local"
+              value={rescheduleTime}
+              onChange={(e) => setRescheduleTime(e.target.value)}
+              className="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 mb-4 outline-none"
+            />
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowRescheduleModal(false)}
+                className="px-4 py-2 rounded-lg bg-gray-600 hover:bg-gray-500"
+              >
+                Close
+              </button>
+              <button
+                onClick={handleRescheduleJob}
+                disabled={isRescheduling}
+                className="px-4 py-2 rounded-lg bg-orange-500 hover:bg-orange-400"
+              >
+                {isRescheduling ? "Rescheduling..." : "Confirm Reschedule"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cancel Modal */}
+      {showCancelModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/70 z-50">
+          <div className="bg-gray-800 p-6 rounded-2xl max-w-md w-full">
+            <h2 className="text-xl font-bold mb-4">Cancel Job</h2>
+            <textarea
+              placeholder="Enter reason for cancellation"
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+              className="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 mb-4 outline-none"
+              rows={3}
+            />
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowCancelModal(false)}
+                className="px-4 py-2 rounded-lg bg-gray-600 hover:bg-gray-500"
+              >
+                Close
+              </button>
+              <button
+                onClick={handleCancelJob}
+                disabled={isCancelling}
+                className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-500"
+              >
+                {isCancelling ? "Cancelling..." : "Confirm Cancel"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      <JobReportModal
+        isOpen={showJobReportModal}
+        onClose={() => setShowJobReportModal(false)}
+        bookingId={booking.id}
+      />
+      <PaymentModal
+        bookingId={booking.id}
+        isOpen={isPaymentUpdate}
+        onClose={() => setIsPaymentUpdate(false)}
+      />
     </div>
   );
 };
 
 export default BookingDetailsPage;
 
-// Utility function to decode Google encoded polyline
+// ---------- Utility Function ----------
 function decodePolyline(encoded: string) {
   let points: { lat: number; lng: number }[] = [];
   let index = 0,
@@ -256,4 +446,98 @@ function decodePolyline(encoded: string) {
   }
 
   return points;
+}
+interface JobReportModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  bookingId: string;
+}
+
+function JobReportModal({ isOpen, onClose, bookingId }: JobReportModalProps) {
+  const [formData, setFormData] = useState({
+    bookingId,
+    techName: "",
+    beforePhotos: [] as string[],
+  });
+  const [createJob] = useCreateJobMutation();
+  const submitData = async () => {
+    // Basic front-end validation
+    if (!formData.techName) {
+      toast.error("Please select a technician");
+      return;
+    }
+    if (formData.beforePhotos.length === 0) {
+      toast.error("Please upload at least one photo");
+      return;
+    }
+
+    try {
+      await createJob(formData).unwrap();
+      toast.success("Job report created successfully!");
+      onClose();
+    } catch (error: any) {
+      console.error("Error creating job report:", error);
+      toast.error(
+        error?.data?.message || "Failed to create job report. Please try again."
+      );
+    }
+  };
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+      <div className="bg-gray-900 p-6 rounded-2xl max-w-md w-full shadow-lg">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-white">Job Report</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-white text-xl font-bold transition"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Technician Dropdown */}
+        <div className="mb-4">
+          <label className="block text-gray-300 mb-2 font-medium">
+            Technician
+          </label>
+          <select
+            name="techName"
+            value={formData.techName}
+            onChange={(e) =>
+              setFormData({ ...formData, techName: e.target.value })
+            }
+            className="w-full p-3 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+          >
+            <option value="">Select Technician</option>
+            <option value="John Doe">John Doe</option>
+            <option value="Jane Smith">Jane Smith</option>
+          </select>
+        </div>
+
+        {/* Before Photos Upload */}
+        <div className="mb-6">
+          <label className="block text-gray-300 mb-2 font-medium">
+            Before Photos
+          </label>
+          <FileUpload
+            files={formData.beforePhotos}
+            setFiles={(urls) =>
+              setFormData({ ...formData, beforePhotos: urls })
+            }
+          />
+        </div>
+
+        {/* Save Button */}
+        <button
+          onClick={submitData}
+          className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition duration-200"
+        >
+          Save Report
+        </button>
+      </div>
+    </div>
+  );
 }
