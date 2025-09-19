@@ -51,33 +51,36 @@ const BookingCalendar = () => {
 
     if (dayBookings.length >= 2) {
       // red for 2+ bookings
-      return "bg-red-500 text-white rounded-full w-full h-full";
+      return "bg-red-500 text-black rounded-full w-full h-full";
     }
     if (dayBookings.length === 1) {
       // orange for 1 booking
-      return "bg-orange-500 text-white rounded-full w-full h-full";
+      return "bg-orange-500 text-black rounded-full w-full h-full";
     }
 
     return "";
   };
 
-  const tileContent = ({ date, view }: { date: Date; view: string }) => {
-    if (view !== "month") return null;
-    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-    const dayBookings = bookingsByDate[key];
-    if (!dayBookings) return null;
+const tileContent = ({ date, view }: { date: Date; view: string }) => {
+  if (view !== "month") return null;
+  const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+  const dayBookings = bookingsByDate[key];
+  if (!dayBookings) return null;
 
-    let color = "";
-    if (dayBookings.length >= 2) color = "bg-red-500";
-    else if (dayBookings.length === 1) color = "bg-orange-500";
+  return (
+    <div className="flex justify-center mt-1">
+      <span
+        className={`inline-block w-2 h-2 rounded-full ${
+          dayBookings.length >= 2 ? "bg-red-500" : "bg-orange-500"
+        }`}
+      ></span>
+      <span className="ml-1 text-xs text-gray-700 dark:text-gray-200">
+        {dayBookings.length}
+      </span>
+    </div>
+  );
+};
 
-    return (
-      <div className="flex justify-center mt-1">
-        <span className={`inline-block w-2 h-2 rounded-full ${color}`}></span>
-        <span className="ml-1 text-xs">{dayBookings.length}</span>
-      </div>
-    );
-  };
 
   if (isLoading)
     return (
@@ -97,19 +100,35 @@ const BookingCalendar = () => {
 
   return (
     <div className="p-4 bg-white dark:bg-gray-900 ">
-      <h1 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">
-        Booking Calendar
-      </h1>
+ 
       <Calendar
         onChange={handleDateChange}
         value={selectedDate}
         tileContent={tileContent}
-        tileClassName={getTileClassName}
-        className="bg-black border border-gray-300 dark:border-gray-700 rounded-lg"
+        tileClassName="text-black"
+
+        // remove bg here – only set text color to ensure visible
+        // tileClassName={({ date, view }) => {
+        //   if (view !== "month") return "";
+        //   const key = `${date.getFullYear()}-${String(
+        //     date.getMonth() + 1
+        //   ).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+        //   const dayBookings = bookingsByDate[key];
+        //   if (!dayBookings) return "";
+
+        //   if (dayBookings.length >= 2) {
+        //     return "text-red-500 font-bold"; // red numbers
+        //   }
+        //   if (dayBookings.length === 1) {
+        //     return "text-orange-500 font-bold"; // orange numbers
+        //   }
+        //   return "";
+        // }}
+        className="react-calendar text-black"
       />
 
       {selectedDate && (
-        <div className="mt-4 text-gray-900 h-[300px] overflow-auto dark:text-gray-100">
+        <div className="mt-4 text-black h-[300px] overflow-auto dark:text-gray-100">
           <h2 className="font-semibold">
             Bookings on {selectedDate.toDateString()}:
           </h2>
