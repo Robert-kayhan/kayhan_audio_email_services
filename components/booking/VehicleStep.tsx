@@ -13,7 +13,7 @@ const VehicleStep: React.FC<VehicleStepProps> = ({
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
   const classes =
-    "w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:border-green-500";
+    "w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:border-green-500 my-1";
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || !e.target.files[0]) return;
