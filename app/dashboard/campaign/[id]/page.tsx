@@ -96,7 +96,7 @@ export default function EmailDashboard() {
         {/* Template Preview */}
         <div className="flex-1 max-h-[400px] overflow-auto p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
           <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Template Preview</h2>
-          <div className="scale-90 transform origin-top-left" dangerouslySetInnerHTML={{ __html: campaign.Template.html }} />
+          <div className="scale-90 transform origin-top-left" dangerouslySetInnerHTML={{ __html: campaign?.Template?.html }} />
         </div>
       </div>
 
