@@ -147,15 +147,15 @@ export const PaymentStep: React.FC<Props> = ({ formData, handleChange }) => {
         <div className="bg-gray-900 p-5 rounded-2xl shadow-md">
           <h3 className="font-semibold mb-3 text-lg">🧾 Payment Type</h3>
           <div className="flex gap-6">
-            {["Full", "Partial"].map((type) => (
+            {["Full", "Partial", "Already Paid"].map((type) => (
               <label
                 key={type}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl cursor-pointer transition
-                  ${
-                    payment.type === type
-                      ? "bg-green-600 text-white"
-                      : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                  }`}
+        ${
+          payment.type === type
+            ? "bg-green-600 text-white"
+            : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+        }`}
               >
                 <input
                   type="radio"
@@ -164,12 +164,55 @@ export const PaymentStep: React.FC<Props> = ({ formData, handleChange }) => {
                   checked={payment.type === type}
                   onChange={() => handleChange("payment", "type", type)}
                 />
-                {type === "Full" ? "✅ Full Payment" : "✂️ Partial Payment"}
+                {type === "Full"
+                  ? "✅ Full Payment"
+                  : type === "Partial"
+                    ? "✂️ Partial Payment"
+                    : "💵 Already Paid"}
               </label>
             ))}
           </div>
 
+          {/* Show partial amount input if Partial */}
           {payment.type === "Partial" && (
+            <div className="mt-4">
+              <input
+                type="number"
+                placeholder="Enter partial amount"
+                value={payment.partialAmount || ""}
+                onChange={(e) =>
+                  handleChange("payment", "partialAmount", e.target.value)
+                }
+                className="w-64 p-3 rounded-xl bg-gray-800 border border-gray-700 focus:outline-none focus:border-green-500 text-white"
+              />
+            </div>
+          )}
+
+          {payment.type === "Already Paid" && (
+            <div className="mt-4">
+              <input
+                type="text"
+                placeholder="Enter Invoice Number"
+                value={formData.booking.invoiceNumber || ""}
+                onChange={(e) =>
+                  handleChange("booking", "invoiceNumber", e.target.value)
+                }
+                className="w-64 p-3 rounded-xl bg-gray-800 border border-gray-700 focus:outline-none focus:border-green-500 text-white"
+              />
+              <input
+                type="number"
+                placeholder="Enter Amount"
+                // value={payment.invoiceNumber || ""}
+                value={payment.partialAmount || ""}
+                onChange={(e) =>
+                  handleChange("payment", "partialAmount", e.target.value)
+                }
+                className="w-64 p-3 rounded-xl mx-2 bg-gray-800 border border-gray-700 focus:outline-none focus:border-green-500 text-white"
+              />
+            </div>
+          )}
+
+          {/* {payment.type === "Partial" && (
             <div className="mt-4">
               <input
                 type="number"
@@ -181,7 +224,7 @@ export const PaymentStep: React.FC<Props> = ({ formData, handleChange }) => {
                 className="w-64 p-3 rounded-xl bg-gray-800 border border-gray-700 focus:outline-none focus:border-green-500 text-white"
               />
             </div>
-          )}
+          )} */}
         </div>
       )}
     </div>
