@@ -261,9 +261,9 @@ export default function BookingForm() {
         },
       });
       router.push("/dashboard/booking");
-    } catch (err) {
+    } catch (err:any) {
       console.error("Booking failed:", err);
-      alert("Booking creation failed");
+      alert(err.data.message || "Booking faild");
     }
   };
 

@@ -19,7 +19,7 @@ import {
 import { PaymentModal } from "@/components/booking/PaymentModal";
 import FileUpload from "@/components/global/FileUpload";
 import Link from "next/link";
-
+import { useRouter } from "next/navigation";
 const containerStyle = {
   width: "100%",
   height: "400px",
@@ -37,7 +37,7 @@ const BookingDetailsPage = () => {
   const [isCancelling, setIsCancelling] = useState(false);
   const [isPaymentUpdate, setIsPaymentUpdate] = useState(false);
   const [showJobReportModal, setShowJobReportModal] = useState(false);
-
+  const router = useRouter()
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY || "",
   });
@@ -94,10 +94,12 @@ const BookingDetailsPage = () => {
       }).unwrap();
       toast.success("Booking cancelled successfully");
       setShowCancelModal(false);
+      router.push("/dashboard/booking")
       refetch();
     } catch (err) {
       console.error(err);
-      toast.error("Failed to cancel booking");
+      router.push("/dashboard/booking")
+      // toast.error("Failed to cancel booking");
     } finally {
       setIsCancelling(false);
     }
