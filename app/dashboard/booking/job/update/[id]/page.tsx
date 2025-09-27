@@ -232,7 +232,7 @@ export default function JobReportPage() {
               <input
                 type="datetime-local"
                 name="arrivalTime"
-                value={formData.arrivalTime}
+                value={formData.arrivalTime ?? ""}
                 onChange={handleChange}
                 className="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 focus:border-blue-500 outline-none"
               />
@@ -301,7 +301,7 @@ export default function JobReportPage() {
             </label>
             <textarea
               name="notes"
-              value={formData.notes}
+              value={formData.notes ?? ""}
               onChange={handleChange}
               className="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 focus:border-blue-500 outline-none"
               rows={3}
@@ -385,7 +385,7 @@ export default function JobReportPage() {
             </label>
             <input
               type="text"
-              value={isRunning ? elapsedMins : formData.totalDurationMins || ""}
+              value={isRunning ? elapsedMins : formData.totalDurationMins ?? ""}
               readOnly
               className="w-full p-3 rounded-lg bg-gray-600 border border-gray-500 text-gray-300"
             />

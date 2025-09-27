@@ -11,3 +11,4 @@ export const JOBREPORT_URL = "/api/job-report";
 export const Channel_URL = "/api/channel";
 export const Department_URL = "/api/department";
 export const Company_URL = "/api/comapany";
+export const CarModel_URL = "/api/car-model";

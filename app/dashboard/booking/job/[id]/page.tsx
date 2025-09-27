@@ -20,7 +20,6 @@ export default function JobReportViewPage() {
   const { id } = useParams();
   const router = useRouter();
   const { data: existingJob, isLoading } = useGetJobByBookingIdQuery(id);
-
   const report = existingJob?.report;
 
   if (isLoading) {
@@ -37,6 +36,22 @@ export default function JobReportViewPage() {
         No job report found.
       </div>
     );
+  }
+
+  // Parse photos
+  let beforePhotos: string[] = [];
+  let afterPhotos: string[] = [];
+
+  try {
+    beforePhotos = JSON.parse(report.beforePhotos ?? "[]");
+  } catch {
+    beforePhotos = [];
+  }
+
+  try {
+    afterPhotos = JSON.parse(report.afterPhotos ?? "[]");
+  } catch {
+    afterPhotos = [];
   }
 
   return (
@@ -75,15 +90,15 @@ export default function JobReportViewPage() {
             <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
               <FileImage className="w-5 h-5 text-purple-400" /> Before Photos
             </h2>
-            {report.beforePhotos?.length ? (
+            {beforePhotos.length ? (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {report.beforePhotos.map((url: string, i: number) => (
+                {beforePhotos.map((url: string, i: number) => (
                   <Image
-                  height={100}
-                  width={200}
                     key={i}
                     src={url}
                     alt={`before-${i}`}
+                    width={200}
+                    height={100}
                     className="w-full h-40 object-cover rounded-xl shadow-md border border-gray-800"
                   />
                 ))}
@@ -97,15 +112,15 @@ export default function JobReportViewPage() {
             <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
               <FileImage className="w-5 h-5 text-green-400" /> After Photos
             </h2>
-            {report.afterPhotos?.length ? (
+            {afterPhotos.length ? (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {report.afterPhotos.map((url: string, i: number) => (
+                {afterPhotos.map((url: string, i: number) => (
                   <Image
-                  height={100}
-                  width={200}
                     key={i}
                     src={url}
                     alt={`after-${i}`}
+                    width={200}
+                    height={100}
                     className="w-full h-40 object-cover rounded-xl shadow-md border border-gray-800"
                   />
                 ))}
@@ -122,17 +137,13 @@ export default function JobReportViewPage() {
             <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
               <AlertCircle className="w-5 h-5 text-yellow-400" /> Notes
             </h2>
-            <p className="text-gray-200 whitespace-pre-line">
-              {report.notes || "—"}
-            </p>
+            <p className="text-gray-200 whitespace-pre-line">{report.notes || "—"}</p>
           </div>
           <div className="bg-gray-900/60 border border-gray-800 rounded-2xl p-6">
             <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
               <Lightbulb className="w-5 h-5 text-amber-400" /> Tips & Tricks
             </h2>
-            <p className="text-gray-200 whitespace-pre-line">
-              {report.tips || "—"}
-            </p>
+            <p className="text-gray-200 whitespace-pre-line">{report.tips || "—"}</p>
           </div>
         </section>
 

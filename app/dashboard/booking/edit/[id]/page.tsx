@@ -14,19 +14,8 @@ export default function UpdateBookingPage() {
   const [updateBooking, { isLoading: isUpdating }] = useUpdateBookingMutation();
 
   const [formData, setFormData] = useState<any>({
-    userData: {
-      firstname: "",
-      lastname: "",
-      email: "",
-      phone: "",
-    },
-    vehicle: {
-      make: "",
-      model: "",
-      year: "",
-      vinNumber: "",
-      currentStereo: "",
-    },
+    userData: { firstname: "", lastname: "", email: "", phone: "" },
+    vehicle: { make: "", model: "", year: "", vinNumber: "", currentStereo: "" },
     booking: {
       installationType: "In-Store",
       invoiceNumber: "",
@@ -50,7 +39,6 @@ export default function UpdateBookingPage() {
     },
   });
 
-  // Prefill form
   useEffect(() => {
     if (data?.booking) {
       setFormData({
@@ -97,12 +85,8 @@ export default function UpdateBookingPage() {
           duration:
             data.booking.MobileInstallationDetail?.routeDuration || "",
           pickupLocation: {
-            lat:
-              data.booking.MobileInstallationDetail?.pickupLat ||
-              30.6565217,
-            lng:
-              data.booking.MobileInstallationDetail?.pickupLng ||
-              76.5649627,
+            lat: data.booking.MobileInstallationDetail?.pickupLat || 30.6565217,
+            lng: data.booking.MobileInstallationDetail?.pickupLng || 76.5649627,
           },
           dropLocation: {
             lat: data.booking.MobileInstallationDetail?.dropoffLat,
@@ -135,7 +119,6 @@ export default function UpdateBookingPage() {
 
   if (isLoading) return <p className="p-4">Loading booking...</p>;
 
-  // Calculate total charges
   const totalCharges = formData.items.reduce(
     (sum: number, item: any) => sum + (parseFloat(item.charge) || 0),
     0
@@ -143,14 +126,16 @@ export default function UpdateBookingPage() {
 
   return (
     <div className="max-w-5xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">Update Booking</h1>
+      <h1 className="text-2xl font-bold mb-6 text-gray-900 dark:text-gray-100">
+        Update Booking
+      </h1>
       <form
         onSubmit={handleSubmit}
-        className="space-y-8 bg-[#07050e] shadow rounded-lg p-6"
+        className="space-y-8 bg-white dark:bg-gray-900 shadow rounded-lg p-6"
       >
         {/* User Info */}
         <section>
-          <h2 className="text-lg text-white font-semibold mb-4">
+          <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
             User Information
           </h2>
           <div className="grid grid-cols-2 gap-4">
@@ -159,11 +144,9 @@ export default function UpdateBookingPage() {
                 key={key}
                 type="text"
                 value={formData.userData[key] || ""}
-                onChange={(e) =>
-                  handleChange("userData", key, e.target.value)
-                }
+                onChange={(e) => handleChange("userData", key, e.target.value)}
                 placeholder={key}
-                className="border rounded px-3 py-2 w-full"
+                className="border rounded px-3 py-2 w-full bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100"
               />
             ))}
           </div>
@@ -171,18 +154,18 @@ export default function UpdateBookingPage() {
 
         {/* Vehicle Info */}
         <section>
-          <h2 className="text-lg font-semibold mb-4">Vehicle Information</h2>
+          <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
+            Vehicle Information
+          </h2>
           <div className="grid grid-cols-2 gap-4">
             {Object.keys(formData.vehicle).map((key) => (
               <input
                 key={key}
                 type="text"
                 value={formData.vehicle[key] || ""}
-                onChange={(e) =>
-                  handleChange("vehicle", key, e.target.value)
-                }
+                onChange={(e) => handleChange("vehicle", key, e.target.value)}
                 placeholder={key}
-                className="border rounded px-3 py-2 w-full"
+                className="border rounded px-3 py-2 w-full bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100"
               />
             ))}
           </div>
@@ -190,14 +173,16 @@ export default function UpdateBookingPage() {
 
         {/* Booking Info */}
         <section>
-          <h2 className="text-lg font-semibold mb-4">Booking Information</h2>
+          <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
+            Booking Information
+          </h2>
           <div className="grid grid-cols-2 gap-4">
             <select
               value={formData.booking.installationType}
               onChange={(e) =>
                 handleChange("booking", "installationType", e.target.value)
               }
-              className="border rounded px-3 py-2 w-full"
+              className="border rounded px-3 py-2 w-full bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             >
               <option>In-Store</option>
               <option>Mobile</option>
@@ -209,7 +194,7 @@ export default function UpdateBookingPage() {
               onChange={(e) =>
                 handleChange("booking", "invoiceNumber", e.target.value)
               }
-              className="border rounded px-3 py-2 w-full"
+              className="border rounded px-3 py-2 w-full bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
             <input
               type="date"
@@ -217,7 +202,7 @@ export default function UpdateBookingPage() {
               onChange={(e) =>
                 handleChange("booking", "preferredDate", e.target.value)
               }
-              className="border rounded px-3 py-2 w-full"
+              className="border rounded px-3 py-2 w-full bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
             <input
               type="time"
@@ -225,37 +210,32 @@ export default function UpdateBookingPage() {
               onChange={(e) =>
                 handleChange("booking", "time", e.target.value)
               }
-              className="border rounded px-3 py-2 w-full"
+              className="border rounded px-3 py-2 w-full bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
             <textarea
               placeholder="Notes"
               value={formData.booking.notes || ""}
-              onChange={(e) =>
-                handleChange("booking", "notes", e.target.value)
-              }
-              className="border rounded px-3 py-2 w-full col-span-2"
+              onChange={(e) => handleChange("booking", "notes", e.target.value)}
+              className="border rounded px-3 py-2 w-full col-span-2 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
           </div>
         </section>
 
         {/* Mobile Installation Details */}
-        {formData.booking.installationType === "Mobile" &&
-          !!formData.mobileDetails && (
-            <MobileDetailsStep
-              formData={formData}
-              handleChange={handleChange}
-            />
-          )}
+        {formData.booking.installationType === "Mobile" && (
+          <MobileDetailsStep formData={formData} handleChange={handleChange} />
+        )}
 
         {/* Items */}
         <section>
-          <h2 className="text-lg font-semibold mb-4">Items</h2>
+          <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
+            Items
+          </h2>
           {formData.items.map((item: any, index: number) => (
             <div
               key={index}
               className="grid grid-cols-3 gap-4 mb-2 items-center"
             >
-              {/* Item Type */}
               <input
                 type="text"
                 placeholder="Item Type"
@@ -265,10 +245,8 @@ export default function UpdateBookingPage() {
                   updated[index].itemType = e.target.value;
                   setFormData((prev: any) => ({ ...prev, items: updated }));
                 }}
-                className="border rounded px-3 py-2 w-full"
+                className="border rounded px-3 py-2 w-full bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100"
               />
-
-              {/* Installation Charge */}
               <input
                 type="number"
                 placeholder="Charge"
@@ -278,28 +256,23 @@ export default function UpdateBookingPage() {
                   updated[index].charge = e.target.value;
                   setFormData((prev: any) => ({ ...prev, items: updated }));
                 }}
-                className="border rounded px-3 py-2 w-full"
+                className="border rounded px-3 py-2 w-full bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100"
               />
-
-              {/* Delete Button */}
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    const updated = formData.items.filter(
-                      (_: any, i: number) => i !== index
-                    );
-                    setFormData((prev: any) => ({ ...prev, items: updated }));
-                  }}
-                  className="bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600"
-                >
-                  Delete
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  const updated = formData.items.filter(
+                    (_: any, i: number) => i !== index
+                  );
+                  setFormData((prev: any) => ({ ...prev, items: updated }));
+                }}
+                className="bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600"
+              >
+                Delete
+              </button>
             </div>
           ))}
 
-          {/* Add Item */}
           <button
             type="button"
             onClick={() =>
@@ -311,15 +284,16 @@ export default function UpdateBookingPage() {
                 ],
               }))
             }
-            className="text-blue-600 text-sm mt-2"
+            className="text-blue-600 dark:text-blue-400 text-sm mt-2"
           >
             + Add Item
           </button>
 
-          {/* Total Charges */}
-          <div className="mt-4 font-semibold text-white">
+          <div className="mt-4 font-semibold text-gray-900 dark:text-gray-100">
             Total Charges:{" "}
-            <span className="text-green-400">${totalCharges.toFixed(2)}</span>
+            <span className="text-green-600 dark:text-green-400">
+              ${totalCharges.toFixed(2)}
+            </span>
           </div>
         </section>
 

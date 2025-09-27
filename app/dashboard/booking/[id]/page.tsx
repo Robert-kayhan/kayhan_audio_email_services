@@ -9,7 +9,7 @@ import {
   Polyline,
   useLoadScript,
 } from "@react-google-maps/api";
-import { Check, Calendar, X, CreditCard, View } from "lucide-react";
+import { Check, Calendar, X, CreditCard, View, CheckCircle, ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
 import {
   useCancelJobMutation,
@@ -37,7 +37,7 @@ const BookingDetailsPage = () => {
   const [isCancelling, setIsCancelling] = useState(false);
   const [isPaymentUpdate, setIsPaymentUpdate] = useState(false);
   const [showJobReportModal, setShowJobReportModal] = useState(false);
-  const router = useRouter()
+  const router = useRouter();
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY || "",
   });
@@ -94,11 +94,11 @@ const BookingDetailsPage = () => {
       }).unwrap();
       toast.success("Booking cancelled successfully");
       setShowCancelModal(false);
-      router.push("/dashboard/booking")
+      router.push("/dashboard/booking");
       refetch();
     } catch (err) {
       console.error(err);
-      router.push("/dashboard/booking")
+      router.push("/dashboard/booking");
       // toast.error("Failed to cancel booking");
     } finally {
       setIsCancelling(false);
@@ -109,7 +109,6 @@ const BookingDetailsPage = () => {
     toast.success("Job marked as completed!");
     // Implement your API logic here if needed
   };
-
   const handleUpdatePayment = () => {
     toast.success("Update payment clicked!");
     // Implement your payment update logic here
@@ -120,14 +119,24 @@ const BookingDetailsPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white p-6">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Heading */}
-        <h1 className="text-4xl font-bold text-center bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">
-          Booking Details
-        </h1>
+       <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold flex items-center gap-3">
+            <CheckCircle className="w-8 h-8 text-blue-500" />
+            Booking
+          </h1>
+          <button
+            onClick={() => router.back()}
+            className="flex items-center gap-1 px-3 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 border border-gray-700 text-sm"
+          >
+            <ArrowLeft className="w-4 h-4" /> Back
+          </button>
+        </div>
 
         {/* Action Panel */}
         {/* Action Panel */}
         <div className="flex flex-wrap justify-center gap-4 p-6 bg-gray-900/40 backdrop-blur-xl rounded-3xl shadow-xl">
-          {booking?.reports?.length == 0 && (
+          {(booking?.reports[0]?.status === "Rescheduled" ||
+            booking?.reports?.length === 0) && (
             <button
               className="flex items-center gap-2 px-6 py-3 font-semibold text-white rounded-full bg-gradient-to-r from-green-400 to-green-600 shadow-lg hover:scale-105 hover:shadow-2xl transition-all duration-300"
               onClick={() => setShowJobReportModal(true)}
@@ -144,28 +153,32 @@ const BookingDetailsPage = () => {
               <Check size={20} /> Complete Job
             </Link>
           )}
-          {booking?.reports?.length !== 0 &&   booking?.reports[0]?.status !== "In Progress" && (
-            <Link
-              href={`/dashboard/booking/job/${id}`}
-              className="flex items-center gap-2 px-6 py-3 font-semibold text-white rounded-full bg-gradient-to-r from-green-400 to-green-600 shadow-lg hover:scale-105 hover:shadow-2xl transition-all duration-300"
-            >
-              <View size={20} /> View Job
-            </Link>
-          )}
+          {booking?.reports?.length !== 0 &&
+            booking?.reports[0]?.status !== "In Progress" && (
+              <Link
+                href={`/dashboard/booking/job/${id}`}
+                className="flex items-center gap-2 px-6 py-3 font-semibold text-white rounded-full bg-gradient-to-r from-green-400 to-green-600 shadow-lg hover:scale-105 hover:shadow-2xl transition-all duration-300"
+              >
+                <View size={20} /> View Job
+              </Link>
+            )}
 
-          <button
-            onClick={() => setShowRescheduleModal(true)}
-            className="flex items-center gap-2 px-6 py-3 font-semibold text-white rounded-full bg-gradient-to-r from-yellow-400 to-yellow-600 shadow-lg hover:scale-105 hover:shadow-2xl transition-all duration-300"
-          >
-            <Calendar size={20} /> Reschedule Job
-          </button>
-
-          <button
-            onClick={() => setShowCancelModal(true)}
-            className="flex items-center gap-2 px-6 py-3 font-semibold text-white rounded-full bg-gradient-to-r from-red-400 to-red-600 shadow-lg hover:scale-105 hover:shadow-2xl transition-all duration-300"
-          >
-            <X size={20} /> Cancel Booking
-          </button>
+          {/* {booking?.reports?.length == 0 && ( */}
+            <>
+              <button
+                onClick={() => setShowRescheduleModal(true)}
+                className="flex items-center gap-2 px-6 py-3 font-semibold text-white rounded-full bg-gradient-to-r from-yellow-400 to-yellow-600 shadow-lg hover:scale-105 hover:shadow-2xl transition-all duration-300"
+              >
+                <Calendar size={20} /> Reschedule Job
+              </button>
+              <button
+                onClick={() => setShowCancelModal(true)}
+                className="flex items-center gap-2 px-6 py-3 font-semibold text-white rounded-full bg-gradient-to-r from-red-400 to-red-600 shadow-lg hover:scale-105 hover:shadow-2xl transition-all duration-300"
+              >
+                <X size={20} /> Cancel Booking
+              </button>
+            </>
+          {/* )} */}
 
           {booking?.payment?.status !== "Completed" && (
             <button
