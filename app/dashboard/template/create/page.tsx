@@ -1,13 +1,13 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState } from "react";
 import { useCreateTemplateMutation } from "@/store/api/templateApi";
 import toast from "react-hot-toast";
 import TemplateSelectorModal from "@/components/template/TemplateSelectorModal";
-import PredefinedTemplateModal from "@/components/template/PredefinedTemplateModal";
-const EmailEditor = dynamic(() => import("react-email-editor"), { ssr: false });
 import { parseAndLoadDesign } from "@/util/ComanFuction";
+
+const EmailEditor = dynamic(() => import("react-email-editor"), { ssr: false });
 
 interface Template {
   id: string;
@@ -18,7 +18,12 @@ interface Template {
 const EmailBuilderPage = () => {
   const editorRef = useRef<any>(null);
   const [showTemplates, setShowTemplates] = useState(false);
-  // const [showPredefined, setShowPredefined] = useState(false);
+
+  // ✅ new state for template type
+  const [templateType, setTemplateType] = useState<"Retail" | "wholeSale">(
+    "Retail"
+  );
+
   const [createTemplate, { isLoading }] = useCreateTemplateMutation();
 
   const exportHtml = () => {
@@ -35,17 +40,18 @@ const EmailBuilderPage = () => {
       return;
     }
 
-    editor.exportHtml((htmlData: any) => {
+    editor.exportHtml(async (htmlData: any) => {
       const name = prompt("Enter your Template name");
       if (!name) return;
 
       try {
-        createTemplate({
+        await createTemplate({
           name,
+          type: templateType, // ✅ include template type
           html: htmlData.html,
           design: htmlData.design,
-        });
-        toast.success("Template created successfully");
+        }).unwrap();
+        toast.success("✅ Template created successfully");
       } catch (error) {
         console.error("Error saving template:", error);
         toast.error("❌ Failed to save template");
@@ -54,14 +60,26 @@ const EmailBuilderPage = () => {
   };
 
   return (
-    <div className="h-screen flex flex-col ">
-      <div className="flex gap-3 p-4">
+    <div className="h-screen flex flex-col">
+      {/* Top Controls */}
+      <div className="flex items-center gap-3 p-4">
+        {/* Template Type Selector */}
+        <select
+          className="bg-[#333] text-white p-2 rounded border border-[#555]"
+          value={templateType}
+          onChange={(e) => setTemplateType(e.target.value as any)}
+        >
+          <option value="Retail">Retail</option>
+          <option value="wholeSale">Wholesale</option>
+        </select>
+
         <button
           className="text-white bg-[#333] p-2 px-3 rounded border-[#555] border"
           onClick={exportHtml}
         >
           Export HTML
         </button>
+
         <button
           className="text-white bg-[#333] p-2 px-3 rounded border-[#555] border"
           onClick={saveTemplate}
@@ -69,20 +87,16 @@ const EmailBuilderPage = () => {
         >
           {isLoading ? "Saving..." : "Save Template"}
         </button>
+
         <button
           className="text-white bg-[#333] p-2 px-3 rounded border-[#555] border"
           onClick={() => setShowTemplates(true)}
         >
           Load Template
         </button>
-        {/* <button
-          className="text-white bg-[#333] p-2 px-3 rounded border-[#555] border"
-          onClick={() => setShowPredefined(true)}
-        >
-          Pre difine Template
-        </button> */}
       </div>
 
+      {/* Email Editor */}
       <div style={{ flex: 1, position: "relative" }}>
         <EmailEditor
           ref={editorRef}
@@ -92,23 +106,20 @@ const EmailBuilderPage = () => {
             height: "100%",
             width: "100%",
           }}
-          onLoad={() => console.log("Editor loaded", editorRef.current?.editor)}
+          onLoad={() =>
+            console.log("Editor loaded", editorRef.current?.editor)
+          }
         />
       </div>
 
+      {/* Template Selector Modal */}
       <TemplateSelectorModal
         open={showTemplates}
         onClose={() => setShowTemplates(false)}
         onSelect={(design) => {
-          // editorRef.current?.editor.loadDesign(design);
           parseAndLoadDesign(design, editorRef);
         }}
       />
-      {/* <PredefinedTemplateModal
-        open={showPredefined}
-        onClose={() => setShowPredefined(false)}
-        onSelect={(design) => editorRef.current?.editor.loadDesign(design)}
-      /> */}
     </div>
   );
 };

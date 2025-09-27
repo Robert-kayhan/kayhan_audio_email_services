@@ -38,12 +38,12 @@ export const templateApi = apiSlice.injectEndpoints({
     // Get All Templates with pagination
     getAllTemplates: builder.query<
       GetAllTemplatesResponse,
-      PaginationParams & { search?: string }
+      PaginationParams & { search?: string; type?: "Retail" | "wholeSale" }
     >({
-      query: ({ page = 1, limit = 10, search = "" }) => ({
+      query: ({ page = 1, limit = 10, search = "", type }) => ({
         url: TEMPLATE_url,
         method: "GET",
-        params: { page, limit, search },
+        params: { page, limit, search, type }, // add type here
       }),
     }),
 

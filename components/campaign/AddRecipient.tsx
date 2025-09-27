@@ -11,12 +11,14 @@ interface Props {
   selectedUserIds: any;
   setSelectedUserIds: any;
   onNext: any;
+  role : any
 }
 
 export default function AddRecipients({
   selectedUserIds,
   setSelectedUserIds,
   onNext,
+  role
 }: Props) {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(25);
@@ -26,6 +28,7 @@ export default function AddRecipients({
     page: currentPage,
     limit,
     search,
+    role
   });
 
   const users: User[] = data?.data || [];

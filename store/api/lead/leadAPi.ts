@@ -9,12 +9,17 @@ const LeadApi = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
-    getAllLeadGroup: builder.query({
-      query: ({ page = 1, limit = 10 }) => ({
-        url: `${Lead_url}?page=${page}&limit=${limit}`,
+    getAllLeadGroup: builder.query<
+      any,
+      { page?: number; limit?: number; type?: "Retail" | "wholeSale" }
+    >({
+      query: ({ page = 1, limit = 10, type } = {}) => ({
+        url: Lead_url,
         method: "GET",
+        params: { page, limit, type }, // send as query params
       }),
     }),
+
     getLeadGroup: builder.query({
       query: ({ id }) => ({
         url: `${Lead_url}/${id}`,
@@ -28,12 +33,12 @@ const LeadApi = apiSlice.injectEndpoints({
         method: "PUT",
       }),
     }),
-  deleteLeadGroup: builder.mutation({
-       query: (data) => ({
-         url: `${Lead_url}/${data}`,
-         method: "DELETE",
-       }),
-     }),
+    deleteLeadGroup: builder.mutation({
+      query: (data) => ({
+        url: `${Lead_url}/${data}`,
+        method: "DELETE",
+      }),
+    }),
   }),
 });
 export const {
