@@ -9,7 +9,12 @@ const UserApi = apiSlice.injectEndpoints({
         method: "POST",
       }),
     }),
-
+    createWholeUser: builder.query({
+      query: () => ({
+        url: `${USER_url}/create-user`,
+        method: "POST",
+      }),
+    }),
     createMultipleUser: builder.mutation({
       query: (data) => ({
         url: `${USER_url}/upload-excel`,
@@ -19,7 +24,13 @@ const UserApi = apiSlice.injectEndpoints({
     }),
 
     getAllUser: builder.query({
-      query: ({ page = 1, limit = 10, search = "", hasLeadOnly = false }) => {
+      query: ({
+        page = 1,
+        limit = 10,
+        search = "",
+        hasLeadOnly = false,
+        role,
+      }) => {
         const params = new URLSearchParams({
           page: page.toString(),
           limit: limit.toString(),
@@ -31,6 +42,10 @@ const UserApi = apiSlice.injectEndpoints({
 
         if (hasLeadOnly) {
           params.append("hasLeadOnly", "true");
+        }
+
+        if (role) {
+          params.append("role", role.toString());
         }
 
         return {
@@ -81,4 +96,5 @@ export const {
   useDeleteUserMutation,
   useUpdateUserMutation,
   useGetAllUserWithLeadQuery,
+  useCreateWholeUserQuery
 } = UserApi;

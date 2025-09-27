@@ -19,12 +19,17 @@ export const CompaignApi = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
-    getAllCampaign: builder.query({
-      query: () => ({
+    getAllCampaign: builder.query<
+      any,
+      { page?: number; limit?: number; templateType?: "Retail" | "wholeSale" }
+    >({
+      query: ({ page = 1, limit = 25, templateType } = {}) => ({
         url: campaign_url,
         method: "GET",
+        params: { page, limit, templateType }, // send as query params
       }),
     }),
+
     getAllCampaignByid: builder.query({
       query: (data) => ({
         url: `${campaign_url}/${data}`,

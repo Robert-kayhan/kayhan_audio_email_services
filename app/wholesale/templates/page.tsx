@@ -2,7 +2,7 @@ import React from 'react'
 import TemplateTablePage from '@/components/template/TemplateList'
 const page = () => {
   return (
-   <TemplateTablePage type={"Retail"} />
+   <TemplateTablePage type={"wholeSale"} />
   )
 }
 

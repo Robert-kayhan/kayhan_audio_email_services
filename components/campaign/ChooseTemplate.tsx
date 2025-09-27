@@ -10,15 +10,17 @@ import Link from "next/link";
 
 interface Props {
   onSelect: (template: { id: string; design: Record<string, any> }) => void;
+  type : any
 }
 
-const ChooseTemplate: React.FC<Props> = ({ onSelect }) => {
+const ChooseTemplate: React.FC<Props> = ({ onSelect , type }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 6;
 
   const { data, isLoading, isError, refetch } = useGetAllTemplatesQuery({
     page: currentPage,
     limit,
+    type 
   });
 
   const [deleteTemplate] = useDeleteTemplateMutation();

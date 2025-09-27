@@ -101,7 +101,7 @@ const CampaignStepper = () => {
       case "template":
         return (
           <ChooseTemplate
-          type={"Retail"}
+          type="wholeSale"
             onSelect={(id: any) => {
               setSelectedTemplateId(id);
               setCompletedStepIndex(Math.max(completedStepIndex, 2));
@@ -112,7 +112,7 @@ const CampaignStepper = () => {
       case "recipients":
         return (
           <AddRecipients
-          role={0}
+          role={3}       
             selectedUserIds={selectedRecipientIds}
             setSelectedUserIds={setSelectedRecipientIds}
             onNext={() => {

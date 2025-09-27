@@ -23,7 +23,7 @@ export default function TablePage() {
   const { data, isLoading, isError, refetch } = useGetAllLeadGroupQuery({
     page: currentPage,
     limit,
-    type : "Retail"
+    type : "wholeSale"
   });
   const [deleteLeadGroup] = useDeleteLeadGroupMutation();
   // Destructure safely
