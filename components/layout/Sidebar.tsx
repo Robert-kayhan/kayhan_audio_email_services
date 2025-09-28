@@ -68,7 +68,7 @@ const navItems = [
       { label: "Retail Lead", href: "/dashboard/lead-group" },
       {
         label: "Wholesale Lead  ",
-        href: "wholesale/lead-group",
+        href: "/wholesale/lead-group",
       },
     ], },
   {
