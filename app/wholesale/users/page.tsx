@@ -94,7 +94,7 @@ export default function TablePage() {
   useEffect(() => {
     const createUser = async () => {
       try {
-        const response = await fetch("http://localhost:5002/api/users/create-user", {
+        const response = await fetch("https://mailerapi.kayhanaudio.com.au/api/users/create-user", {
           method: "GET",
         });
         refetch();
