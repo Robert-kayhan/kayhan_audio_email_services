@@ -36,7 +36,7 @@ const navItems = [
       { label: "Retail Campaigns", href: "/dashboard/campaign" },
       {
         label: "Wholesale Campaigns",
-        href: "/wholesale/compagin",
+        href: "/wholesale/campaign",
       },
     ],
   },
