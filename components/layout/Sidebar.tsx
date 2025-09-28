@@ -76,7 +76,7 @@ const navItems = [
     label: "Match Order",
     href: "/dashboard/match-with-orders",
   },
-  { icon: PhoneCall, label: "CRM", href: "/dashboard/lead-follow-up" },
+  { icon: PhoneCall, label: "CRM", href: "/dashboard/lead-folow-up" },
   {
     icon: Settings,
     label: "Product specifications",
