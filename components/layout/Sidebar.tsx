@@ -74,7 +74,7 @@ const navItems = [
   {
     icon: LucideListOrdered,
     label: "Match Order",
-    href: "/dashboard/match-with-orders",
+    href: "/dashboard/macth-with-orders",
   },
   { icon: PhoneCall, label: "CRM", href: "/dashboard/lead-folow-up" },
   {
