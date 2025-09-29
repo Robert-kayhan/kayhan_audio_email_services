@@ -33,13 +33,13 @@ const navItems = [
     label: "Retail",
     href: "#",
     subItems: [
-      { label: " Campaigns", href: "/dashboard/campaign" },
-      { label: "User", href: "/dashboard/user" },
-      { label: " Lead Group", href: "/dashboard/lead-group" },
       {
-        label: " templates ",
+        label: " Templates ",
         href: "/wholesale/templates",
       },
+      { label: " Campaigns", href: "/dashboard/campaign" },
+      { label: "User", href: "/dashboard/user" },
+      { label: " Lead Group", href: "/dashboard/lead-group" }, 
     ],
   },
   {
@@ -48,11 +48,11 @@ const navItems = [
     href: "",
     subItems: [
       {
-        label: "templates ",
+        label: "Templates ",
         href: "/wholesale/templates",
       },
       {
-        label: "campaign",
+        label: "Campaign",
         href: "/wholesale/campaign",
       },
       {
