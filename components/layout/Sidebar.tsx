@@ -30,47 +30,42 @@ const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
   {
     icon: Mail,
-    label: "Campaigns",
-    href: "/dashboard/campaign",
+    label: "Retail",
+    href: "#",
     subItems: [
-      { label: "Retail Campaigns", href: "/dashboard/campaign" },
+      { label: " Campaigns", href: "/dashboard/campaign" },
+      { label: "User", href: "/dashboard/user" },
+      { label: " Lead Group", href: "/dashboard/lead-group" },
       {
-        label: "Wholesale Campaigns",
-        href: "/wholesale/campaign",
-      },
-    ],
-  },
-  {
-    icon: FileText,
-    label: "Templates",
-    href: "/dashboard/template",
-    subItems: [
-      { label: "Retail Campaigns", href: "/dashboard/template" },
-      {
-        label: "Wholesale Campaigns",
+        label: " templates ",
         href: "/wholesale/templates",
       },
     ],
   },
   {
-    icon: User,
-    label: "User",
+    icon: FileText,
+    label: "Wholesale",
     href: "",
     subItems: [
-      { label: "RetailUser", href: "/dashboard/user" },
       {
-        label: "Wholesale User",
+        label: "templates ",
+        href: "/wholesale/templates",
+      },
+      {
+        label: "campaign",
+        href: "/wholesale/campaign",
+      },
+      {
+        label: " User",
         href: "/wholesale/users",
+      },
+      {
+        label: "Lead Group ",
+        href: "/wholesale/lead-group",
       },
     ],
   },
-  { icon: Users, label: "Leads Group", href: "/dashboard/lead-group",subItems: [
-      { label: "Retail Lead", href: "/dashboard/lead-group" },
-      {
-        label: "Wholesale Lead  ",
-        href: "/wholesale/lead-group",
-      },
-    ], },
+
   {
     icon: LucideListOrdered,
     label: "Match Order",
