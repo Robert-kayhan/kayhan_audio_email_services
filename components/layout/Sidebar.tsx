@@ -35,7 +35,7 @@ const navItems = [
     subItems: [
       {
         label: " Templates ",
-        href: "/wholesale/templates",
+        href: "/dashboard/template",
       },
       { label: " Campaigns", href: "/dashboard/campaign" },
       { label: "User", href: "/dashboard/user" },
@@ -80,6 +80,7 @@ const navItems = [
   { icon: Album, label: "Flyer", href: "/dashboard/flyer/" },
   { icon: BookKeyIcon, label: "Booking", href: "/dashboard/booking/" },
   { icon: ReceiptText, label: "Invoice", href: "/dashboard/invoice" },
+  { icon: ReceiptText, label: "Repair and return", href: "/dashboard/repair-return" },
 ];
 
 const Navigation = () => {

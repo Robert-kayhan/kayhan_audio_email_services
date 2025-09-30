@@ -1,7 +1,8 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation"; // ✅ for reading query params
 import { useCreateTemplateMutation } from "@/store/api/templateApi";
 import toast from "react-hot-toast";
 import TemplateSelectorModal from "@/components/template/TemplateSelectorModal";
@@ -19,10 +20,23 @@ const EmailBuilderPage = () => {
   const editorRef = useRef<any>(null);
   const [showTemplates, setShowTemplates] = useState(false);
 
+  // ✅ get "type" from URL
+  const searchParams = useSearchParams();
+  const urlType = searchParams.get("type");
+
   // ✅ new state for template type
   const [templateType, setTemplateType] = useState<"Retail" | "wholeSale">(
     "Retail"
   );
+
+  // ✅ set default type based on query param
+  useEffect(() => {
+    if (urlType?.toLowerCase() === "wholesale") {
+      setTemplateType("wholeSale");
+    } else {
+      setTemplateType("Retail");
+    }
+  }, [urlType]);
 
   const [createTemplate, { isLoading }] = useCreateTemplateMutation();
 

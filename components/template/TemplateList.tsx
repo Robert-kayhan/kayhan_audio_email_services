@@ -6,7 +6,7 @@ import { ChevronDown } from "lucide-react";
 import Pagination from "@/components/global/Pagination";
 import toast from "react-hot-toast";
 import Link from "next/link";
-
+import { useRouter } from "next/navigation";
 // RTK Query hooks (update these paths as per your project)
 import {
   useGetAllTemplatesQuery,
@@ -27,7 +27,7 @@ const columns: Column<Template>[] = [
   { header: "Created At", accessor: "createdAt" },
 ];
 
-export default function TemplateTablePage({type}:any) {
+export default function TemplateTablePage({ type }: any) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -53,7 +53,7 @@ export default function TemplateTablePage({type}:any) {
     page: currentPage,
     limit,
     search,
-    type
+    type,
   });
 
   const [deleteTemplate] = useDeleteTemplateMutation();
@@ -98,7 +98,7 @@ export default function TemplateTablePage({type}:any) {
       console.error(error);
     }
   };
-
+  const router = useRouter()
   return (
     <div className="p-4">
       {/* Header */}
@@ -139,16 +139,16 @@ export default function TemplateTablePage({type}:any) {
                 Show {size}
               </option>
             ))}
-          </select> 
+          </select>
 
           {/* Create Button */}
           <div className="relative inline-block text-left">
-          <Link
-                  href="/dashboard/template/create"
-                  className="block bg-blue-800 w-full rounded-sm shadow-2xl text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  Create Template
-                </Link>
+            <Link
+              href={`/dashboard/template/create?type=${type}`}
+              className="block bg-blue-800 w-full rounded-sm shadow-2xl text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+            >
+              Create Template
+            </Link>
 
             {/* {dropdownOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white text-black border border-gray-200 rounded shadow z-50 dark:bg-gray-800 dark:text-white dark:border-gray-700">
@@ -186,14 +186,14 @@ export default function TemplateTablePage({type}:any) {
             showActions
             onEdit={handleEdit}
             onDelete={handleDelete}
-            // customActions={[
-            //   {
-            //     label: "View",
-            //     onClick: (row) => console.log("Viewing", row),
-            //     className:
-            //       "text-purple-600 dark:text-purple-400 hover:underline",
-            //   },
-            // ]}
+            customActions={[
+              {
+                label: "View",
+                onClick: (row) => router.push(`/dashboard/template/edit/${row.id}`) ,
+                className:
+                  "text-purple-600 dark:text-purple-400 hover:underline",
+              },
+            ]}
           />
 
           <Pagination
