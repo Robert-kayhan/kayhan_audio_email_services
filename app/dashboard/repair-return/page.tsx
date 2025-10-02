@@ -1,557 +1,204 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import Select from "react-select";
-import { useCreateRepairReportMutation } from "@/store/api/repair-return/repairApi";
-// Utility: warranty checker
-const isOutOfWarranty = (orderDate: string) => {
-  if (!orderDate) return false;
-  const placedDate = new Date(orderDate);
-  const oneYearLater = new Date(placedDate);
-  oneYearLater.setFullYear(placedDate.getFullYear() + 1);
-  return new Date() > oneYearLater;
+
+import { useState, useEffect } from "react";
+import CustomTable, { Column } from "@/components/global/Table";
+import { ChevronDown } from "lucide-react";
+import Pagination from "@/components/global/Pagination";
+import toast from "react-hot-toast";
+import Link from "next/link";
+import {
+  useGetAllRepairReportQuery,
+  useDeleteRepairReportMutation,
+} from "@/store/api/repair-return/repairApi";
+// 📦 Type for Repair Report
+type RepairReport = {
+  id: number;
+  order_id: string;
+  customer_name: string;
+  customer_email: string;
+  customer_phone: string;
+  billing_address: any;
+  shipping_address: any;
+  products: any[];
+  user_tracking_number: string | null;
+  user_post_method: string | null;
+  admin_tracking_number: string | null;
+  admin_post_method: string | null;
+  status: string;
+  createdAt: string;
 };
 
-const OrderSelector = () => {
-  const [orderOptions, setOrderOptions] = useState<
-    { value: number; label: string }[]
-  >([]);
-  const [selectedOrder, setSelectedOrder] = useState<{
-    value: number;
-    label: string;
-  } | null>(null);
-  const [orderDetail, setOrderDetail] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+// 🧾 Table Columns
+const columns: Column<RepairReport>[] = [
+  { header: "Order ID", accessor: "order_id", sortable: true },
+  { header: "Customer", accessor: "customer_name", sortable: true },
+  { header: "Email", accessor: "customer_email" },
+  { header: "Phone", accessor: "customer_phone" },
+  { header: "user tracking number", accessor: "user_tracking_number" },
+  { header: "user Post Method", accessor: "user_post_method" },
 
-  const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
-  const [trackingNumber, setTrackingNumber] = useState("");
-  const [postMethod, setPostMethod] = useState("");
+  { header: "Status", accessor: "status" },
+  {
+    header: "Created",
+    accessor: "createdAt",
+    // render: (row) => new Date(row.createdAt).toLocaleDateString(),
+  },
+];
 
-  const [createRepairReport] = useCreateRepairReportMutation();
+export default function RepairReportTablePage() {
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [limit, setLimit] = useState(25);
 
-  // Manual entry state (when no order exists)
-  const [manualUser, setManualUser] = useState({
-    name: "",
-    last_name: "",
-    email: "",
-    phone: "",
-  });
-  const [manualBilling, setManualBilling] = useState({
-    street: "",
-    city: "",
-    state: "",
-    country: "",
-    postcode: "",
-  });
-  const [manualShipping, setManualShipping] = useState({
-    street: "",
-    city: "",
-    state: "",
-    country: "",
-    postcode: "",
-  });
-  const [manualProducts, setManualProducts] = useState<
-    { id: number; name: string; price: number; quantity: number }[]
-  >([]);
+  // 🔍 Search state and debounce
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
+   useEffect(() => {
+    const delay = setTimeout(() => {
+      setSearch(searchInput);
+      setCurrentPage(1);
+    }, 500);
+    return () => clearTimeout(delay);
+  }, [searchInput]);
 
-  useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const res = await axios.get("http://localhost:5003/v1/order/list", {
-          params: { page: 1, status: "", search: "" },
-        });
-        if (res.data.success) {
-          const options = res.data.data.result.map((o: any) => ({
-            value: o.id,
-            label: `Order #${o.id}`,
-          }));
-          setOrderOptions(options);
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetchOrders();
-  }, []);
+  const { data, isLoading, isError, refetch } = useGetAllRepairReportQuery(
+  {
+    page: currentPage,
+    limit,
+    search,
+  },
+  {
+    refetchOnFocus: true,
+    refetchOnMountOrArgChange: true,
+  }
+);
 
-  const handleFetchDetails = async () => {
-    if (!selectedOrder) return;
-    setLoading(true);
-    setError("");
+
+  const [deleteRepairReport] = useDeleteRepairReportMutation();
+
+  const reports: RepairReport[] = data?.data?.result ?? [];
+  const pagination = {
+    totalItems: data?.data?.total ?? 0,
+    currentPage: data?.data?.page ?? 1,
+    totalPages: Math.ceil((data?.data?.total ?? 0) / limit),
+  };
+
+  const showPagination = Array.from(
+    { length: pagination.totalPages },
+    (_, i) => i + 1
+  );
+
+  const handleDelete = async (row: RepairReport) => {
     try {
-      const res = await axios.get(
-        `http://localhost:5003/v1/order/detail/${selectedOrder.value}`
-      );
-      if (res.data.success && res.data.data.result) {
-        setOrderDetail(res.data.data.result);
-        setSelectedProducts([]);
-      } else {
-        setOrderDetail(null);
-        setError("Order not found");
-      }
-    } catch (err: any) {
-      setError(err?.message || "Network error");
-    } finally {
-      setLoading(false);
+      await deleteRepairReport(row.id).unwrap();
+      toast.success("Repair report deleted successfully");
+      refetch();
+    } catch (error) {
+      toast.error("Failed to delete report");
+      console.error(error);
     }
   };
 
-  const handleProductToggle = (id: number) => {
-    console.log(id, "clg this is id");
-    const numId = Number(id); // ensure ID is a number
-    setSelectedProducts(
-      (prev) =>
-        prev.includes(numId)
-          ? prev.filter((p) => p !== numId) // unselect this product
-          : [...prev, numId] // select this product
-    );
-  };
 
-  const handleSubmit = async() => {
-    if (orderDetail) {
-      const selectedProductDetails =
-        orderDetail.products?.filter((p: any) =>
-          selectedProducts.includes(p.product_id)
-        ) || [];
-
-      if (selectedProductDetails.length === 0) {
-        alert("Please select at least one product!");
-        return;
-      }
-      const data = {
-        order_id: orderDetail?.id,
-        customer_id: orderDetail,
-        customer_name: orderDetail?.billing_address?.name,
-        customer_email: orderDetail?.billing_address?.email,
-        customer_phone: orderDetail.billing_address?.phone,
-        billing_address: orderDetail?.billing_address,
-        shipping_address: orderDetail?.shipping_address,
-        products: selectedProductDetails,
-        user_tracking_number: trackingNumber,
-        user_post_method: postMethod,
-      };
-     await createRepairReport(data).unwrap
-    } else {
-      // Manual entry
-      if (manualProducts.length === 0) {
-        alert("Please add at least one product!");
-        return;
-      }
-      console.log("Manual User:", manualUser);
-      console.log("Manual Billing:", manualBilling);
-      console.log("Manual Shipping:", manualShipping);
-      console.log("Manual Products:", manualProducts);
-      console.log("Tracking Number:", trackingNumber);
-      console.log("Post Method:", postMethod);
-    }
-  };
-
-  const handleAddManualProduct = () => {
-    const newProduct = {
-      id: Date.now(),
-      name: "",
-      price: 0,
-      quantity: 1,
-    };
-    setManualProducts([...manualProducts, newProduct]);
-  };
-
-  const handleManualProductChange = (
-    id: number,
-    field: keyof (typeof manualProducts)[0],
-    value: any
-  ) => {
-    setManualProducts((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, [field]: value } : p))
-    );
-  };
-
-  // const handleSubmit = () => {
-  //   if (orderDetail) {
-  //     const selectedProductDetails =
-  //       orderDetail?.products?.filter((p: any) =>
-  //         selectedProducts.includes(p.id)
-  //       ) || [];
-  //     console.log("Selected Products:", selectedProductDetails);
-  //     console.log("Tracking Number:", trackingNumber);
-  //     console.log("Post Method:", postMethod);
-  //     console.log("Order ID:", orderDetail?.id);
-  //   } else {
-  //     console.log("Manual User:", manualUser);
-  //     console.log("Manual Billing:", manualBilling);
-  //     console.log("Manual Shipping:", manualShipping);
-  //     console.log("Manual Products:", manualProducts);
-  //     console.log("Tracking Number:", trackingNumber);
-  //     console.log("Post Method:", postMethod);
-  //   }
-  // };
-
-  console.log(orderDetail?.products);
   return (
-    <div className="min-h-screen flex justify-center bg-gray-100 dark:bg-gray-900 p-6 transition-colors">
-      <div className="bg-white dark:bg-gray-800 max-w-5xl w-full p-8 rounded-2xl shadow-lg transition-colors">
-        <h2 className="text-3xl font-bold mb-8 text-center text-gray-800 dark:text-gray-100">
-          Repair and return
-        </h2>
+    <div className="p-4">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center px-3 py-2 gap-4 flex-wrap">
+        <h2 className="text-2xl font-serif font-bold">Repair Reports</h2>
 
-        {/* Order selector */}
-        <div className="flex gap-3 mb-6">
-          <div className="flex-1">
-            <Select
-              options={orderOptions}
-              value={selectedOrder}
-              onChange={setSelectedOrder}
-              placeholder="Search order number…"
-              isSearchable
+        <div className="flex flex-wrap items-center gap-3">
+          {/* 🔍 Search Input */}
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              placeholder="Search by customer, email, or order id"
+              className="px-3 py-1 rounded-md bg-black text-white border border-gray-700 focus:outline-none text-sm"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
             />
-          </div>
-          <button
-            onClick={handleFetchDetails}
-            disabled={!selectedOrder || loading}
-            className="px-5 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 disabled:opacity-50 transition"
-          >
-            {loading ? "Loading…" : "Show Details"}
-          </button>
-        </div>
-
-        {error && <p className="text-red-500 dark:text-red-400">{error}</p>}
-
-        {/* Order details OR Manual Entry */}
-        {orderDetail ? (
-          <div className="space-y-8">
-            {/* Order header with warranty */}
-            <div className="p-6 border rounded-xl shadow-sm bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
-              <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
-                Order #{orderDetail.id || "N/A"}
-              </h3>
-              {orderDetail?.createdAt && (
-                <p className="text-sm mt-1 text-gray-600 dark:text-gray-300">
-                  Placed on:{" "}
-                  {new Date(orderDetail.createdAt).toLocaleDateString()}
-                </p>
-              )}
-              {orderDetail?.createdAt && (
-                <p
-                  className={`text-sm font-semibold mt-2 ${
-                    isOutOfWarranty(orderDetail.createdAt)
-                      ? "text-red-500 dark:text-red-400"
-                      : "text-green-600 dark:text-green-400"
-                  }`}
-                >
-                  {isOutOfWarranty(orderDetail.createdAt)
-                    ? "Out of Warranty"
-                    : "Under Warranty"}
-                </p>
-              )}
-            </div>
-
-            {/* Customer Details */}
-            <section className="p-6 border rounded-xl shadow-sm bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
-              <h4 className="font-semibold mb-2 text-gray-700 dark:text-gray-200">
-                Customer Details
-              </h4>
-              <div className="grid grid-cols-2 gap-4">
-                <input
-                  className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
-                  value={orderDetail.user_detail?.name || ""}
-                  readOnly
-                />
-                <input
-                  className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
-                  value={orderDetail.user_detail?.last_name || ""}
-                  readOnly
-                />
-                <input
-                  className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 col-span-2"
-                  value={orderDetail.user_detail?.email || ""}
-                  readOnly
-                />
-                <input
-                  className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 col-span-2"
-                  value={orderDetail.user_detail?.phone || ""}
-                  readOnly
-                />
-              </div>
-            </section>
-
-            {/* Billing + Shipping */}
-            <div className="grid md:grid-cols-2 gap-6">
-              <section className="p-6 border rounded-xl shadow-sm bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
-                <h4 className="font-semibold mb-3 text-gray-700 dark:text-gray-200">
-                  Billing Address
-                </h4>
-                <div className="space-y-2 text-gray-800 dark:text-gray-100">
-                  <p>{orderDetail.billing_address?.street_address}</p>
-                  <p>
-                    {orderDetail.billing_address?.city},{" "}
-                    {orderDetail.billing_address?.state_name}
-                  </p>
-                  <p>
-                    {orderDetail.billing_address?.country_name} -{" "}
-                    {orderDetail.billing_address?.postcode}
-                  </p>
-                </div>
-              </section>
-
-              <section className="p-6 border rounded-xl shadow-sm bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
-                <h4 className="font-semibold mb-3 text-gray-700 dark:text-gray-200">
-                  Shipping Address
-                </h4>
-                <div className="space-y-2 text-gray-800 dark:text-gray-100">
-                  <p>{orderDetail.shipping_address?.street_address}</p>
-                  <p>
-                    {orderDetail.shipping_address?.city},{" "}
-                    {orderDetail.shipping_address?.state_name}
-                  </p>
-                  <p>
-                    {orderDetail.shipping_address?.country_name} -{" "}
-                    {orderDetail.shipping_address?.postcode}
-                  </p>
-                </div>
-              </section>
-            </div>
-
-            {/* Products */}
-            <section className="p-6 border rounded-xl shadow-sm bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
-              <h4 className="font-semibold mb-4 text-gray-700 dark:text-gray-200">
-                Products
-              </h4>
-              <div className="overflow-x-auto">
-                <table className="w-full border rounded-lg overflow-hidden text-sm">
-                  <thead className="bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200">
-                    <tr>
-                      <th className="border px-3 py-2 text-left">Select</th>
-                      <th className="border px-3 py-2 text-left">Name</th>
-                      <th className="border px-3 py-2 text-left">Price</th>
-                      <th className="border px-3 py-2 text-left">Quantity</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {orderDetail.products?.map((prod: any, idx: number) => (
-                      <tr
-                        key={idx}
-                        className="hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-                      >
-                        <td className="border px-3 py-2 text-center">
-                          <input
-                            type="checkbox"
-                            checked={selectedProducts.includes(
-                              Number(prod.product_id)
-                            )} // only this product
-                            onChange={() =>
-                              handleProductToggle(Number(prod?.product_id))
-                            }
-                          />
-                        </td>
-                        <td className="border px-3 py-2 text-gray-800 dark:text-gray-100">
-                          {prod.name}
-                        </td>
-                        <td className="border px-3 py-2 text-gray-800 dark:text-gray-100">
-                          ${prod.price}
-                        </td>
-                        <td className="border px-3 py-2 text-gray-800 dark:text-gray-100">
-                          {prod.quantity}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </section>
-          </div>
-        ) : (
-          /* Manual entry when no order */
-          <div className="space-y-8">
-            <p className="text-gray-700 dark:text-gray-300">
-              No order selected. Enter details manually:
-            </p>
-
-            {/* User */}
-            <section className="p-6 border rounded-xl bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
-              <h4 className="font-semibold mb-2 text-gray-700 dark:text-gray-200">
-                User Details
-              </h4>
-              <div className="grid grid-cols-2 gap-4">
-                <input
-                  placeholder="First Name"
-                  className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
-                  value={manualUser.name}
-                  onChange={(e) =>
-                    setManualUser({ ...manualUser, name: e.target.value })
-                  }
-                />
-                <input
-                  placeholder="Last Name"
-                  className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
-                  value={manualUser.last_name}
-                  onChange={(e) =>
-                    setManualUser({ ...manualUser, last_name: e.target.value })
-                  }
-                />
-                <input
-                  placeholder="Email"
-                  className="border p-2 rounded-lg col-span-2 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
-                  value={manualUser.email}
-                  onChange={(e) =>
-                    setManualUser({ ...manualUser, email: e.target.value })
-                  }
-                />
-                <input
-                  placeholder="Phone"
-                  className="border p-2 rounded-lg col-span-2 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
-                  value={manualUser.phone}
-                  onChange={(e) =>
-                    setManualUser({ ...manualUser, phone: e.target.value })
-                  }
-                />
-              </div>
-            </section>
-
-            {/* Billing + Shipping */}
-            <div className="grid md:grid-cols-2 gap-6">
-              <section className="p-6 border rounded-xl bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
-                <h4 className="font-semibold mb-2 text-gray-700 dark:text-gray-200">
-                  Billing Address
-                </h4>
-                <div className="space-y-2">
-                  {Object.keys(manualBilling).map((key) => (
-                    <input
-                      key={key}
-                      placeholder={key}
-                      className="border p-2 rounded-lg w-full bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
-                      value={(manualBilling as any)[key]}
-                      onChange={(e) =>
-                        setManualBilling({
-                          ...manualBilling,
-                          [key]: e.target.value,
-                        })
-                      }
-                    />
-                  ))}
-                </div>
-              </section>
-
-              <section className="p-6 border rounded-xl bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
-                <h4 className="font-semibold mb-2 text-gray-700 dark:text-gray-200">
-                  Shipping Address
-                </h4>
-                <div className="space-y-2">
-                  {Object.keys(manualShipping).map((key) => (
-                    <input
-                      key={key}
-                      placeholder={key}
-                      className="border p-2 rounded-lg w-full bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
-                      value={(manualShipping as any)[key]}
-                      onChange={(e) =>
-                        setManualShipping({
-                          ...manualShipping,
-                          [key]: e.target.value,
-                        })
-                      }
-                    />
-                  ))}
-                </div>
-              </section>
-            </div>
-
-            {/* Products */}
-            <section className="p-6 border rounded-xl bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
-              <h4 className="font-semibold mb-3 text-gray-700 dark:text-gray-200">
-                Products
-              </h4>
+            {search && (
               <button
-                onClick={handleAddManualProduct}
-                className="mb-3 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
+                onClick={() => setSearchInput("")}
+                className="text-red-400 text-sm hover:underline"
               >
-                Add Product
+                Clear
               </button>
-              <div className="space-y-3">
-                {manualProducts.map((prod) => (
-                  <div
-                    key={prod.id}
-                    className="grid grid-cols-4 gap-3 items-center"
-                  >
-                    <input
-                      placeholder="Name"
-                      className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
-                      value={prod.name}
-                      onChange={(e) =>
-                        handleManualProductChange(
-                          prod.id,
-                          "name",
-                          e.target.value
-                        )
-                      }
-                    />
-                    <input
-                      type="number"
-                      placeholder="Price"
-                      className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
-                      value={prod.price}
-                      onChange={(e) =>
-                        handleManualProductChange(
-                          prod.id,
-                          "price",
-                          Number(e.target.value)
-                        )
-                      }
-                    />
-                    <input
-                      type="number"
-                      placeholder="Quantity"
-                      className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
-                      value={prod.quantity}
-                      onChange={(e) =>
-                        handleManualProductChange(
-                          prod.id,
-                          "quantity",
-                          Number(e.target.value)
-                        )
-                      }
-                    />
-                  </div>
-                ))}
-              </div>
-            </section>
+            )}
           </div>
-        )}
 
-        {/* Shipping Info + Submit (shared) */}
-        <div className="mt-8 space-y-6">
-          {/* Shipping Info */}
-          <section className="p-6 border rounded-xl shadow-sm bg-gray-50 dark:bg-gray-700 dark:border-gray-600 space-y-4">
-            <h4 className="font-semibold text-gray-700 dark:text-gray-200">
-              Shipping Info
-            </h4>
-            <div className="grid grid-cols-2 gap-4">
-              <input
-                type="text"
-                placeholder="Tracking Number"
-                className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
-                value={trackingNumber}
-                onChange={(e) => setTrackingNumber(e.target.value)}
-              />
-              <input
-                type="text"
-                placeholder="Post Method"
-                className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
-                value={postMethod}
-                onChange={(e) => setPostMethod(e.target.value)}
-              />
-            </div>
-          </section>
-
-          <button
-            onClick={handleSubmit}
-            className="w-full py-3 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition"
+          {/* Page Size Selector */}
+          <select
+            className="text-sm px-3 py-1 rounded-md bg-black text-white focus:outline-none"
+            value={limit}
+            onChange={(e) => {
+              setLimit(Number(e.target.value));
+              setCurrentPage(1);
+            }}
           >
-            Submit
-          </button>
+            {[5, 10, 25, 50, 100].map((size) => (
+              <option key={size} value={size}>
+                Show {size}
+              </option>
+            ))}
+          </select>
+
+          {/* Create Button */}
+          <div className="relative inline-block text-left">
+                           <Link
+                  href="/dashboard/repair-return/create"
+              className="bg-blue-600 text-white px-4 py-2 rounded-md flex items-center gap-1 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-400"
+            >
+              Create
+              <ChevronDown className="rotate-[265deg]" size={16} />
+            </Link>
+
+          </div>
         </div>
       </div>
+
+      {/* Table or State */}
+      {isLoading ? (
+        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+          Loading reports...
+        </div>
+      ) : isError ? (
+        <div className="text-center py-8 text-red-500">
+          Failed to fetch reports.
+        </div>
+      ) : reports.length === 0 ? (
+        <div className="text-center py-8 text-gray-400">
+          No repair reports found.
+        </div>
+      ) : (
+        <>
+          <CustomTable
+            pageSize={limit}
+            columns={columns}
+            data={reports}
+            showActions
+            onDelete={handleDelete}
+            customActions={[
+              {
+                label: "View",
+                onClick: (row) =>
+                  (window.location.href = `/dashboard/repair-return/${row.id}`),
+                className:
+                  "text-purple-600 dark:text-purple-400 hover:underline",
+              },
+            ]}
+          />
+
+          <Pagination
+            currentPage={currentPage}
+            totalRecords={pagination.totalItems}
+            totalPages={pagination.totalPages}
+            setCurrentPage={setCurrentPage}
+            limit={limit}
+            showPagination={showPagination}
+            tableDataLength={reports.length}
+          />
+        </>
+      )}
     </div>
   );
-};
-
-export default OrderSelector;
+}
