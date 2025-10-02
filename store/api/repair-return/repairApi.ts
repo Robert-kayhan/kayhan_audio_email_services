@@ -9,31 +9,35 @@ const LeadApi = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
-    getAllLeadGroup: builder.query<
-      any,
-      { page?: number; limit?: number; type?: "Retail" | "wholeSale" }
-    >({
-      query: ({ page = 1, limit = 10, type } = {}) => ({
+    getAllRepairReport: builder.query({
+      query: ({ page = 1, limit = 10, type, search }) => ({
         url: Repair_URl,
         method: "GET",
-        params: { page, limit, type }, 
+        params: { page, limit, type, search },
       }),
     }),
 
-    getLeadGroup: builder.query({
-      query: ({ id }) => ({
+    getRepairReport: builder.query({
+      query: (id) => ({
         url: `${Repair_URl}/${id}`,
         method: "GET",
       }),
     }),
-    updateLeadGroup: builder.mutation({
+    updateRepairReport: builder.mutation({
       query: ({ id, data }) => ({
         url: `${Repair_URl}/${id}`,
         body: data,
         method: "PUT",
       }),
     }),
-    deleteLeadGroup: builder.mutation({
+     addNotes: builder.mutation({
+      query: ({ id, data }) => ({
+        url: `${Repair_URl}/note/${id}`,
+        body: data,
+        method: "POST",
+      }),
+    }),
+    deleteRepairReport: builder.mutation({
       query: (data) => ({
         url: `${Repair_URl}/${data}`,
         method: "DELETE",
@@ -43,8 +47,9 @@ const LeadApi = apiSlice.injectEndpoints({
 });
 export const {
   useCreateRepairReportMutation,
-  useGetAllLeadGroupQuery,
-  useUpdateLeadGroupMutation,
-  useGetLeadGroupQuery,
-  useDeleteLeadGroupMutation,
+  useGetAllRepairReportQuery,
+  useUpdateRepairReportMutation,
+  useGetRepairReportQuery,
+  useDeleteRepairReportMutation,
+  useAddNotesMutation
 } = LeadApi;
