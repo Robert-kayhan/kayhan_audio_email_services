@@ -30,8 +30,9 @@ const OrderSelector = () => {
   const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
   const [trackingNumber, setTrackingNumber] = useState("");
   const [postMethod, setPostMethod] = useState("");
+  const [searchText, setSearchText] = useState("");
 
-  const [createRepairReport] = useCreateRepairReportMutation();
+  const [createRepairReport, { isLoading }] = useCreateRepairReportMutation();
 
   // Manual entry state (when no order exists)
   const [manualUser, setManualUser] = useState({
@@ -61,10 +62,13 @@ const OrderSelector = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const res = await axios.get("https://api.kayhanaudio.com.au/v1/order/list", {
-          params: { page: 1, status: "", search: "" },
-        });
-        console.log(res)
+        const res = await axios.get(
+          "https://api.kayhanaudio.com.au/v1/order/list",
+          {
+            params: { page: 2, status: "", search: searchText },
+          }
+        );
+        console.log(res);
         if (res.data.success) {
           const options = res.data.data.result.map((o: any) => ({
             value: o.id,
@@ -111,66 +115,65 @@ const OrderSelector = () => {
           : [...prev, numId] // select this product
     );
   };
-  const router = useRouter() 
+  const router = useRouter();
 
   const handleSubmit = async () => {
-  try {
-    if (!orderDetail && manualProducts.length === 0) {
-      toast.error("Please select or add at least one product!");
-      return;
-    }
-
-    if (orderDetail) {
-      // Filter selected products
-      const selectedProductDetails =
-        orderDetail.products?.filter((p: any) =>
-          selectedProducts.includes(p.product_id)
-        ) || [];
-
-      if (selectedProductDetails.length === 0) {
-        toast.error("Please select at least one product!");
+    try {
+      if (!orderDetail && manualProducts.length === 0) {
+        toast.error("Please select or add at least one product!");
         return;
       }
 
-      const data = {
-        order_id: orderDetail.id,
-        customer_id: orderDetail.customer_id || orderDetail.id, // ensure correct customer id
-        customer_name: orderDetail.billing_address?.name,
-        customer_email: orderDetail.billing_address?.email,
-        customer_phone: orderDetail.billing_address?.phone,
-        billing_address: orderDetail.billing_address,
-        shipping_address: orderDetail.shipping_address,
-        products: selectedProductDetails,
-        user_tracking_number: trackingNumber,
-        user_post_method: postMethod,
-      };
+      if (orderDetail) {
+        // Filter selected products
+        const selectedProductDetails =
+          orderDetail.products?.filter((p: any) =>
+            selectedProducts.includes(p.product_id)
+          ) || [];
 
-      await createRepairReport(data).unwrap(); 
-      router.push("/dashboard/repair-return")
-      toast.success("Repair report created successfully!");
-    } else {
-      // Manual entry
-      const data = {
-        customer_name: manualUser.name,
-        customer_email: manualUser.email,
-        customer_phone: manualUser.phone,
-        billing_address: manualBilling,
-        shipping_address: manualShipping,
-        products: manualProducts,
-        user_tracking_number: trackingNumber,
-        user_post_method: postMethod,
-      };
+        if (selectedProductDetails.length === 0) {
+          toast.error("Please select at least one product!");
+          return;
+        }
 
-      console.log("Manual Repair Report Data:", data);
-      await createRepairReport(data).unwrap();
-      toast.success("Manual repair report created successfully!");
+        const data = {
+          order_id: orderDetail.id,
+          customer_id: orderDetail.customer_id || orderDetail.id, // ensure correct customer id
+          customer_name: orderDetail.billing_address?.name,
+          customer_email: orderDetail.billing_address?.email,
+          customer_phone: orderDetail.billing_address?.phone,
+          billing_address: orderDetail.billing_address,
+          shipping_address: orderDetail.shipping_address,
+          products: selectedProductDetails,
+          user_tracking_number: trackingNumber,
+          user_post_method: postMethod,
+        };
+
+        await createRepairReport(data).unwrap();
+        router.push("/dashboard/repair-return");
+        toast.success("Repair report created successfully!");
+      } else {
+        // Manual entry
+        const data = {
+          customer_name: manualUser.name,
+          customer_email: manualUser.email,
+          customer_phone: manualUser.phone,
+          billing_address: manualBilling,
+          shipping_address: manualShipping,
+          products: manualProducts,
+          user_tracking_number: trackingNumber,
+          user_post_method: postMethod,
+        };
+        router.push("/dashboard/repair-return");
+        console.log("Manual Repair Report Data:", data);
+        await createRepairReport(data).unwrap();
+        toast.success("Manual repair report created successfully!");
+      }
+    } catch (error: any) {
+      console.error("Failed to create repair report:", error);
+      toast.error(error?.message || "Something went wrong!");
     }
-  } catch (error: any) {
-    console.error("Failed to create repair report:", error);
-    toast.error(error?.message || "Something went wrong!");
-  }
-};
-
+  };
 
   const handleAddManualProduct = () => {
     const newProduct = {
@@ -227,6 +230,7 @@ const OrderSelector = () => {
               options={orderOptions}
               value={selectedOrder}
               onChange={setSelectedOrder}
+              onInputChange={(inputValue) => setSearchText(inputValue)}
               placeholder="Search order number…"
               isSearchable
             />
@@ -568,10 +572,35 @@ const OrderSelector = () => {
           </section>
 
           <button
+            disabled={isLoading}
             onClick={handleSubmit}
-            className="w-full py-3 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition"
+            className={`w-full py-3 rounded-lg shadow text-white transition flex items-center justify-center gap-2
+    ${isLoading ? "bg-green-500 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"}
+  `}
           >
-            Submit
+            {isLoading && (
+              <svg
+                className="animate-spin h-5 w-5 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                ></path>
+              </svg>
+            )}
+            <span>{isLoading ? "Submitting..." : "Submit"}</span>
           </button>
         </div>
       </div>
