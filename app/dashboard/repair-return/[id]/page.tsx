@@ -17,7 +17,7 @@ const formatValue = (val: any, fallbackKey: string = "name") => {
   return val.toString();
 };
 
-const formatCurrency = (amount: number) => `$${amount.toFixed(2)}`;
+const formatCurrency = (amount: number) => `$${amount}`;
 
 const Card = ({ children }: { children: React.ReactNode }) => (
   <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-md">
@@ -29,7 +29,7 @@ const RepairReportDetailPage = () => {
   const { id } = useParams();
   const { data, isLoading, isError } = useGetRepairReportQuery(id);
   const report = data?.data?.result ?? null;
-
+  console.log(data, "This is data");
   // --- Notes ---
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
   const [noteText, setNoteText] = useState("");
@@ -45,6 +45,7 @@ const RepairReportDetailPage = () => {
 
   // --- Products ---
   const [products, setProducts] = useState(report?.products || []);
+  console.log(products, "this is product");
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [newProduct, setNewProduct] = useState({
     name: "",
@@ -143,6 +144,18 @@ const RepairReportDetailPage = () => {
       console.error(err);
     }
   };
+  const parsedProducts =
+    typeof products === "string" ? JSON.parse(products) : products;
+  // Parse the addresses
+  const billingAddress =
+    typeof report.billing_address === "string"
+      ? JSON.parse(report.billing_address)
+      : report.billing_address;
+
+  const shippingAddress =
+    typeof report.shipping_address === "string"
+      ? JSON.parse(report.shipping_address)
+      : report.shipping_address;
 
   return (
     <div className="p-8 space-y-8">
@@ -196,29 +209,31 @@ const RepairReportDetailPage = () => {
             </p>
           </div>
         </Card>
+
         <Card>
           <h2 className="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200">
             Billing Address
           </h2>
-          <p>{report.billing_address?.street}</p>
+          <p>{billingAddress?.street_address || billingAddress?.street}</p>
           <p>
-            {report.billing_address?.city},{" "}
-            {formatValue(report.billing_address?.state)}{" "}
-            {report.billing_address?.postcode}
+            {billingAddress?.city},{" "}
+            {billingAddress?.state?.name || billingAddress?.state}{" "}
+            {billingAddress?.postcode}
           </p>
-          <p>{formatValue(report.billing_address?.country)}</p>
+          <p>{billingAddress?.country?.name || billingAddress?.country}</p>
         </Card>
+
         <Card>
           <h2 className="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200">
             Shipping Address
           </h2>
-          <p>{report.shipping_address?.street}</p>
+          <p>{shippingAddress?.street_address || shippingAddress?.street}</p>
           <p>
-            {report.shipping_address?.city},{" "}
-            {formatValue(report.shipping_address?.state)}{" "}
-            {report.shipping_address?.postcode}
+            {shippingAddress?.city},{" "}
+            {shippingAddress?.state?.name || shippingAddress?.state}{" "}
+            {shippingAddress?.postcode}
           </p>
-          <p>{formatValue(report.shipping_address?.country)}</p>
+          <p>{shippingAddress?.country?.name || shippingAddress?.country}</p>
         </Card>
       </div>
 
@@ -257,7 +272,7 @@ const RepairReportDetailPage = () => {
                 </tr>
               </thead>
               <tbody>
-                {products.map((p: any, idx: number) => (
+                {parsedProducts.map((p: any, idx: number) => (
                   <tr
                     key={p.id || idx}
                     className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
@@ -333,7 +348,7 @@ const RepairReportDetailPage = () => {
 
         {report.notes?.length ? (
           <ul className="space-y-2">
-            {report.notes.map((n: any, idx: number) => (
+            {Array(report?.notes)?.map((n: any, idx: number) => (
               <li
                 key={idx}
                 className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border dark:border-gray-700"
@@ -599,9 +614,12 @@ const RepairReportDetailPage = () => {
 };
 
 export default RepairReportDetailPage;
-const ImageGallery = ({ images }: { images: string[] }) => {
-  if (!images || !images.length)
+const ImageGallery = ({ images }: { images?: string[] }) => {
+  // Ensure images is an array
+  if (!Array.isArray(images) || images.length === 0) {
     return <p className="text-gray-500">No images uploaded.</p>;
+  }
+
   return (
     <div className="flex flex-wrap gap-4 mt-2">
       {images.map((url, idx) => (
