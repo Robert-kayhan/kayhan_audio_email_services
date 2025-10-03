@@ -17,7 +17,7 @@ const formatValue = (val: any, fallbackKey: string = "name") => {
   return val.toString();
 };
 
-const formatCurrency = (amount: number) => `$${amount.toFixed(2)}`;
+const formatCurrency = (amount: number) => `$${amount}`;
 
 const Card = ({ children }: { children: React.ReactNode }) => (
   <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-md">
@@ -29,22 +29,18 @@ const RepairReportDetailPage = () => {
   const { id } = useParams();
   const { data, isLoading, isError } = useGetRepairReportQuery(id);
   const report = data?.data?.result ?? null;
-
+  console.log(report)
   // --- Notes ---
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
   const [noteText, setNoteText] = useState("");
 
   // --- Tracking ---
   const [isTrackingModalOpen, setIsTrackingModalOpen] = useState(false);
-  const [adminPostMethod, setAdminPostMethod] = useState(
-    report?.admin_post_method || ""
-  );
-  const [adminTrackingNumber, setAdminTrackingNumber] = useState(
-    report?.admin_tracking_number || ""
-  );
+  const [adminPostMethod, setAdminPostMethod] = useState("");
+  const [adminTrackingNumber, setAdminTrackingNumber] = useState("");
 
   // --- Products ---
-  const [products, setProducts] = useState(report?.products || []);
+  const [products, setProducts] = useState<any[]>([]);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [newProduct, setNewProduct] = useState({
     name: "",
@@ -54,32 +50,33 @@ const RepairReportDetailPage = () => {
 
   // --- File Uploads ---
   const [isReceivedFileModalOpen, setIsReceivedFileModalOpen] = useState(false);
-  const [userReceivedFiles, setUserReceivedFiles] = useState(
-    report?.user_received_productImages || []
-  );
-
+  const [userReceivedFiles, setUserReceivedFiles] = useState<string[]>([]);
   const [isSendFileModalOpen, setIsSendFileModalOpen] = useState(false);
-  const [productSendFiles, setProductSendFiles] = useState(
-    report?.product_send_productImages || []
-  );
+  const [productSendFiles, setProductSendFiles] = useState<string[]>([]);
 
   // --- Mutations ---
   const [addNotes, { isLoading: isAdding }] = useAddNotesMutation();
   const [updateRepairReport, { isLoading: isUpdating }] =
     useUpdateRepairReportMutation();
 
-  // Sync products and files when report data loads
+  // --- Sync report data when loaded ---
   useEffect(() => {
-    if (report?.products) setProducts(report.products);
-    if (report?.user_received_productImages)
-      setUserReceivedFiles(report.user_received_productImages);
-    if (report?.product_send_productImages)
-      setProductSendFiles(report.product_send_productImages);
-  }, [
-    report?.products,
-    report?.user_received_productImages,
-    report?.product_send_productImages,
-  ]);
+    if (!report) return;
+
+    // Parse products string if necessary
+    if (report.products) {
+      const parsed =
+        typeof report.products === "string"
+          ? JSON.parse(report.products)
+          : report.products;
+      setProducts(parsed);
+    }
+
+    setUserReceivedFiles(report.user_received_productImages || []);
+    setProductSendFiles(report.product_send_productImages || []);
+    setAdminPostMethod(report.admin_post_method || "");
+    setAdminTrackingNumber(report.admin_tracking_number || "");
+  }, [report]);
 
   if (isLoading)
     return <div className="p-6 text-gray-500">Loading repair report...</div>;
@@ -87,6 +84,17 @@ const RepairReportDetailPage = () => {
     return (
       <div className="p-6 text-red-500">Failed to load repair report.</div>
     );
+
+  // --- Parse Addresses ---
+  const billingAddress =
+    typeof report.billing_address === "string"
+      ? JSON.parse(report.billing_address)
+      : report.billing_address;
+
+  const shippingAddress =
+    typeof report.shipping_address === "string"
+      ? JSON.parse(report.shipping_address)
+      : report.shipping_address;
 
   // --- Handlers ---
   const handleAddNote = async () => {
@@ -131,7 +139,7 @@ const RepairReportDetailPage = () => {
   };
 
   const handleDeleteProduct = (id: number) => {
-    setProducts(products.filter((p: any) => p.id !== id));
+    setProducts(products.filter((p) => p.id !== id));
   };
 
   const handleSaveProducts = async () => {
@@ -144,6 +152,7 @@ const RepairReportDetailPage = () => {
     }
   };
 
+  // --- JSX ---
   return (
     <div className="p-8 space-y-8">
       {/* Header */}
@@ -196,29 +205,31 @@ const RepairReportDetailPage = () => {
             </p>
           </div>
         </Card>
+
         <Card>
           <h2 className="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200">
             Billing Address
           </h2>
-          <p>{report.billing_address?.street}</p>
+          <p>{billingAddress?.street_address || billingAddress?.street}</p>
           <p>
-            {report.billing_address?.city},{" "}
-            {formatValue(report.billing_address?.state)}{" "}
-            {report.billing_address?.postcode}
+            {billingAddress?.city},{" "}
+            {billingAddress?.state?.name || billingAddress?.state}{" "}
+            {billingAddress?.postcode}
           </p>
-          <p>{formatValue(report.billing_address?.country)}</p>
+          <p>{billingAddress?.country?.name || billingAddress?.country}</p>
         </Card>
+
         <Card>
           <h2 className="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200">
             Shipping Address
           </h2>
-          <p>{report.shipping_address?.street}</p>
+          <p>{shippingAddress?.street_address || shippingAddress?.street}</p>
           <p>
-            {report.shipping_address?.city},{" "}
-            {formatValue(report.shipping_address?.state)}{" "}
-            {report.shipping_address?.postcode}
+            {shippingAddress?.city},{" "}
+            {shippingAddress?.state?.name || shippingAddress?.state}{" "}
+            {shippingAddress?.postcode}
           </p>
-          <p>{formatValue(report.shipping_address?.country)}</p>
+          <p>{shippingAddress?.country?.name || shippingAddress?.country}</p>
         </Card>
       </div>
 
@@ -257,7 +268,7 @@ const RepairReportDetailPage = () => {
                 </tr>
               </thead>
               <tbody>
-                {products.map((p: any, idx: number) => (
+                {products.map((p, idx) => (
                   <tr
                     key={p.id || idx}
                     className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
@@ -304,6 +315,8 @@ const RepairReportDetailPage = () => {
           </p>
         </div>
       </Card>
+
+      {/* User Received Images */}
       <Card>
         <h2 className="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200">
           User Received Images
@@ -311,12 +324,14 @@ const RepairReportDetailPage = () => {
         <ImageGallery images={userReceivedFiles} />
       </Card>
 
+      {/* Product Send Images */}
       <Card>
         <h2 className="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200">
           Product Send Images
         </h2>
         <ImageGallery images={productSendFiles} />
       </Card>
+
       {/* Notes */}
       <Card>
         <div className="flex justify-between items-center mb-3">
@@ -333,7 +348,7 @@ const RepairReportDetailPage = () => {
 
         {report.notes?.length ? (
           <ul className="space-y-2">
-            {report.notes.map((n: any, idx: number) => (
+            {Array(report.notes).map((n, idx) => (
               <li
                 key={idx}
                 className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border dark:border-gray-700"
@@ -351,256 +366,160 @@ const RepairReportDetailPage = () => {
       </Card>
 
       {/* --- Modals Section --- */}
-
       {/* Note Modal */}
       {isNoteModalOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-          onClick={() => setIsNoteModalOpen(false)}
+        <Modal
+          title="➕ Add a New Note"
+          onClose={() => setIsNoteModalOpen(false)}
         >
-          <div
-            className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-2xl w-full max-w-md"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">
-              ➕ Add a New Note
-            </h3>
-            <textarea
-              value={noteText}
-              onChange={(e) => setNoteText(e.target.value)}
-              className="w-full p-3 border rounded-lg dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              rows={4}
-              placeholder="Write your note..."
-            />
-            <div className="flex justify-end mt-6 gap-3">
-              <button
-                onClick={() => setIsNoteModalOpen(false)}
-                className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleAddNote}
-                disabled={isAdding}
-                className={`px-5 py-2 rounded-lg text-white font-medium transition ${isAdding ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"}`}
-              >
-                💾 {isAdding ? "Saving..." : "Save Note"}
-              </button>
-            </div>
-          </div>
-        </div>
+          <textarea
+            value={noteText}
+            onChange={(e) => setNoteText(e.target.value)}
+            className="w-full p-3 border rounded-lg dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            rows={4}
+            placeholder="Write your note..."
+          />
+          <ModalActions
+            onCancel={() => setIsNoteModalOpen(false)}
+            onSave={handleAddNote}
+            loading={isAdding}
+            saveLabel="Save Note"
+          />
+        </Modal>
       )}
 
       {/* Admin Tracking Modal */}
       {isTrackingModalOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-          onClick={() => setIsTrackingModalOpen(false)}
+        <Modal
+          title="📝 Update Admin Tracking"
+          onClose={() => setIsTrackingModalOpen(false)}
         >
-          <div
-            className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-2xl w-full max-w-md"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">
-              📝 Update Admin Tracking
-            </h3>
-            <input
-              type="text"
-              placeholder="Admin Post Method"
-              value={adminPostMethod}
-              onChange={(e) => setAdminPostMethod(e.target.value)}
-              className="w-full p-3 mb-3 border rounded-lg dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-green-500 focus:outline-none"
-            />
-            <input
-              type="text"
-              placeholder="Admin Tracking Number"
-              value={adminTrackingNumber}
-              onChange={(e) => setAdminTrackingNumber(e.target.value)}
-              className="w-full p-3 mb-3 border rounded-lg dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-green-500 focus:outline-none"
-            />
-            <div className="flex justify-end mt-6 gap-3">
-              <button
-                onClick={() => setIsTrackingModalOpen(false)}
-                className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleUpdateTracking}
-                disabled={isUpdating}
-                className={`px-5 py-2 rounded-lg text-white font-medium transition ${isUpdating ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"}`}
-              >
-                💾 Save
-              </button>
-            </div>
-          </div>
-        </div>
+          <input
+            type="text"
+            placeholder="Admin Post Method"
+            value={adminPostMethod}
+            onChange={(e) => setAdminPostMethod(e.target.value)}
+            className="w-full p-3 mb-3 border rounded-lg dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-green-500 focus:outline-none"
+          />
+          <input
+            type="text"
+            placeholder="Admin Tracking Number"
+            value={adminTrackingNumber}
+            onChange={(e) => setAdminTrackingNumber(e.target.value)}
+            className="w-full p-3 mb-3 border rounded-lg dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-green-500 focus:outline-none"
+          />
+          <ModalActions
+            onCancel={() => setIsTrackingModalOpen(false)}
+            onSave={handleUpdateTracking}
+            loading={isUpdating}
+            saveLabel="Save"
+          />
+        </Modal>
       )}
 
       {/* Product Modal */}
       {isProductModalOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-          onClick={() => setIsProductModalOpen(false)}
+        <Modal
+          title="➕ Add Product"
+          onClose={() => setIsProductModalOpen(false)}
         >
-          <div
-            className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-2xl w-full max-w-md"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">
-              ➕ Add Product
-            </h3>
-            <input
-              type="text"
-              placeholder="Product Name"
-              value={newProduct.name}
-              onChange={(e) =>
-                setNewProduct({ ...newProduct, name: e.target.value })
-              }
-              className="w-full p-3 mb-3 border rounded-lg dark:bg-gray-800 dark:text-white"
-            />
-            <input
-              type="number"
-              placeholder="Quantity"
-              value={newProduct.quantity}
-              onChange={(e) =>
-                setNewProduct({
-                  ...newProduct,
-                  quantity: Number(e.target.value),
-                })
-              }
-              className="w-full p-3 mb-3 border rounded-lg dark:bg-gray-800 dark:text-white"
-            />
-            <input
-              type="number"
-              placeholder="Price"
-              value={newProduct.price}
-              onChange={(e) =>
-                setNewProduct({ ...newProduct, price: Number(e.target.value) })
-              }
-              className="w-full p-3 mb-3 border rounded-lg dark:bg-gray-800 dark:text-white"
-            />
-            <div className="flex justify-end mt-6 gap-3">
-              <button
-                onClick={() => setIsProductModalOpen(false)}
-                className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleAddProduct}
-                className="px-5 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
-              >
-                Add Product
-              </button>
-            </div>
-          </div>
-        </div>
+          <input
+            type="text"
+            placeholder="Product Name"
+            value={newProduct.name}
+            onChange={(e) =>
+              setNewProduct({ ...newProduct, name: e.target.value })
+            }
+            className="w-full p-3 mb-3 border rounded-lg dark:bg-gray-800 dark:text-white"
+          />
+          <input
+            type="number"
+            placeholder="Quantity"
+            value={newProduct.quantity}
+            onChange={(e) =>
+              setNewProduct({ ...newProduct, quantity: Number(e.target.value) })
+            }
+            className="w-full p-3 mb-3 border rounded-lg dark:bg-gray-800 dark:text-white"
+          />
+          <input
+            type="number"
+            placeholder="Price"
+            value={newProduct.price}
+            onChange={(e) =>
+              setNewProduct({ ...newProduct, price: Number(e.target.value) })
+            }
+            className="w-full p-3 mb-3 border rounded-lg dark:bg-gray-800 dark:text-white"
+          />
+          <ModalActions
+            onCancel={() => setIsProductModalOpen(false)}
+            onSave={handleAddProduct}
+            saveLabel="Add Product"
+          />
+        </Modal>
       )}
 
-      {/* --- File Upload Modals --- */}
-
-      {/* 1️⃣ User Received Product Images */}
+      {/* File Upload Modals */}
       {isReceivedFileModalOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-          onClick={() => setIsReceivedFileModalOpen(false)}
+        <Modal
+          title="📥 Upload Received Product Images"
+          onClose={() => setIsReceivedFileModalOpen(false)}
         >
-          <div
-            className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-2xl w-full max-w-lg"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">
-              📥 Upload Received Product Images
-            </h3>
-            {/* <FileUpload files={user */}
-            <FileUpload
-              files={userReceivedFiles}
-              setFiles={setUserReceivedFiles}
-            />
-            <div className="flex justify-end mt-6 gap-3">
-              <button
-                onClick={() => setIsReceivedFileModalOpen(false)}
-                className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition"
-              >
-                Close
-              </button>
-              <button
-                onClick={async () => {
-                  try {
-                    await updateRepairReport({
-                      id,
-                      data: { user_received_productImages: userReceivedFiles },
-                    }).unwrap();
-                    toast.success("Received images updated successfully!");
-                    setIsReceivedFileModalOpen(false);
-                  } catch (err) {
-                    toast.error("Failed to update received images");
-                    console.error(err);
-                  }
-                }}
-                className="px-5 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700"
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
+          <FileUpload
+            files={userReceivedFiles}
+            setFiles={setUserReceivedFiles}
+          />
+          <ModalActions
+            onCancel={() => setIsReceivedFileModalOpen(false)}
+            onSave={async () => {
+              try {
+                await updateRepairReport({
+                  id,
+                  data: { user_received_productImages: userReceivedFiles },
+                }).unwrap();
+                toast.success("Received images updated successfully!");
+                setIsReceivedFileModalOpen(false);
+              } catch (err) {
+                toast.error("Failed to update received images");
+              }
+            }}
+            saveLabel="Save"
+          />
+        </Modal>
       )}
 
-      {/* 2️⃣ Product Send Images */}
       {isSendFileModalOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-          onClick={() => setIsSendFileModalOpen(false)}
+        <Modal
+          title="📤 Upload Send Product Images"
+          onClose={() => setIsSendFileModalOpen(false)}
         >
-          <div
-            className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-2xl w-full max-w-lg"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">
-              📤 Upload Send Product Images
-            </h3>
-            <FileUpload
-              files={productSendFiles}
-              setFiles={setProductSendFiles}
-            />
-            <div className="flex justify-end mt-6 gap-3">
-              <button
-                onClick={() => setIsSendFileModalOpen(false)}
-                className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition"
-              >
-                Close
-              </button>
-              <button
-                onClick={async () => {
-                  try {
-                    await updateRepairReport({
-                      id,
-                      data: { product_send_productImages: productSendFiles },
-                    }).unwrap();
-                    toast.success("Send images updated successfully!");
-                    setIsSendFileModalOpen(false);
-                  } catch (err) {
-                    toast.error("Failed to update send images");
-                    console.error(err);
-                  }
-                }}
-                className="px-5 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700"
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
+          <FileUpload files={productSendFiles} setFiles={setProductSendFiles} />
+          <ModalActions
+            onCancel={() => setIsSendFileModalOpen(false)}
+            onSave={async () => {
+              try {
+                await updateRepairReport({
+                  id,
+                  data: { product_send_productImages: productSendFiles },
+                }).unwrap();
+                toast.success("Send images updated successfully!");
+                setIsSendFileModalOpen(false);
+              } catch (err) {
+                toast.error("Failed to update send images");
+              }
+            }}
+            saveLabel="Save"
+          />
+        </Modal>
       )}
     </div>
   );
 };
 
 export default RepairReportDetailPage;
-const ImageGallery = ({ images }: { images: string[] }) => {
-  if (!images || !images.length)
+
+// --- Image Gallery ---
+const ImageGallery = ({ images }: { images?: string[] }) => {
+  if (!Array.isArray(images) || images.length === 0)
     return <p className="text-gray-500">No images uploaded.</p>;
   return (
     <div className="flex flex-wrap gap-4 mt-2">
@@ -621,3 +540,58 @@ const ImageGallery = ({ images }: { images: string[] }) => {
     </div>
   );
 };
+
+// --- Generic Modal ---
+const Modal = ({
+  children,
+  title,
+  onClose,
+}: {
+  children: React.ReactNode;
+  title: string;
+  onClose: () => void;
+}) => (
+  <div
+    className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    onClick={onClose}
+  >
+    <div
+      className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-2xl w-full max-w-md"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <h3 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">
+        {title}
+      </h3>
+      {children}
+    </div>
+  </div>
+);
+
+// --- Modal Actions Buttons ---
+const ModalActions = ({
+  onCancel,
+  onSave,
+  loading = false,
+  saveLabel,
+}: {
+  onCancel: () => void;
+  onSave: () => void;
+  loading?: boolean;
+  saveLabel: string;
+}) => (
+  <div className="flex justify-end mt-6 gap-3">
+    <button
+      onClick={onCancel}
+      className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition"
+    >
+      Cancel
+    </button>
+    <button
+      onClick={onSave}
+      disabled={loading}
+      className={`px-5 py-2 rounded-lg text-white font-medium transition ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"}`}
+    >
+      {loading ? "Saving..." : saveLabel}
+    </button>
+  </div>
+);
