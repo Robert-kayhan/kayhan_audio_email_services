@@ -18,10 +18,10 @@ import {
   X,
   BookKeyIcon,
   ReceiptText,
-  ArchiveXIcon
+  ArchiveXIcon,
 } from "lucide-react";
 import { useLogoutMutation } from "@/store/api/AuthApi";
-
+import { Layers } from "lucide-react";
 const userInfo = {
   username: "karan",
 };
@@ -82,6 +82,7 @@ const navItems = [
   { icon: BookKeyIcon, label: "Booking", href: "/dashboard/booking/" },
   { icon: ReceiptText, label: "Invoice", href: "/dashboard/invoice" },
   { icon: Settings, label: "Repair and return", href: "/dashboard/repair-return" },
+  { icon: Layers, label: "Inventory", href: "/Inventory/departments/" },
 ];
 
 const Navigation = () => {
