@@ -16,13 +16,8 @@ const isOutOfWarranty = (orderDate: string) => {
 };
 
 const OrderSelector = () => {
-  const [orderOptions, setOrderOptions] = useState<
-    { value: number; label: string }[]
-  >([]);
-  const [selectedOrder, setSelectedOrder] = useState<{
-    value: number;
-    label: string;
-  } | null>(null);
+  const [orderOptions, setOrderOptions] = useState<{ value: number; label: string }[]>([]);
+  const [selectedOrder, setSelectedOrder] = useState<{ value: number; label: string } | null>(null);
   const [orderDetail, setOrderDetail] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -33,42 +28,21 @@ const OrderSelector = () => {
   const [searchText, setSearchText] = useState("");
 
   const [createRepairReport, { isLoading }] = useCreateRepairReportMutation();
+  const router = useRouter();
 
-  // Manual entry state (when no order exists)
-  const [manualUser, setManualUser] = useState({
-    name: "",
-    last_name: "",
-    email: "",
-    phone: "",
-  });
-  const [manualBilling, setManualBilling] = useState({
-    street: "",
-    city: "",
-    state: "",
-    country: "",
-    postcode: "",
-  });
-  const [manualShipping, setManualShipping] = useState({
-    street: "",
-    city: "",
-    state: "",
-    country: "",
-    postcode: "",
-  });
-  const [manualProducts, setManualProducts] = useState<
-    { id: number; name: string; price: number; quantity: number }[]
-  >([]);
+  // Manual entry state
+  const [manualUser, setManualUser] = useState({ name: "", last_name: "", email: "", phone: "" });
+  const [manualBilling, setManualBilling] = useState({ street: "", city: "", state: "", country: "", postcode: "" });
+  const [manualShipping, setManualShipping] = useState({ street: "", city: "", state: "", country: "", postcode: "" });
+  const [manualProducts, setManualProducts] = useState<{ id: number; name: string; price: number; quantity: number }[]>([]);
 
+  // Fetch orders when searchText changes (debounced)
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const res = await axios.get(
-          "https://api.kayhanaudio.com.au/v1/order/list",
-          {
-            params: { page: 2, status: "", search: searchText },
-          }
-        );
-        console.log(res);
+        const res = await axios.get("https://api.kayhanaudio.com.au/v1/order/list", {
+          params: { page: 1, status: "", search: searchText },
+        });
         if (res.data.success) {
           const options = res.data.data.result.map((o: any) => ({
             value: o.id,
@@ -80,17 +54,21 @@ const OrderSelector = () => {
         console.error(err);
       }
     };
-    fetchOrders();
-  }, []);
 
+    const debounce = setTimeout(() => {
+      if (searchText) fetchOrders();
+    }, 500);
+
+    return () => clearTimeout(debounce);
+  }, [searchText]);
+
+  // Fetch order details
   const handleFetchDetails = async () => {
     if (!selectedOrder) return;
     setLoading(true);
     setError("");
     try {
-      const res = await axios.get(
-        `https://api.kayhanaudio.com.au/v1/order/detail/${selectedOrder.value}`
-      );
+      const res = await axios.get(`https://api.kayhanaudio.com.au/v1/order/detail/${selectedOrder.value}`);
       if (res.data.success && res.data.data.result) {
         setOrderDetail(res.data.data.result);
         setSelectedProducts([]);
@@ -105,18 +83,14 @@ const OrderSelector = () => {
     }
   };
 
+  // Toggle product selection
   const handleProductToggle = (id: number) => {
-    console.log(id, "clg this is id");
-    const numId = Number(id); // ensure ID is a number
-    setSelectedProducts(
-      (prev) =>
-        prev.includes(numId)
-          ? prev.filter((p) => p !== numId) // unselect this product
-          : [...prev, numId] // select this product
+    setSelectedProducts(prev =>
+      prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]
     );
   };
-  const router = useRouter();
 
+  // Submit repair report
   const handleSubmit = async () => {
     try {
       if (!orderDetail && manualProducts.length === 0) {
@@ -125,11 +99,8 @@ const OrderSelector = () => {
       }
 
       if (orderDetail) {
-        // Filter selected products
         const selectedProductDetails =
-          orderDetail.products?.filter((p: any) =>
-            selectedProducts.includes(p.product_id)
-          ) || [];
+          orderDetail.products?.filter((p: any) => selectedProducts.includes(p.product_id)) || [];
 
         if (selectedProductDetails.length === 0) {
           toast.error("Please select at least one product!");
@@ -138,7 +109,7 @@ const OrderSelector = () => {
 
         const data = {
           order_id: orderDetail.id,
-          customer_id: orderDetail.customer_id || orderDetail.id, // ensure correct customer id
+          customer_id: orderDetail.customer_id || orderDetail.id,
           customer_name: orderDetail.billing_address?.name,
           customer_email: orderDetail.billing_address?.email,
           customer_phone: orderDetail.billing_address?.phone,
@@ -150,10 +121,9 @@ const OrderSelector = () => {
         };
 
         await createRepairReport(data).unwrap();
-        router.push("/dashboard/repair-return");
         toast.success("Repair report created successfully!");
+        router.push("/dashboard/repair-return");
       } else {
-        // Manual entry
         const data = {
           customer_name: manualUser.name,
           customer_email: manualUser.email,
@@ -164,10 +134,9 @@ const OrderSelector = () => {
           user_tracking_number: trackingNumber,
           user_post_method: postMethod,
         };
-        router.push("/dashboard/repair-return");
-        console.log("Manual Repair Report Data:", data);
         await createRepairReport(data).unwrap();
         toast.success("Manual repair report created successfully!");
+        router.push("/dashboard/repair-return");
       }
     } catch (error: any) {
       console.error("Failed to create repair report:", error);
@@ -175,53 +144,20 @@ const OrderSelector = () => {
     }
   };
 
+  // Manual products
   const handleAddManualProduct = () => {
-    const newProduct = {
-      id: Date.now(),
-      name: "",
-      price: 0,
-      quantity: 1,
-    };
+    const newProduct = { id: Date.now(), name: "", price: 0, quantity: 1 };
     setManualProducts([...manualProducts, newProduct]);
   };
 
-  const handleManualProductChange = (
-    id: number,
-    field: keyof (typeof manualProducts)[0],
-    value: any
-  ) => {
-    setManualProducts((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, [field]: value } : p))
-    );
+  const handleManualProductChange = (id: number, field: keyof typeof manualProducts[0], value: any) => {
+    setManualProducts(prev => prev.map(p => (p.id === id ? { ...p, [field]: value } : p)));
   };
 
-  // const handleSubmit = () => {
-  //   if (orderDetail) {
-  //     const selectedProductDetails =
-  //       orderDetail?.products?.filter((p: any) =>
-  //         selectedProducts.includes(p.id)
-  //       ) || [];
-  //     console.log("Selected Products:", selectedProductDetails);
-  //     console.log("Tracking Number:", trackingNumber);
-  //     console.log("Post Method:", postMethod);
-  //     console.log("Order ID:", orderDetail?.id);
-  //   } else {
-  //     console.log("Manual User:", manualUser);
-  //     console.log("Manual Billing:", manualBilling);
-  //     console.log("Manual Shipping:", manualShipping);
-  //     console.log("Manual Products:", manualProducts);
-  //     console.log("Tracking Number:", trackingNumber);
-  //     console.log("Post Method:", postMethod);
-  //   }
-  // };
-
-  console.log(orderDetail?.products);
   return (
     <div className="min-h-screen flex justify-center bg-gray-100 dark:bg-gray-900 p-6 transition-colors">
       <div className="bg-white dark:bg-gray-800 max-w-5xl w-full p-8 rounded-2xl shadow-lg transition-colors">
-        <h2 className="text-3xl font-bold mb-8 text-center text-gray-800 dark:text-gray-100">
-          Repair and return
-        </h2>
+        <h2 className="text-3xl font-bold mb-8 text-center text-gray-800 dark:text-gray-100">Repair and return</h2>
 
         {/* Order selector */}
         <div className="flex gap-3 mb-6">
@@ -230,7 +166,7 @@ const OrderSelector = () => {
               options={orderOptions}
               value={selectedOrder}
               onChange={setSelectedOrder}
-              onInputChange={(inputValue) => setSearchText(inputValue)}
+              onInputChange={setSearchText}
               placeholder="Search order number…"
               isSearchable
             />
@@ -249,103 +185,56 @@ const OrderSelector = () => {
         {/* Order details OR Manual Entry */}
         {orderDetail ? (
           <div className="space-y-8">
-            {/* Order header with warranty */}
+            {/* Order header */}
             <div className="p-6 border rounded-xl shadow-sm bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
-              <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
-                Order #{orderDetail.id || "N/A"}
-              </h3>
+              <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Order #{orderDetail.id || "N/A"}</h3>
               {orderDetail?.createdAt && (
                 <p className="text-sm mt-1 text-gray-600 dark:text-gray-300">
-                  Placed on:{" "}
-                  {new Date(orderDetail.createdAt).toLocaleDateString()}
+                  Placed on: {new Date(orderDetail.createdAt).toLocaleDateString()}
                 </p>
               )}
               {orderDetail?.createdAt && (
-                <p
-                  className={`text-sm font-semibold mt-2 ${
-                    isOutOfWarranty(orderDetail.createdAt)
-                      ? "text-red-500 dark:text-red-400"
-                      : "text-green-600 dark:text-green-400"
-                  }`}
-                >
-                  {isOutOfWarranty(orderDetail.createdAt)
-                    ? "Out of Warranty"
-                    : "Under Warranty"}
+                <p className={`text-sm font-semibold mt-2 ${isOutOfWarranty(orderDetail.createdAt) ? "text-red-500 dark:text-red-400" : "text-green-600 dark:text-green-400"}`}>
+                  {isOutOfWarranty(orderDetail.createdAt) ? "Out of Warranty" : "Under Warranty"}
                 </p>
               )}
             </div>
 
             {/* Customer Details */}
             <section className="p-6 border rounded-xl shadow-sm bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
-              <h4 className="font-semibold mb-2 text-gray-700 dark:text-gray-200">
-                Customer Details
-              </h4>
+              <h4 className="font-semibold mb-2 text-gray-700 dark:text-gray-200">Customer Details</h4>
               <div className="grid grid-cols-2 gap-4">
-                <input
-                  className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
-                  value={orderDetail.user_detail?.name || ""}
-                  readOnly
-                />
-                <input
-                  className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
-                  value={orderDetail.user_detail?.last_name || ""}
-                  readOnly
-                />
-                <input
-                  className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 col-span-2"
-                  value={orderDetail.user_detail?.email || ""}
-                  readOnly
-                />
-                <input
-                  className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 col-span-2"
-                  value={orderDetail.user_detail?.phone || ""}
-                  readOnly
-                />
+                <input className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100" value={orderDetail.user_detail?.name || ""} readOnly />
+                <input className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100" value={orderDetail.user_detail?.last_name || ""} readOnly />
+                <input className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 col-span-2" value={orderDetail.user_detail?.email || ""} readOnly />
+                <input className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 col-span-2" value={orderDetail.user_detail?.phone || ""} readOnly />
               </div>
             </section>
 
             {/* Billing + Shipping */}
             <div className="grid md:grid-cols-2 gap-6">
               <section className="p-6 border rounded-xl shadow-sm bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
-                <h4 className="font-semibold mb-3 text-gray-700 dark:text-gray-200">
-                  Billing Address
-                </h4>
+                <h4 className="font-semibold mb-3 text-gray-700 dark:text-gray-200">Billing Address</h4>
                 <div className="space-y-2 text-gray-800 dark:text-gray-100">
                   <p>{orderDetail.billing_address?.street_address}</p>
-                  <p>
-                    {orderDetail.billing_address?.city},{" "}
-                    {orderDetail.billing_address?.state_name}
-                  </p>
-                  <p>
-                    {orderDetail.billing_address?.country_name} -{" "}
-                    {orderDetail.billing_address?.postcode}
-                  </p>
+                  <p>{orderDetail.billing_address?.city}, {orderDetail.billing_address?.state_name}</p>
+                  <p>{orderDetail.billing_address?.country_name} - {orderDetail.billing_address?.postcode}</p>
                 </div>
               </section>
 
               <section className="p-6 border rounded-xl shadow-sm bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
-                <h4 className="font-semibold mb-3 text-gray-700 dark:text-gray-200">
-                  Shipping Address
-                </h4>
+                <h4 className="font-semibold mb-3 text-gray-700 dark:text-gray-200">Shipping Address</h4>
                 <div className="space-y-2 text-gray-800 dark:text-gray-100">
                   <p>{orderDetail.shipping_address?.street_address}</p>
-                  <p>
-                    {orderDetail.shipping_address?.city},{" "}
-                    {orderDetail.shipping_address?.state_name}
-                  </p>
-                  <p>
-                    {orderDetail.shipping_address?.country_name} -{" "}
-                    {orderDetail.shipping_address?.postcode}
-                  </p>
+                  <p>{orderDetail.shipping_address?.city}, {orderDetail.shipping_address?.state_name}</p>
+                  <p>{orderDetail.shipping_address?.country_name} - {orderDetail.shipping_address?.postcode}</p>
                 </div>
               </section>
             </div>
 
             {/* Products */}
             <section className="p-6 border rounded-xl shadow-sm bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
-              <h4 className="font-semibold mb-4 text-gray-700 dark:text-gray-200">
-                Products
-              </h4>
+              <h4 className="font-semibold mb-4 text-gray-700 dark:text-gray-200">Products</h4>
               <div className="overflow-x-auto">
                 <table className="w-full border rounded-lg overflow-hidden text-sm">
                   <thead className="bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200">
@@ -357,31 +246,14 @@ const OrderSelector = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {orderDetail.products?.map((prod: any, idx: number) => (
-                      <tr
-                        key={idx}
-                        className="hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-                      >
+                    {orderDetail.products?.map((prod: any) => (
+                      <tr key={prod.product_id} className="hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
                         <td className="border px-3 py-2 text-center">
-                          <input
-                            type="checkbox"
-                            checked={selectedProducts.includes(
-                              Number(prod.product_id)
-                            )} // only this product
-                            onChange={() =>
-                              handleProductToggle(Number(prod?.product_id))
-                            }
-                          />
+                          <input type="checkbox" checked={selectedProducts.includes(prod.product_id)} onChange={() => handleProductToggle(prod.product_id)} />
                         </td>
-                        <td className="border px-3 py-2 text-gray-800 dark:text-gray-100">
-                          {prod.name}
-                        </td>
-                        <td className="border px-3 py-2 text-gray-800 dark:text-gray-100">
-                          ${prod.price}
-                        </td>
-                        <td className="border px-3 py-2 text-gray-800 dark:text-gray-100">
-                          {prod.quantity}
-                        </td>
+                        <td className="border px-3 py-2 text-gray-800 dark:text-gray-100">{prod.name}</td>
+                        <td className="border px-3 py-2 text-gray-800 dark:text-gray-100">${prod.price}</td>
+                        <td className="border px-3 py-2 text-gray-800 dark:text-gray-100">{prod.quantity}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -390,95 +262,37 @@ const OrderSelector = () => {
             </section>
           </div>
         ) : (
-          /* Manual entry when no order */
+          // Manual entry
           <div className="space-y-8">
-            <p className="text-gray-700 dark:text-gray-300">
-              No order selected. Enter details manually:
-            </p>
+            <p className="text-gray-700 dark:text-gray-300">No order selected. Enter details manually:</p>
 
             {/* User */}
             <section className="p-6 border rounded-xl bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
-              <h4 className="font-semibold mb-2 text-gray-700 dark:text-gray-200">
-                User Details
-              </h4>
+              <h4 className="font-semibold mb-2 text-gray-700 dark:text-gray-200">User Details</h4>
               <div className="grid grid-cols-2 gap-4">
-                <input
-                  placeholder="First Name"
-                  className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
-                  value={manualUser.name}
-                  onChange={(e) =>
-                    setManualUser({ ...manualUser, name: e.target.value })
-                  }
-                />
-                <input
-                  placeholder="Last Name"
-                  className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
-                  value={manualUser.last_name}
-                  onChange={(e) =>
-                    setManualUser({ ...manualUser, last_name: e.target.value })
-                  }
-                />
-                <input
-                  placeholder="Email"
-                  className="border p-2 rounded-lg col-span-2 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
-                  value={manualUser.email}
-                  onChange={(e) =>
-                    setManualUser({ ...manualUser, email: e.target.value })
-                  }
-                />
-                <input
-                  placeholder="Phone"
-                  className="border p-2 rounded-lg col-span-2 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
-                  value={manualUser.phone}
-                  onChange={(e) =>
-                    setManualUser({ ...manualUser, phone: e.target.value })
-                  }
-                />
+                <input placeholder="First Name" className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100" value={manualUser.name} onChange={(e) => setManualUser({ ...manualUser, name: e.target.value })} />
+                <input placeholder="Last Name" className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100" value={manualUser.last_name} onChange={(e) => setManualUser({ ...manualUser, last_name: e.target.value })} />
+                <input placeholder="Email" className="border p-2 rounded-lg col-span-2 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100" value={manualUser.email} onChange={(e) => setManualUser({ ...manualUser, email: e.target.value })} />
+                <input placeholder="Phone" className="border p-2 rounded-lg col-span-2 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100" value={manualUser.phone} onChange={(e) => setManualUser({ ...manualUser, phone: e.target.value })} />
               </div>
             </section>
 
             {/* Billing + Shipping */}
             <div className="grid md:grid-cols-2 gap-6">
               <section className="p-6 border rounded-xl bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
-                <h4 className="font-semibold mb-2 text-gray-700 dark:text-gray-200">
-                  Billing Address
-                </h4>
+                <h4 className="font-semibold mb-2 text-gray-700 dark:text-gray-200">Billing Address</h4>
                 <div className="space-y-2">
                   {Object.keys(manualBilling).map((key) => (
-                    <input
-                      key={key}
-                      placeholder={key}
-                      className="border p-2 rounded-lg w-full bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
-                      value={(manualBilling as any)[key]}
-                      onChange={(e) =>
-                        setManualBilling({
-                          ...manualBilling,
-                          [key]: e.target.value,
-                        })
-                      }
-                    />
+                    <input key={key} placeholder={key} className="border p-2 rounded-lg w-full bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100" value={(manualBilling as any)[key]} onChange={(e) => setManualBilling({ ...manualBilling, [key]: e.target.value })} />
                   ))}
                 </div>
               </section>
 
               <section className="p-6 border rounded-xl bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
-                <h4 className="font-semibold mb-2 text-gray-700 dark:text-gray-200">
-                  Shipping Address
-                </h4>
+                <h4 className="font-semibold mb-2 text-gray-700 dark:text-gray-200">Shipping Address</h4>
                 <div className="space-y-2">
                   {Object.keys(manualShipping).map((key) => (
-                    <input
-                      key={key}
-                      placeholder={key}
-                      className="border p-2 rounded-lg w-full bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
-                      value={(manualShipping as any)[key]}
-                      onChange={(e) =>
-                        setManualShipping({
-                          ...manualShipping,
-                          [key]: e.target.value,
-                        })
-                      }
-                    />
+                    <input key={key} placeholder={key} className="border p-2 rounded-lg w-full bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100" value={(manualShipping as any)[key]} onChange={(e) => setManualShipping({ ...manualShipping, [key]: e.target.value })} />
                   ))}
                 </div>
               </section>
@@ -486,59 +300,14 @@ const OrderSelector = () => {
 
             {/* Products */}
             <section className="p-6 border rounded-xl bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
-              <h4 className="font-semibold mb-3 text-gray-700 dark:text-gray-200">
-                Products
-              </h4>
-              <button
-                onClick={handleAddManualProduct}
-                className="mb-3 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
-              >
-                Add Product
-              </button>
+              <h4 className="font-semibold mb-3 text-gray-700 dark:text-gray-200">Products</h4>
+              <button onClick={handleAddManualProduct} className="mb-3 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition">Add Product</button>
               <div className="space-y-3">
                 {manualProducts.map((prod) => (
-                  <div
-                    key={prod.id}
-                    className="grid grid-cols-4 gap-3 items-center"
-                  >
-                    <input
-                      placeholder="Name"
-                      className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
-                      value={prod.name}
-                      onChange={(e) =>
-                        handleManualProductChange(
-                          prod.id,
-                          "name",
-                          e.target.value
-                        )
-                      }
-                    />
-                    <input
-                      type="number"
-                      placeholder="Price"
-                      className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
-                      value={prod.price}
-                      onChange={(e) =>
-                        handleManualProductChange(
-                          prod.id,
-                          "price",
-                          Number(e.target.value)
-                        )
-                      }
-                    />
-                    <input
-                      type="number"
-                      placeholder="Quantity"
-                      className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
-                      value={prod.quantity}
-                      onChange={(e) =>
-                        handleManualProductChange(
-                          prod.id,
-                          "quantity",
-                          Number(e.target.value)
-                        )
-                      }
-                    />
+                  <div key={prod.id} className="grid grid-cols-4 gap-3 items-center">
+                    <input placeholder="Name" className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100" value={prod.name} onChange={(e) => handleManualProductChange(prod.id, "name", e.target.value)} />
+                    <input type="number" placeholder="Price" className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100" value={prod.price} onChange={(e) => handleManualProductChange(prod.id, "price", Number(e.target.value))} />
+                    <input type="number" placeholder="Quantity" className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100" value={prod.quantity} onChange={(e) => handleManualProductChange(prod.id, "quantity", Number(e.target.value))} />
                   </div>
                 ))}
               </div>
@@ -546,61 +315,22 @@ const OrderSelector = () => {
           </div>
         )}
 
-        {/* Shipping Info + Submit (shared) */}
+        {/* Shipping Info + Submit */}
         <div className="mt-8 space-y-6">
-          {/* Shipping Info */}
           <section className="p-6 border rounded-xl shadow-sm bg-gray-50 dark:bg-gray-700 dark:border-gray-600 space-y-4">
-            <h4 className="font-semibold text-gray-700 dark:text-gray-200">
-              Shipping Info
-            </h4>
+            <h4 className="font-semibold text-gray-700 dark:text-gray-200">Shipping Info</h4>
             <div className="grid grid-cols-2 gap-4">
-              <input
-                type="text"
-                placeholder="Tracking Number"
-                className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
-                value={trackingNumber}
-                onChange={(e) => setTrackingNumber(e.target.value)}
-              />
-              <input
-                type="text"
-                placeholder="Post Method"
-                className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
-                value={postMethod}
-                onChange={(e) => setPostMethod(e.target.value)}
-              />
+              <input type="text" placeholder="Tracking Number" className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100" value={trackingNumber} onChange={(e) => setTrackingNumber(e.target.value)} />
+              <input type="text" placeholder="Post Method" className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100" value={postMethod} onChange={(e) => setPostMethod(e.target.value)} />
             </div>
           </section>
 
           <button
-            disabled={isLoading}
             onClick={handleSubmit}
-            className={`w-full py-3 rounded-lg shadow text-white transition flex items-center justify-center gap-2
-    ${isLoading ? "bg-green-500 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"}
-  `}
+            disabled={isLoading}
+            className="w-full py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg shadow transition disabled:opacity-50"
           >
-            {isLoading && (
-              <svg
-                className="animate-spin h-5 w-5 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                ></path>
-              </svg>
-            )}
-            <span>{isLoading ? "Submitting..." : "Submit"}</span>
+            {isLoading ? "Submitting…" : "Create Repair Report"}
           </button>
         </div>
       </div>
