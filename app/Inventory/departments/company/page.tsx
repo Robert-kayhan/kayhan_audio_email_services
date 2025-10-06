@@ -15,6 +15,7 @@ type Channel = {
 };
 
 const columns: Column<Channel>[] = [
+  { header: "ID", accessor: "id", sortable: true },
   { header: "Name", accessor: "name", sortable: true },
   { header: "Description", accessor: "description", sortable: true },
   { header: "Created At", accessor: "createdAt" },
@@ -47,6 +48,10 @@ const ChannelPage = () => {
     page: currentPage,
     limit,
     search,
+  } , {
+    refetchOnMountOrArgChange: true, 
+    refetchOnFocus: true, 
+    pollingInterval: 10000,
   });
 
   const [deleteDepartment] = useDeletecompanyMutation();

@@ -82,7 +82,28 @@ const navItems = [
   { icon: BookKeyIcon, label: "Booking", href: "/dashboard/booking/" },
   { icon: ReceiptText, label: "Invoice", href: "/dashboard/invoice" },
   { icon: Settings, label: "Repair and return", href: "/dashboard/repair-return" },
-  { icon: Layers, label: "Inventory", href: "/Inventory/departments/" },
+  { icon: Layers, label: "Inventory", href: "#" ,subItems: [
+     {
+        label: "Channel",
+        href: "/Inventory/channel",
+      },
+      {
+        label: "Departments ",
+        href: "/Inventory/departments",
+      },
+      {
+        label: "Company",
+        href: "/Inventory/departments/company",
+      },
+      {
+        label: "Product",
+        href: "/Inventory/product/",
+      },
+      {
+        label: "Orders",
+        href: "/Inventory/orders",
+      },
+    ], },
 ];
 
 const Navigation = () => {
@@ -113,7 +134,7 @@ const Navigation = () => {
       <div key={item.label}>
         <div
           onClick={() => (item.subItems ? toggleMenu(item.label) : undefined)}
-          className="flex items-center justify-between hover:translate-x-2 transition-transform cursor-pointer mt-6"
+          className="flex items-center justify-between hover:translate-x-2 transition-transform cursor-pointer mt-6 scroll-smooth"
         >
           <Link href={item.href} className="flex items-center gap-2">
             <item.icon size={20} />

@@ -194,10 +194,24 @@ export default function BookingForm() {
 
   const handleSubmit = async () => {
     try {
-      // Basic validation (similar as before)
+      // Basic validation
       if (!formData.userInfo.firstname?.trim())
         return alert("First name is required");
       if (!formData.items.list.length) return alert("Add at least one item");
+
+      // Calculate total amount from items
+      const totalAmount = formData.items.totalAmount || 0;
+      console.log(totalAmount)
+      // Payment validation
+      if (formData.payment.type === "Full") {
+        const paidAmount = formData.payment.partialAmount
+          ? parseFloat(formData.payment.partialAmount)
+          : totalAmount;
+
+        if (paidAmount > totalAmount || Number(formData.payment.partialAmount) > totalAmount) {
+          return alert("Payment cannot exceed total amount");
+        }
+      }
 
       const payload = {
         userData: formData.userInfo,
@@ -206,11 +220,13 @@ export default function BookingForm() {
         items: formData.items.list,
         mobileDetails: formData.mobileDetails,
         paymentDetails: formData.payment,
-        totalAmount: formData.items,
+        totalAmount: totalAmount,
       };
 
       await createBooking(payload).unwrap();
       alert("Booking created successfully!");
+
+      // Reset form
       setFormData({
         userInfo: { firstname: "", lastname: "", email: "", phone: "" },
         vehicle: {
@@ -229,16 +245,14 @@ export default function BookingForm() {
           notes: "",
         },
         items: {
-          list: [], // added items
-          newItem: "", // current input for item name
-          newCharge: "", // current input for item charge
-          discountType: "amount", // or "percentage"
-          discountValue: 0, // current discount value
-          totalAmount: 0, // total after discount
-          discountAmount: 0, // calculated discount amount
+          list: [],
+          newItem: "",
+          newCharge: "",
+          discountType: "amount",
+          discountValue: 0,
+          totalAmount: 0,
+          discountAmount: 0,
         },
-
-        // items: { list: [], newItem: "" ,},
         mobileDetails: {
           routePolyline: "",
           parking: "",
@@ -249,9 +263,7 @@ export default function BookingForm() {
           distance: "",
           duration: "",
           pickupLocation: { lat: 30.6565217, lng: 76.5649627 },
-
           dropLocation: { lat: null, lng: null },
-          // routeDistance : {}
         },
         payment: {
           category: "Instant",
@@ -260,10 +272,11 @@ export default function BookingForm() {
           partialAmount: "",
         },
       });
+
       router.push("/dashboard/booking");
-    } catch (err:any) {
+    } catch (err: any) {
       console.error("Booking failed:", err);
-      alert(err.data.message || "Booking faild");
+      alert(err?.data?.message || "Booking failed");
     }
   };
 
