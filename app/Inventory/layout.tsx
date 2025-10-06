@@ -1,6 +1,6 @@
 // app/layout.tsx
 import type { Metadata } from "next";
-import Navigation from "@/components/layout/InventrorySideBar";
+import Navigation from "@/components/layout/Sidebar";
 import AuthClient from "@/components/global/AuthProvider"; // ✅ this is the correct client-side wrapper
 
 export const metadata: Metadata = {
