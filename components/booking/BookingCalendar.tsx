@@ -9,10 +9,17 @@ const BookingCalendar = () => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   // Fetch bookings
-  const { data, isLoading, isError } = useGetAllBookingQuery({
-    page: 1,
-    limit: 10000,
-  });
+  const { data, isLoading, isError } = useGetAllBookingQuery(
+    {
+      page: 1,
+      limit: 1000,
+    },
+    {
+      refetchOnMountOrArgChange: true,
+      refetchOnFocus: true,
+      pollingInterval: 10000,
+    }
+  );
   console.log(data, "this is data");
   // keep full booking object so nested data exists
   const bookings = useMemo(() => {
@@ -61,26 +68,25 @@ const BookingCalendar = () => {
     return "";
   };
 
-const tileContent = ({ date, view }: { date: Date; view: string }) => {
-  if (view !== "month") return null;
-  const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-  const dayBookings = bookingsByDate[key];
-  if (!dayBookings) return null;
+  const tileContent = ({ date, view }: { date: Date; view: string }) => {
+    if (view !== "month") return null;
+    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+    const dayBookings = bookingsByDate[key];
+    if (!dayBookings) return null;
 
-  return (
-    <div className="flex justify-center mt-1">
-      <span
-        className={`inline-block w-2 h-2 rounded-full ${
-          dayBookings.length >= 2 ? "bg-red-500" : "bg-orange-500"
-        }`}
-      ></span>
-      <span className="ml-1 text-xs text-gray-700 dark:text-gray-200">
-        {dayBookings.length}
-      </span>
-    </div>
-  );
-};
-
+    return (
+      <div className="flex justify-center mt-1">
+        <span
+          className={`inline-block w-2 h-2 rounded-full ${
+            dayBookings.length >= 2 ? "bg-red-500" : "bg-orange-500"
+          }`}
+        ></span>
+        <span className="ml-1 text-xs text-gray-700 dark:text-gray-200">
+          {dayBookings.length}
+        </span>
+      </div>
+    );
+  };
 
   if (isLoading)
     return (
@@ -100,13 +106,11 @@ const tileContent = ({ date, view }: { date: Date; view: string }) => {
 
   return (
     <div className="p-4 bg-white dark:bg-gray-900 ">
- 
       <Calendar
         onChange={handleDateChange}
         value={selectedDate}
         tileContent={tileContent}
         tileClassName="text-black"
-
         // remove bg here – only set text color to ensure visible
         // tileClassName={({ date, view }) => {
         //   if (view !== "month") return "";

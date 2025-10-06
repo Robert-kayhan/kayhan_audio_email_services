@@ -157,6 +157,10 @@ export default function BookingTablePage() {
     type,
     startDate,
     endDate,
+  } ,{
+    pollingInterval : 10000,
+    refetchOnFocus : true,
+    refetchOnMountOrArgChange: true, 
   });
 
   const bookings = data?.bookings ?? [];
