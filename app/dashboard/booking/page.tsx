@@ -158,7 +158,7 @@ export default function BookingTablePage() {
     startDate,
     endDate,
   } ,{
-    pollingInterval : 10000,
+    // pollingInterval : 10000,
     refetchOnFocus : true,
     refetchOnMountOrArgChange: true, 
   });
@@ -282,7 +282,7 @@ export default function BookingTablePage() {
           >
             <option value="">All Status</option>
             <option value="Pending">Pending</option>
-            <option value="Confirmed">Confirmed</option>
+            <option value="Rescheduled">Rescheduled</option>
             <option value="Completed">Completed</option>
             <option value="Cancelled">Cancelled</option>
           </select>

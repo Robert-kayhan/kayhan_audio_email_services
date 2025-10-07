@@ -13,6 +13,8 @@ import { ItemsStep } from "@/components/booking/ItemsStep";
 import { useRouter } from "next/navigation";
 import { PaymentStep } from "@/components/booking/PaymentStep";
 import BookingCalendar from "@/components/booking/BookingCalendar";
+import { validateFormData } from "@/util/validateFormData";
+
 // Step Definitions
 const steps = [
   { title: "User Info", icon: User },
@@ -193,22 +195,31 @@ export default function BookingForm() {
   const router = useRouter();
 
   const handleSubmit = async () => {
+    validateFormData(formData);
     try {
       // Basic validation
       if (!formData.userInfo.firstname?.trim())
         return alert("First name is required");
       if (!formData.items.list.length) return alert("Add at least one item");
+      if (!formData.payment.methods.length)
+        return alert("Please select Payment method ");
 
       // Calculate total amount from items
       const totalAmount = formData.items.totalAmount || 0;
-      console.log(totalAmount)
+
+      if (totalAmount <= 0) return  alert("Total amount must be greater than 0"); 
+      
+      
       // Payment validation
       if (formData.payment.type === "Full") {
         const paidAmount = formData.payment.partialAmount
           ? parseFloat(formData.payment.partialAmount)
           : totalAmount;
 
-        if (paidAmount > totalAmount || Number(formData.payment.partialAmount) > totalAmount) {
+        if (
+          paidAmount > totalAmount ||
+          Number(formData.payment.partialAmount) > totalAmount
+        ) {
           return alert("Payment cannot exceed total amount");
         }
       }
@@ -221,8 +232,9 @@ export default function BookingForm() {
         mobileDetails: formData.mobileDetails,
         paymentDetails: formData.payment,
         totalAmount: totalAmount,
+        discountAmount: formData.items.discountAmount,
       };
-
+      console.log(payload, "this is payload");
       await createBooking(payload).unwrap();
       alert("Booking created successfully!");
 

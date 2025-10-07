@@ -21,7 +21,7 @@ export default function JobReportViewPage() {
   const router = useRouter();
   const { data: existingJob, isLoading } = useGetJobByBookingIdQuery(id);
   const report = existingJob?.report;
-
+  console.log(report)
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-gray-100">
@@ -39,20 +39,17 @@ export default function JobReportViewPage() {
   }
 
   // Parse photos
-  let beforePhotos: string[] = [];
-  let afterPhotos: string[] = [];
+  // let beforePhotos: string[] = [];
+  // let afterPhotos: string[] = [];
 
-  try {
-    beforePhotos = JSON.parse(report.beforePhotos ?? "[]");
-  } catch {
-    beforePhotos = [];
-  }
+const beforePhotos = Array.isArray(report.beforePhotos)
+  ? report.beforePhotos
+  : JSON.parse(report.beforePhotos || "[]");
 
-  try {
-    afterPhotos = JSON.parse(report.afterPhotos ?? "[]");
-  } catch {
-    afterPhotos = [];
-  }
+const afterPhotos = Array.isArray(report.afterPhotos)
+  ? report.afterPhotos
+  : JSON.parse(report.afterPhotos || "[]");
+
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 p-6">

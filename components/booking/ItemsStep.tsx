@@ -40,6 +40,7 @@ export const ItemsStep: React.FC<Props> = ({ items, setItems }) => {
         newItem: "",
         newCharge: "",
         totalAmount: total,
+        // discountType ,
         discountAmount,
       });
     }
@@ -63,7 +64,7 @@ export const ItemsStep: React.FC<Props> = ({ items, setItems }) => {
       ...items,
       list: updatedList,
       totalAmount: total,
-      discountAmount,
+      discountAmount ,
     });
   };
 
@@ -80,6 +81,7 @@ export const ItemsStep: React.FC<Props> = ({ items, setItems }) => {
       ...items,
       discountType: type,
       discountValue: value,
+      
       discountAmount,
       totalAmount: total,
     });
