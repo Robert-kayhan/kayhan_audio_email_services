@@ -174,7 +174,7 @@ export default function JobReportPage() {
         alert("Job Report Updated Successfully!");
       }
       refetch();
-      router.push("/dashboard/booking/job")
+      router.push(`/dashboard/booking/job/${id}`)
     } catch (err: any) {
       console.error(err);
       alert(

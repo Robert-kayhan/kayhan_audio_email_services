@@ -9,7 +9,15 @@ import {
   Polyline,
   useLoadScript,
 } from "@react-google-maps/api";
-import { Check, Calendar, X, CreditCard, View, CheckCircle, ArrowLeft } from "lucide-react";
+import {
+  Check,
+  Calendar,
+  X,
+  CreditCard,
+  View,
+  CheckCircle,
+  ArrowLeft,
+} from "lucide-react";
 import toast from "react-hot-toast";
 import {
   useCancelJobMutation,
@@ -26,7 +34,11 @@ const containerStyle = {
 };
 const BookingDetailsPage = () => {
   const { id } = useParams();
-  const { data, isLoading, refetch } = useGetBookingByIdQuery(id as string);
+  const { data, isLoading, refetch } = useGetBookingByIdQuery(id as string, {
+    // pollingInterval : 1000,
+    refetchOnFocus: true,
+    refetchOnMountOrArgChange: true,
+  });
   console.log(data, "this is dara ");
   const [showRescheduleModal, setShowRescheduleModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
@@ -104,7 +116,9 @@ const BookingDetailsPage = () => {
       setIsCancelling(false);
     }
   };
-
+  const latestStatus = booking?.reports?.[booking.reports.length - 1]?.status;
+  const canAddReport =
+    !booking?.reports?.length || (latestStatus === "Rescheduled" && latestStatus !== "In Progress");
   const handleCompleteJob = () => {
     toast.success("Job marked as completed!");
     // Implement your API logic here if needed
@@ -119,7 +133,7 @@ const BookingDetailsPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white p-6">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Heading */}
-       <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold flex items-center gap-3">
             <CheckCircle className="w-8 h-8 text-blue-500" />
             Booking
@@ -135,7 +149,7 @@ const BookingDetailsPage = () => {
         {/* Action Panel */}
         {/* Action Panel */}
         <div className="flex flex-wrap justify-center gap-4 p-6 bg-gray-900/40 backdrop-blur-xl rounded-3xl shadow-xl">
-          {(booking?.reports[0]?.status === "Rescheduled" ||
+          {/* {(booking?.reports[0]?.status === "Rescheduled" ||
             booking?.reports?.length === 0) && (
             <button
               className="flex items-center gap-2 px-6 py-3 font-semibold text-white rounded-full bg-gradient-to-r from-green-400 to-green-600 shadow-lg hover:scale-105 hover:shadow-2xl transition-all duration-300"
@@ -143,16 +157,27 @@ const BookingDetailsPage = () => {
             >
               Add Job Report
             </button>
+          )} */}
+          {canAddReport && (
+            <button
+              className="flex items-center gap-2 px-6 py-3 font-semibold text-white rounded-full
+               bg-gradient-to-r from-green-400 to-green-600 shadow-lg
+               hover:scale-105 hover:shadow-2xl transition-all duration-300"
+              onClick={() => setShowJobReportModal(true)}
+            >
+              Add Job Report
+            </button>
           )}
 
-          {booking?.reports[0]?.status == "In Progress" && (
-            <Link
-              href={`/dashboard/booking/job/update/${id}`}
-              className="flex items-center gap-2 px-6 py-3 font-semibold text-white rounded-full bg-gradient-to-r from-green-400 to-green-600 shadow-lg hover:scale-105 hover:shadow-2xl transition-all duration-300"
-            >
-              <Check size={20} /> Complete Job
-            </Link>
-          )}
+          {(booking?.reports[0]?.status == "In Progress" ||  booking?.reports[0]?.status == "In Progress" ) &&
+             (
+              <Link
+                href={`/dashboard/booking/job/update/${id}`}
+                className="flex items-center gap-2 px-6 py-3 font-semibold text-white rounded-full bg-gradient-to-r from-green-400 to-green-600 shadow-lg hover:scale-105 hover:shadow-2xl transition-all duration-300"
+              >
+                <Check size={20} /> Complete Job
+              </Link>
+            )}
           {booking?.reports?.length !== 0 &&
             booking?.reports[0]?.status !== "In Progress" && (
               <Link
@@ -164,20 +189,20 @@ const BookingDetailsPage = () => {
             )}
 
           {/* {booking?.reports?.length == 0 && ( */}
-            <>
-              <button
-                onClick={() => setShowRescheduleModal(true)}
-                className="flex items-center gap-2 px-6 py-3 font-semibold text-white rounded-full bg-gradient-to-r from-yellow-400 to-yellow-600 shadow-lg hover:scale-105 hover:shadow-2xl transition-all duration-300"
-              >
-                <Calendar size={20} /> Reschedule Job
-              </button>
-              <button
-                onClick={() => setShowCancelModal(true)}
-                className="flex items-center gap-2 px-6 py-3 font-semibold text-white rounded-full bg-gradient-to-r from-red-400 to-red-600 shadow-lg hover:scale-105 hover:shadow-2xl transition-all duration-300"
-              >
-                <X size={20} /> Cancel Booking
-              </button>
-            </>
+          <>
+            <button
+              onClick={() => setShowRescheduleModal(true)}
+              className="flex items-center gap-2 px-6 py-3 font-semibold text-white rounded-full bg-gradient-to-r from-yellow-400 to-yellow-600 shadow-lg hover:scale-105 hover:shadow-2xl transition-all duration-300"
+            >
+              <Calendar size={20} /> Reschedule Job
+            </button>
+            <button
+              onClick={() => setShowCancelModal(true)}
+              className="flex items-center gap-2 px-6 py-3 font-semibold text-white rounded-full bg-gradient-to-r from-red-400 to-red-600 shadow-lg hover:scale-105 hover:shadow-2xl transition-all duration-300"
+            >
+              <X size={20} /> Cancel Booking
+            </button>
+          </>
           {/* )} */}
 
           {booking?.payment?.status !== "Completed" && (
@@ -301,12 +326,12 @@ const BookingDetailsPage = () => {
                   {parseFloat(payment.totalAmount) +
                     parseFloat(payment.discountAmount)}
                 </p>
-                <p>
+                {/* <p>
                   <b>Discount:</b>{" "}
                   {payment.discountType === "amount" ? "₹" : ""}
                   {payment.discountValue}
                   {payment.discountType === "percentage" ? "%" : ""}
-                </p>
+                </p> */}
                 <p>
                   <b>Discount Amount:</b> ₹{parseFloat(payment.discountAmount)}
                 </p>

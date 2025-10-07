@@ -59,9 +59,9 @@ export const PaymentModal: React.FC<Props> = ({ isOpen, onClose, bookingId }) =>
 
       toast.success("Payment updated successfully.");
       onClose();
-    } catch (err) {
+    } catch (err:any) {
       console.error(err);
-      toast.error("Failed to update payment.");
+      toast.error(err?.data?.error);
     }
   };
 

@@ -10,11 +10,45 @@ const VehicleStep: React.FC<VehicleStepProps> = ({
   formData,
   handleChange,
 }) => {
+  const [errors, setErrors] = useState<any>({});
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
+
   const classes =
     "w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:border-green-500 my-1";
 
+  // Validate individual fields
+  const validateField = (field: string, value: string) => {
+    let error = "";
+
+    switch (field) {
+      case "make":
+        if (!value.trim()) error = "Vehicle make is required.";
+        break;
+      case "model":
+        if (!value.trim()) error = "Vehicle model is required.";
+        break;
+      case "year":
+        if (!value.trim()) error = "Year is required.";
+        else if (Number(value) < 1950 || Number(value) > new Date().getFullYear() + 1)
+          error = "Enter a valid year.";
+        break;
+      case "vin":
+        if (!value.trim()) error = "Registration number is required.";
+        
+        break;
+    }
+
+    setErrors((prev: any) => ({ ...prev, [field]: error }));
+  };
+
+  // Handle changes with validation
+  const handleInputChange = (key: string, value: string) => {
+    handleChange("vehicle", key, value);
+    validateField(key, value);
+  };
+
+  // File Upload (optional)
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || !e.target.files[0]) return;
     const file = e.target.files[0];
@@ -25,7 +59,7 @@ const VehicleStep: React.FC<VehicleStepProps> = ({
       const formDataToSend = new FormData();
       formDataToSend.append("photo", file);
 
-      const res = await fetch("http://localhost:5002/api/upload ", {
+      const res = await fetch("http://localhost:5002/api/upload", {
         method: "POST",
         body: formDataToSend,
       });
@@ -33,7 +67,6 @@ const VehicleStep: React.FC<VehicleStepProps> = ({
       const data = await res.json();
 
       if (data.success) {
-        // store the S3 URL in formData
         handleChange("vehicle", "dashPhotosUrl", data.url);
       } else {
         setUploadError(data.message || "Upload failed");
@@ -48,61 +81,67 @@ const VehicleStep: React.FC<VehicleStepProps> = ({
 
   return (
     <>
+      {/* Vehicle Make */}
       <input
         className={classes}
         placeholder="Make"
         value={formData.vehicle.make}
-        onChange={(e: any) => handleChange("vehicle", "make", e.target.value)}
+        onChange={(e) => handleInputChange("make", e.target.value)}
+        onBlur={(e) => validateField("make", e.target.value)}
       />
+      {errors.make && <p className="text-red-400 text-sm">{errors.make}</p>}
+
+      {/* Vehicle Model */}
       <input
         className={classes}
         placeholder="Model"
         value={formData.vehicle.model}
-        onChange={(e: any) => handleChange("vehicle", "model", e.target.value)}
+        onChange={(e) => handleInputChange("model", e.target.value)}
+        onBlur={(e) => validateField("model", e.target.value)}
       />
+      {errors.model && <p className="text-red-400 text-sm">{errors.model}</p>}
+
+      {/* Year */}
       <input
         type="number"
         className={classes}
         placeholder="Year"
         value={formData.vehicle.year}
-        onChange={(e: any) => handleChange("vehicle", "year", e.target.value)}
+        onChange={(e) => handleInputChange("year", e.target.value)}
+        onBlur={(e) => validateField("year", e.target.value)}
       />
+      {errors.year && <p className="text-red-400 text-sm">{errors.year}</p>}
+
+      {/* Registration Number */}
       <input
         className={classes}
         placeholder="Registration Number"
         value={formData.vehicle.vin}
-        onChange={(e: any) => handleChange("vehicle", "vin", e.target.value)}
+        onChange={(e) => handleInputChange("vin", e.target.value)}
+        onBlur={(e) => validateField("vin", e.target.value)}
       />
+      {errors.vin && <p className="text-red-400 text-sm">{errors.vin}</p>}
+
+      {/* Current Stereo */}
       <input
         className={classes}
         placeholder="Current Stereo"
         value={formData.vehicle.currentStereo}
-        onChange={(e: any) =>
-          handleChange("vehicle", "currentStereo", e.target.value)
-        }
+        onChange={(e) => handleInputChange("currentStereo", e.target.value)}
+        onBlur={(e) => validateField("currentStereo", e.target.value)}
       />
+      {errors.currentStereo && (
+        <p className="text-red-400 text-sm">{errors.currentStereo}</p>
+      )}
 
-      {/* File input for image */}
-      {/* <div className="mt-4">
+      {/* Upload Section (optional) */}
+      {/* <div className="mt-3">
         <label
           htmlFor="fileUpload"
-          className="group flex flex-col items-center justify-center w-full p-6 border-2 border-dashed border-gray-500 rounded-xl cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all duration-200"
+          className="group flex flex-col items-center justify-center w-full p-6 border-2 border-dashed border-gray-500 rounded-xl cursor-pointer hover:border-green-400 transition-all duration-200"
         >
-          <svg
-            className="w-12 h-12 mb-2 text-gray-400 group-hover:text-blue-500 transition-colors duration-200"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M7 16V4h10v12m-5 4v-4m-4 4h8"
-            />
-          </svg>
-          <span className="text-gray-400 group-hover:text-blue-600 text-center font-medium">
-            Upload there Dashboard picture
+          <span className="text-gray-400 group-hover:text-green-400">
+            Upload Dashboard Picture
           </span>
           <input
             id="fileUpload"
@@ -113,30 +152,22 @@ const VehicleStep: React.FC<VehicleStepProps> = ({
           />
         </label>
 
-        {formData.fileName && (
-          <p className="mt-2 text-sm text-gray-300 text-center">
-            {formData.fileName}
-          </p>
-        )}
-      </div>
+        {uploading && <p className="text-yellow-400 text-sm mt-2">Uploading...</p>}
+        {uploadError && <p className="text-red-400 text-sm mt-2">{uploadError}</p>}
+      </div> */}
 
-      {uploading && <p className="text-sm text-yellow-400">Uploading...</p>}
-      {uploadError && <p className="text-sm text-red-400">{uploadError}</p>} */}
-
-      {/* {formData.vehicle.dashPhotosUrl && !uploading && !uploadError && (
-        <>
+      {formData.vehicle.dashPhotosUrl && !uploading && !uploadError && (
+        <div className="mt-3 text-center">
           <Image
             src={formData.vehicle.dashPhotosUrl}
-            alt="this is image"
+            alt="Dashboard"
             height={100}
-            width={100}
+            width={150}
+            className="rounded-lg mx-auto"
           />
-
-          <p className="mt-2 text-sm text-green-400">
-            Uploaded image URL: {formData.vehicle.dashPhotosUrl}
-          </p>
-        </>
-      )} */}
+          <p className="text-green-400 text-sm mt-1">Uploaded successfully!</p>
+        </div>
+      )}
     </>
   );
 };
