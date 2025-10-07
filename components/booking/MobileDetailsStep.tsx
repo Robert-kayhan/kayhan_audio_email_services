@@ -244,7 +244,7 @@ const MobileDetailsStep: React.FC<MobileDetailsStepProps> = ({
             onChange={(e) =>
               handleChange("mobileDetails", "pickup", e.target.value)
             }
-            placeholder="Pickup address"
+            placeholder="Shop address"
             className="w-full p-2 border rounded"
           />
         </Autocomplete>
@@ -273,7 +273,7 @@ const MobileDetailsStep: React.FC<MobileDetailsStepProps> = ({
             onChange={(e) =>
               handleChange("mobileDetails", "drop", e.target.value)
             }
-            placeholder="Drop address"
+            placeholder="Installtion address"
             className="w-full p-2 border rounded"
           />
         </Autocomplete>
