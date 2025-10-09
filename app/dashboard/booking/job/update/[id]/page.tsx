@@ -19,6 +19,7 @@ import {
   useUpdateJobMutation,
 } from "@/store/api/booking/JobReportApi";
 import { useParams, useRouter } from "next/navigation";
+import FullPageLoader from "@/components/global/FullPageLoader";
 
 export default function JobReportPage() {
   const { id } = useParams();
@@ -437,6 +438,7 @@ export default function JobReportPage() {
                   : "bg-blue-600 hover:bg-blue-500"
               }`}
             >
+              <FullPageLoader show={isCreating || isUpdating} message="updateing , please wait..." />
               {isCreating || isUpdating
                 ? "Saving..."
                 : isExisting

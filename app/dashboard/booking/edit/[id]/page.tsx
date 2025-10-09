@@ -7,6 +7,7 @@ import {
 } from "@/store/api/booking/BookingApi";
 import MobileDetailsStep from "@/components/booking/MobileDetailsStep";
 import { ItemsStep } from "@/components/booking/ItemsStep"; // <-- import your new ItemsStep
+import FullPageLoader from "@/components/global/FullPageLoader";
 
 type Item = { name: string; charge: number };
 type ItemsState = {
@@ -154,8 +155,8 @@ export default function UpdateBookingPage() {
           itemType: item.name,
           charge: item.charge,
         })),
-        totalAmount : itemsState.totalAmount,
-        discount : itemsState.discountAmount
+        totalAmount: itemsState.totalAmount,
+        discount: itemsState.discountAmount,
       };
       await updateBooking({ id, body }).unwrap();
       alert("Booking updated successfully");
@@ -274,7 +275,7 @@ export default function UpdateBookingPage() {
           </h2>
           <ItemsStep items={itemsState} setItems={setItemsState} />
         </section>
-
+        <FullPageLoader show={isLoading} message="booking , please wait..." />
         <button
           type="submit"
           disabled={isUpdating}
