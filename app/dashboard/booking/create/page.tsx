@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 import { PaymentStep } from "@/components/booking/PaymentStep";
 import BookingCalendar from "@/components/booking/BookingCalendar";
 import { validateFormData } from "@/util/validateFormData";
+import FullPageLoader from "@/components/global/FullPageLoader";
 
 // Step Definitions
 const steps = [
@@ -364,7 +365,7 @@ export default function BookingForm() {
             )}
           </div>
         </div>
-
+               <FullPageLoader show={isLoading} message="booking , please wait..." />
         {/* Calendar column (hidden below on mobile) */}
         <aside className="hidden lg:block">
           <div className="bg-gray-900/80 backdrop-blur rounded-2xl shadow-xl p-4">

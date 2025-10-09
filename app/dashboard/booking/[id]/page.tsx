@@ -35,7 +35,7 @@ const containerStyle = {
 const BookingDetailsPage = () => {
   const { id } = useParams();
   const { data, isLoading, refetch } = useGetBookingByIdQuery(id as string, {
-    // pollingInterval : 1000,
+    pollingInterval : 2000,
     refetchOnFocus: true,
     refetchOnMountOrArgChange: true,
   });
@@ -118,7 +118,8 @@ const BookingDetailsPage = () => {
   };
   const latestStatus = booking?.reports?.[booking.reports.length - 1]?.status;
   const canAddReport =
-    !booking?.reports?.length || (latestStatus === "Rescheduled" && latestStatus !== "In Progress");
+    !booking?.reports?.length ||
+    (latestStatus === "Rescheduled" && latestStatus !== "In Progress");
   const handleCompleteJob = () => {
     toast.success("Job marked as completed!");
     // Implement your API logic here if needed
@@ -165,19 +166,19 @@ const BookingDetailsPage = () => {
                hover:scale-105 hover:shadow-2xl transition-all duration-300"
               onClick={() => setShowJobReportModal(true)}
             >
-              Add Job Report
+              Start InstallTions 
             </button>
           )}
 
-          {(booking?.reports[0]?.status == "In Progress" ||  booking?.reports[0]?.status == "In Progress" ) &&
-             (
-              <Link
-                href={`/dashboard/booking/job/update/${id}`}
-                className="flex items-center gap-2 px-6 py-3 font-semibold text-white rounded-full bg-gradient-to-r from-green-400 to-green-600 shadow-lg hover:scale-105 hover:shadow-2xl transition-all duration-300"
-              >
-                <Check size={20} /> Complete Job
-              </Link>
-            )}
+          {(booking?.reports[0]?.status == "In Progress" ||
+            booking?.reports[0]?.status == "In Progress") && (
+            <Link
+              href={`/dashboard/booking/job/update/${id}`}
+              className="flex items-center gap-2 px-6 py-3 font-semibold text-white rounded-full bg-gradient-to-r from-green-400 to-green-600 shadow-lg hover:scale-105 hover:shadow-2xl transition-all duration-300"
+            >
+              <Check size={20} /> Complete Job
+            </Link>
+          )}
           {booking?.reports?.length !== 0 &&
             booking?.reports[0]?.status !== "In Progress" && (
               <Link
@@ -189,7 +190,10 @@ const BookingDetailsPage = () => {
             )}
 
           {/* {booking?.reports?.length == 0 && ( */}
-          <>
+          
+          {/* )} */}
+
+       {booking?.status !== "Completed" &&    <>
             <button
               onClick={() => setShowRescheduleModal(true)}
               className="flex items-center gap-2 px-6 py-3 font-semibold text-white rounded-full bg-gradient-to-r from-yellow-400 to-yellow-600 shadow-lg hover:scale-105 hover:shadow-2xl transition-all duration-300"
@@ -202,8 +206,7 @@ const BookingDetailsPage = () => {
             >
               <X size={20} /> Cancel Booking
             </button>
-          </>
-          {/* )} */}
+          </>}
 
           {booking?.payment?.status !== "Completed" && (
             <button
@@ -352,6 +355,32 @@ const BookingDetailsPage = () => {
                     ? payment.methods.join(", ")
                     : payment?.methods || "N/A"}
                 </p>
+                <section className="space-y-2">
+                  {payment?.histories?.length > 0 ? (
+                    payment.histories.map((history:any) => (
+                      <div
+                        key={history.id}
+                        className="flex items-center justify-between p-3 rounded-lg bg-gray-800 text-white shadow-sm"
+                      >
+                        <div>
+                          <p className="font-semibold">
+                            Amount Paid: ${history.paidAmount}
+                          </p>
+                          <p className="text-sm text-gray-400">
+                            Status: {history.status}
+                          </p>
+                        </div>
+                        <p className="text-sm text-gray-400">
+                          {new Date(history.createdAt).toLocaleString()}
+                        </p>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-500">
+                      No payment history available.
+                    </p>
+                  )}
+                </section>
               </div>
             )}
           </section>
