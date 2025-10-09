@@ -21,6 +21,23 @@ export default function JobReportViewPage() {
   const router = useRouter();
   const { data: existingJob, isLoading } = useGetJobByBookingIdQuery(id);
   const report = existingJob?.report;
+  const formatSydneyTime = (time: string | null | undefined) => {
+  if (!time) return "—";
+  try {
+    const date = new Date(time);
+    return date.toLocaleString("en-AU", {
+      timeZone: "Australia/Sydney",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  } catch (error) {
+    return "—";
+  }
+};
   console.log(report)
   if (isLoading) {
     return (
@@ -66,7 +83,7 @@ const afterPhotos = Array.isArray(report.afterPhotos)
             Job Report
           </h1>
           <button
-            onClick={() => router.back()}
+            onClick={() => router.push("/dashboard/booking")}
             className="flex items-center gap-1 px-3 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 border border-gray-700 text-sm"
           >
             <ArrowLeft className="w-4 h-4" /> Back
@@ -173,19 +190,19 @@ const afterPhotos = Array.isArray(report.afterPhotos)
             <h2 className="text-sm font-semibold mb-1 flex items-center gap-2">
               <Clock className="w-4 h-4 text-cyan-400" /> Arrival Time
             </h2>
-            <p className="text-gray-200">{report.arrivalTime || "—"}</p>
+            <p className="text-gray-200">{formatSydneyTime(report.arrivalTime) || "—"}</p>
           </div>
           <div>
             <h2 className="text-sm font-semibold mb-1 flex items-center gap-2">
               <Clock className="w-4 h-4 text-cyan-400" /> Start Time
             </h2>
-            <p className="text-gray-200">{report.startTime || "—"}</p>
+            <p className="text-gray-200">{formatSydneyTime(report.startTime) || "—"}</p>
           </div>
           <div>
             <h2 className="text-sm font-semibold mb-1 flex items-center gap-2">
               <Clock className="w-4 h-4 text-cyan-400" /> Completion Time
             </h2>
-            <p className="text-gray-200">{report.completionTime || "—"}</p>
+            <p className="text-gray-200">{formatSydneyTime(report.completionTime) || "—"}</p>
           </div>
           <div>
             <h2 className="text-sm font-semibold mb-1">Total Duration (mins)</h2>
