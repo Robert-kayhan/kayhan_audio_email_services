@@ -24,10 +24,16 @@ export default function UpdateBookingPage() {
   const router = useRouter();
   const { data, isLoading } = useGetBookingByIdQuery(id);
   const [updateBooking, { isLoading: isUpdating }] = useUpdateBookingMutation();
-
+  const [payment, setPayment] = useState();
   const [formData, setFormData] = useState<any>({
     userData: { firstname: "", lastname: "", email: "", phone: "" },
-    vehicle: { make: "", model: "", year: "", vinNumber: "", currentStereo: "" },
+    vehicle: {
+      make: "",
+      model: "",
+      year: "",
+      vinNumber: "",
+      currentStereo: "",
+    },
     booking: {
       installationType: "In-Store",
       invoiceNumber: "",
@@ -84,9 +90,11 @@ export default function UpdateBookingPage() {
           notes: data.booking.notes || "",
         },
         mobileDetails: {
-          parking: data.booking.MobileInstallationDetail?.parkingRestrictions || "",
+          parking:
+            data.booking.MobileInstallationDetail?.parkingRestrictions || "",
           powerAccess: data.booking.MobileInstallationDetail?.powerAccess || "",
-          instructions: data.booking.MobileInstallationDetail?.specialInstructions || "",
+          instructions:
+            data.booking.MobileInstallationDetail?.specialInstructions || "",
           pickup:
             data.booking.MobileInstallationDetail?.pickupAddress ||
             "Unit 3/151 Dohertys Rd, Laverton North VIC 3026, Australia",
@@ -101,17 +109,22 @@ export default function UpdateBookingPage() {
             lat: data.booking.MobileInstallationDetail?.dropoffLat,
             lng: data.booking.MobileInstallationDetail?.dropoffLng,
           },
-          routePolyline: data.booking.MobileInstallationDetail?.routePolyline || "",
+          routePolyline:
+            data.booking.MobileInstallationDetail?.routePolyline || "",
         },
       });
 
       // Map booking items to ItemsStep state
-      const list = data.booking.BookingItems?.map((item: any) => ({
-        name: item.itemType || "",
-        charge: parseFloat(item.charge) || 0,
-      })) || [];
+      const list =
+        data.booking.BookingItems?.map((item: any) => ({
+          name: item.itemType || "",
+          charge: parseFloat(item.charge) || 0,
+        })) || [];
 
-      const subtotal = list.reduce((sum:any, item:any) => sum + item.charge, 0);
+      const subtotal = list.reduce(
+        (sum: any, item: any) => sum + item.charge,
+        0
+      );
 
       setItemsState({
         list,
@@ -141,6 +154,8 @@ export default function UpdateBookingPage() {
           itemType: item.name,
           charge: item.charge,
         })),
+        totalAmount : itemsState.totalAmount,
+        discount : itemsState.discountAmount
       };
       await updateBooking({ id, body }).unwrap();
       alert("Booking updated successfully");
@@ -235,9 +250,7 @@ export default function UpdateBookingPage() {
             <input
               type="time"
               value={formData.booking.time || ""}
-              onChange={(e) =>
-                handleChange("booking", "time", e.target.value)
-              }
+              onChange={(e) => handleChange("booking", "time", e.target.value)}
               className="border rounded px-3 py-2 w-full bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
             <textarea
