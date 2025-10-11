@@ -40,7 +40,7 @@ const OrderSelector = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const res = await axios.get("https://api.kayhanaudio.com.au/v1/order/list", {
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_KAYHAN_URL}/v1/order/search`, {
           params: { page: 1, status: "", search: searchText },
         });
         if (res.data.success) {
@@ -68,9 +68,9 @@ const OrderSelector = () => {
     setLoading(true);
     setError("");
     try {
-      const res = await axios.get(`https://api.kayhanaudio.com.au/v1/order/detail/${selectedOrder.value}`);
-      if (res.data.success && res.data.data.result) {
-        setOrderDetail(res.data.data.result);
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_KAYHAN_URL}/v1/order/search/${selectedOrder.value}`);
+      if (res.data.success && res.data.data) {
+        setOrderDetail(res.data.data);
         setSelectedProducts([]);
       } else {
         setOrderDetail(null);
