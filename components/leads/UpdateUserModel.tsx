@@ -20,14 +20,15 @@ const UserForUpdate: React.FC<Props> = ({ isOpen, onClose, user, refetch }) => {
     email: "",
     phone: "",
     address: "",
-    isSubscribed: true, 
+    isSubscribed: false, 
   });
 
   const [updateUser] = useUpdateUserMutation();
-  console.log(user , "this is user")
+  // console.log(user , "this is user")
   // ✅ Populate form data from the `user` prop
   useEffect(() => {
     if (user) {
+      console.log(user)
       setFormData({
         id: user.id,
         firstname: user.firstname || "",
@@ -49,7 +50,7 @@ const UserForUpdate: React.FC<Props> = ({ isOpen, onClose, user, refetch }) => {
       [name]: type === "checkbox" ? checked : value,
     }));
   };
-
+  console.log(user , "check it")
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 

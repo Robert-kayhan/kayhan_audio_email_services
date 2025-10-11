@@ -25,6 +25,8 @@ const columns: Column<User>[] = [
   { header: "Role", accessor: "role" },
   { header: "Phone", accessor: "phone" },
   { header: "Status", accessor: "status" },
+  { header: "isSubscribed", accessor: "isSubscribed" },
+
 ];
 
 export default function TablePage() {
@@ -53,7 +55,7 @@ export default function TablePage() {
     limit,
     search,
   });
-
+  console.log(data , "this is data")
   const [deleteUser] = useDeleteUserMutation();
 
   const users = data?.data ?? [];
@@ -69,13 +71,14 @@ export default function TablePage() {
   const handleEdit = (row: any) => {
     const [firstname, ...rest] = row.name.split(" ");
     const lastname = rest.join(" ");
+    console.log(row , "this is row")
     setUser({
       firstname,
       lastname,
       email: row.email,
       phone: row.phone,
       address: row.address || "",
-      isSubscribed : row.isSubscribed || true
+      isSubscribed : row.isSubscribed || false
     });
     setUpdateuserShowModal(true);
   };
@@ -218,6 +221,7 @@ export default function TablePage() {
         isOpen={updateuserShowModal}
         refetch={refetch}
         onClose={() => setUpdateuserShowModal(false)}
+        
       />
     </div>
   );
