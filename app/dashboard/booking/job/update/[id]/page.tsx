@@ -47,7 +47,7 @@ export default function JobReportPage() {
     tips: "",
     difficulty: "",
     customerRating: 0,
-    arrivalTime: "",
+    // arrivalTime: "",
     startTime: "",
     completionTime: "",
     totalDurationMins: 0,
@@ -166,7 +166,7 @@ export default function JobReportPage() {
 
   const handleSubmit = async () => {
     if (
-      !formData.arrivalTime ||
+      // !formData.arrivalTime ||
       !formData.startTime ||
       !formData.completionTime
     ) {
@@ -185,7 +185,7 @@ export default function JobReportPage() {
             tips: formData.tips,
             difficulty: formData.difficulty,
             customerRating: formData.customerRating,
-            arrivalTime: formData.arrivalTime,
+            // arrivalTime: formData.arrivalTime,
             startTime: formData.startTime,
             completionTime: formData.completionTime,
             totalDurationMins: formData.totalDurationMins,
@@ -272,8 +272,8 @@ export default function JobReportPage() {
           </div>
 
           {/* Time controls */}
-          <div className="grid grid-cols-3 gap-4">
-            <div>
+          <div className="grid grid-cols-2 gap-4">
+            {/* <div>
               <label className="block text-sm mb-2 font-semibold flex items-center gap-2">
                 <Clock className="w-4 h-4 text-cyan-400" /> Arrival Time
               </label>
@@ -285,7 +285,7 @@ export default function JobReportPage() {
                 disabled={isJobRunning}
                 className="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 focus:border-blue-500 outline-none disabled:opacity-60"
               />
-            </div>
+            </div> */}
 
             <div className="flex flex-col">
               <label className="block text-sm mb-2 font-semibold flex items-center gap-2">
