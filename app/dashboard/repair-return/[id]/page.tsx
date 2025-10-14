@@ -59,6 +59,20 @@ const RepairReportDetailPage = () => {
   const [updateRepairReport, { isLoading: isUpdating }] =
     useUpdateRepairReportMutation();
 
+    let parsedNotes: any[] = [];
+  try {
+    if (typeof report.notes === "string") {
+      // Try parsing if it's JSON string
+      parsedNotes = JSON.parse(report.notes);
+    } else if (Array.isArray(report.notes)) {
+      // Filter out invalid items if array contains junk
+      parsedNotes = report.notes.filter((n:any) => n && typeof n === "object" && n.text);
+    } else {
+      parsedNotes = [];
+    }
+  } catch (err) {
+    parsedNotes = [];
+  }
   // --- Sync report data when loaded ---
   useEffect(() => {
     if (!report) return;
@@ -84,7 +98,7 @@ const RepairReportDetailPage = () => {
     return (
       <div className="p-6 text-red-500">Failed to load repair report.</div>
     );
-
+    console.log(report?.notes , "this is report")
   // --- Parse Addresses ---
   const billingAddress =
     typeof report.billing_address === "string"
@@ -346,9 +360,9 @@ const RepairReportDetailPage = () => {
           </button>
         </div>
 
-        {report.notes?.length ? (
+         {parsedNotes.length > 0 ? (
           <ul className="space-y-2">
-            {Array(report.notes).map((n, idx) => (
+            {parsedNotes.map((n, idx) => (
               <li
                 key={idx}
                 className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border dark:border-gray-700"

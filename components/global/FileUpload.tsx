@@ -54,7 +54,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ files, setFiles }) => {
       </label>
 
       {/* Preview Grid */}
-      {previews.length > 0 && (
+      {Array.isArray(previews) && previews.length > 0 &&  (
         <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           {previews.map((url, index) => (
             <div

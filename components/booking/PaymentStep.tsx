@@ -22,6 +22,9 @@ export const PaymentStep: React.FC<Props> = ({ formData, handleChange }) => {
     { label: "Cash", icon: <DollarSign size={18} /> },
     { label: "EFTPOS", icon: <CreditCard size={18} /> },
     { label: "Credit", icon: <Banknote size={18} /> },
+    { label: "Zip Pay", icon: <CreditCard size={18} /> },
+    { label: "After Pay", icon: <Clock size={18} /> },
+    { label: "Bank", icon: <Banknote size={18} /> },
   ];
 
   const laterMethods = [
