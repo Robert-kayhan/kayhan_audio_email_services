@@ -224,7 +224,10 @@ export default function BookingForm() {
           return alert("Payment cannot exceed total amount");
         }
       }
-
+      // if(formData.payment.type === "Later"){
+      //   formData.payment.partialAmount == "0"
+      // }
+      
       const payload = {
         userData: formData.userInfo,
         vehicle: formData.vehicle,

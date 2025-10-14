@@ -37,8 +37,13 @@ export const JobReportApi = apiSlice.injectEndpoints({
         body: { rescheduleTime },
       }),
     }),
-
-    // ✅ Get All Job Reports (optional filters)
+    timeApi: builder.mutation({
+      query: ({ id, data }) => ({
+        url: `${JOBREPORT_URL}/${id}/times`,
+        method: "PATCH",
+        body: data,
+      }),
+    }),
   }),
 });
 
@@ -47,5 +52,6 @@ export const {
   useCancelJobMutation,
   useRescheduleJobMutation,
   useGetJobByBookingIdQuery,
-  useUpdateJobMutation
+  useUpdateJobMutation,
+  useTimeApiMutation
 } = JobReportApi;

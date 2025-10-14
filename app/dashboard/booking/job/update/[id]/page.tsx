@@ -17,6 +17,7 @@ import {
   useGetJobByBookingIdQuery,
   useCreateJobMutation,
   useUpdateJobMutation,
+  useTimeApiMutation,
 } from "@/store/api/booking/JobReportApi";
 import { useParams, useRouter } from "next/navigation";
 import FullPageLoader from "@/components/global/FullPageLoader";
@@ -25,13 +26,18 @@ export default function JobReportPage() {
   const { id } = useParams();
   const router = useRouter();
 
-  // Get existing job
+  // ✅ All hooks should always be declared at the top
   const {
     data: existingJob,
     isLoading: isJobLoading,
     refetch,
   } = useGetJobByBookingIdQuery(id);
 
+  const [createJob, { isLoading: isCreating }] = useCreateJobMutation();
+  const [updateJob, { isLoading: isUpdating }] = useUpdateJobMutation();
+  const [timeApi] = useTimeApiMutation();
+
+  // ✅ Component state
   const [formData, setFormData] = useState({
     bookingId: id,
     techName: "",
@@ -50,27 +56,32 @@ export default function JobReportPage() {
   const [isRunning, setIsRunning] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
-  const [createJob, { isLoading: isCreating }] = useCreateJobMutation();
-  const [updateJob, { isLoading: isUpdating }] = useUpdateJobMutation();
-
   const isExisting = !!existingJob?.report;
   const isJobRunning = isRunning && !formData.completionTime;
   const hasAfterPhotos =
     Array.isArray(formData.afterPhotos) && formData.afterPhotos.length > 0;
 
-  // preload when existing job arrives
+  // ✅ Load existing job data
   useEffect(() => {
     if (existingJob?.report) {
-      setFormData((prev) => ({
-        ...prev,
-        ...existingJob.report,
-      }));
-      setIsRunning(false);
-      setElapsedSeconds((existingJob.report.totalDurationMins || 0) * 60);
+      const report = existingJob.report;
+      setFormData((prev) => ({ ...prev, ...report }));
+
+      // Resume timer if the job is still in progress
+      if (report.startTime && !report.completionTime) {
+        setIsRunning(true);
+        const diff = Math.floor(
+          (Date.now() - new Date(report.startTime).getTime()) / 1000
+        );
+        setElapsedSeconds(diff);
+      } else {
+        setIsRunning(false);
+        setElapsedSeconds((report.totalDurationMins || 0) * 60);
+      }
     }
   }, [existingJob]);
 
-  // Auto-calc total duration
+  // ✅ Auto-update total duration when start/completion times change
   useEffect(() => {
     if (formData.startTime && formData.completionTime) {
       const start = new Date(formData.startTime);
@@ -83,14 +94,11 @@ export default function JobReportPage() {
         }));
         setElapsedSeconds(diffSecs);
         setIsRunning(false);
-      } else {
-        setFormData((prev) => ({ ...prev, totalDurationMins: 0 }));
-        setElapsedSeconds(0);
       }
     }
   }, [formData.startTime, formData.completionTime]);
 
-  // Timer tick (updates seconds live while running)
+  // ✅ Live timer when job is running
   useEffect(() => {
     let timer: NodeJS.Timeout | null = null;
     if (isRunning && formData.startTime) {
@@ -110,6 +118,7 @@ export default function JobReportPage() {
     };
   }, [isRunning, formData.startTime]);
 
+  // ✅ Handlers
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -122,7 +131,7 @@ export default function JobReportPage() {
     setFormData({ ...formData, customerRating: rating });
   };
 
-  const handleStart = () => {
+  const handleStart = async () => {
     const now = new Date().toISOString();
     setFormData((prev) => ({
       ...prev,
@@ -131,15 +140,28 @@ export default function JobReportPage() {
     }));
     setElapsedSeconds(0);
     setIsRunning(true);
+
+    try {
+      await timeApi({ id, data: { startTime: now } }).unwrap();
+    } catch (err) {
+      console.error("Failed to start job:", err);
+      alert("Failed to update start time on server");
+    }
   };
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
     const now = new Date().toISOString();
-    setFormData((prev) => ({
-      ...prev,
-      completionTime: now,
-    }));
+    setFormData((prev) => ({ ...prev, completionTime: now }));
     setIsRunning(false);
+
+    try {
+      await timeApi({ id, data: { completionTime: now } }).unwrap();
+      alert("Job completed successfully!");
+      refetch();
+    } catch (err) {
+      console.error("Failed to complete job:", err);
+      alert("Failed to update completion time on server");
+    }
   };
 
   const handleSubmit = async () => {
@@ -148,21 +170,14 @@ export default function JobReportPage() {
       !formData.startTime ||
       !formData.completionTime
     ) {
-      alert(
-        "Arrival, start and completion times are required for a completed job"
-      );
-      return;
-    }
-
-    if (formData.totalDurationMins && Number(formData.totalDurationMins) <= 0) {
-      alert("Total duration must be greater than 0");
+      alert("Arrival, start and completion times are required.");
       return;
     }
 
     try {
       if (isExisting) {
         await updateJob({
-          id: id,
+          id,
           data: {
             techName: formData.techName,
             afterPhotos: formData.afterPhotos,
@@ -186,11 +201,13 @@ export default function JobReportPage() {
       router.push(`/dashboard/booking/job/${id}`);
     } catch (err: any) {
       console.error(err);
-      alert("Failed to save job report: " + (err?.data?.message || err.message));
+      alert(
+        "Failed to save job report: " + (err?.data?.message || err.message)
+      );
     }
   };
 
-  // loader overlay
+  // ✅ Loader overlay
   if (isJobLoading) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-black/60 text-white z-50">
@@ -202,7 +219,6 @@ export default function JobReportPage() {
     );
   }
 
-  // format elapsed time as MM:SS
   const formatElapsed = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -211,6 +227,7 @@ export default function JobReportPage() {
       .padStart(2, "0")}s`;
   };
 
+  // ✅ Main UI
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 p-6">
       <motion.div
@@ -223,10 +240,13 @@ export default function JobReportPage() {
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <CheckCircle className="w-8 h-8 text-blue-500" /> Job Report
           </h1>
+
           {isJobRunning && (
             <div className="flex items-center gap-3 text-green-400">
               <Loader2 className="w-5 h-5 animate-spin" />
-              <div className="text-sm">Running — {formatElapsed(elapsedSeconds)}</div>
+              <div className="text-sm">
+                Running — {formatElapsed(elapsedSeconds)}
+              </div>
             </div>
           )}
         </div>
@@ -251,7 +271,7 @@ export default function JobReportPage() {
             </select>
           </div>
 
-          {/* Start / Complete */}
+          {/* Time controls */}
           <div className="grid grid-cols-3 gap-4">
             <div>
               <label className="block text-sm mb-2 font-semibold flex items-center gap-2">
@@ -295,7 +315,8 @@ export default function JobReportPage() {
               </button>
               {isRunning && !hasAfterPhotos && (
                 <p className="mt-2 text-xs text-amber-300">
-                  Please upload at least one <strong>After Photo</strong> to enable completion.
+                  Please upload at least one <strong>After Photo</strong> to
+                  enable completion.
                 </p>
               )}
             </div>
@@ -312,12 +333,6 @@ export default function JobReportPage() {
                 setFormData({ ...formData, afterPhotos: urls })
               }
             />
-            {hasAfterPhotos && (
-              <div className="mt-2 text-sm text-green-300">
-                {formData.afterPhotos.length} photo
-                {formData.afterPhotos.length > 1 ? "s" : ""} uploaded
-              </div>
-            )}
           </div>
 
           {/* Notes */}
@@ -417,8 +432,8 @@ export default function JobReportPage() {
                 isRunning
                   ? formatElapsed(elapsedSeconds)
                   : formData.totalDurationMins
-                  ? `${formData.totalDurationMins}m`
-                  : ""
+                    ? `${formData.totalDurationMins}m`
+                    : ""
               }
               readOnly
               className="w-full p-3 rounded-lg bg-gray-600 border border-gray-500 text-gray-300"
@@ -438,12 +453,15 @@ export default function JobReportPage() {
                   : "bg-blue-600 hover:bg-blue-500"
               }`}
             >
-              <FullPageLoader show={isCreating || isUpdating} message="updateing , please wait..." />
+              <FullPageLoader
+                show={isCreating || isUpdating}
+                message="Updating, please wait..."
+              />
               {isCreating || isUpdating
                 ? "Saving..."
                 : isExisting
-                ? "Update Report"
-                : "Save Report"}
+                  ? "Update Report"
+                  : "Save Report"}
             </motion.button>
           </div>
         </div>

@@ -10,7 +10,7 @@ import {
   useAddNotesMutation,
   useUpdateRepairReportMutation,
 } from "@/store/api/repair-return/repairApi";
-
+import { useTimeApiMutation } from "@/store/api/booking/JobReportApi";
 const formatValue = (val: any, fallbackKey: string = "name") => {
   if (!val) return "";
   if (typeof val === "object") return val?.[fallbackKey] ?? "";
@@ -53,12 +53,21 @@ const RepairReportDetailPage = () => {
   const [userReceivedFiles, setUserReceivedFiles] = useState<string[]>([]);
   const [isSendFileModalOpen, setIsSendFileModalOpen] = useState(false);
   const [productSendFiles, setProductSendFiles] = useState<string[]>([]);
-
+const parseImageArray = (imagesStr?: any): string[] => {
+  try {
+    if (!imagesStr) return [];
+    const parsed = JSON.parse(imagesStr);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (err) {
+    console.error("Invalid image array:", err);
+    return [];
+  }
+};
   // --- Mutations ---
   const [addNotes, { isLoading: isAdding }] = useAddNotesMutation();
   const [updateRepairReport, { isLoading: isUpdating }] =
     useUpdateRepairReportMutation();
-
+  const [timeApi , {isLoading : isUpdateTime}] = useTimeApiMutation()
     let parsedNotes: any[] = [];
   try {
     if (typeof report.notes === "string") {
@@ -114,6 +123,7 @@ const RepairReportDetailPage = () => {
   const handleAddNote = async () => {
     if (!noteText.trim()) return;
     try {
+      console.log(noteText , "this is noteText")
       await addNotes({ id, data: { text: noteText } }).unwrap();
       toast.success("Note added successfully!");
       setNoteText("");
@@ -335,7 +345,7 @@ const RepairReportDetailPage = () => {
         <h2 className="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200">
           User Received Images
         </h2>
-        <ImageGallery images={userReceivedFiles} />
+        <ImageGallery images={parseImageArray(userReceivedFiles)} />
       </Card>
 
       {/* Product Send Images */}
