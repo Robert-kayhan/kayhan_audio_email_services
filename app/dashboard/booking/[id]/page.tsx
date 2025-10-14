@@ -17,6 +17,7 @@ import {
   View,
   CheckCircle,
   ArrowLeft,
+  Clock,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import {
@@ -35,7 +36,7 @@ const containerStyle = {
 const BookingDetailsPage = () => {
   const { id } = useParams();
   const { data, isLoading, refetch } = useGetBookingByIdQuery(id as string, {
-    pollingInterval : 2000,
+    pollingInterval: 2000,
     refetchOnFocus: true,
     refetchOnMountOrArgChange: true,
   });
@@ -166,7 +167,7 @@ const BookingDetailsPage = () => {
                hover:scale-105 hover:shadow-2xl transition-all duration-300"
               onClick={() => setShowJobReportModal(true)}
             >
-              Start InstallTions 
+              Start InstallTions
             </button>
           )}
 
@@ -190,23 +191,25 @@ const BookingDetailsPage = () => {
             )}
 
           {/* {booking?.reports?.length == 0 && ( */}
-          
+
           {/* )} */}
 
-       {booking?.status !== "Completed" &&    <>
-            <button
-              onClick={() => setShowRescheduleModal(true)}
-              className="flex items-center gap-2 px-6 py-3 font-semibold text-white rounded-full bg-gradient-to-r from-yellow-400 to-yellow-600 shadow-lg hover:scale-105 hover:shadow-2xl transition-all duration-300"
-            >
-              <Calendar size={20} /> Reschedule Job
-            </button>
-            <button
-              onClick={() => setShowCancelModal(true)}
-              className="flex items-center gap-2 px-6 py-3 font-semibold text-white rounded-full bg-gradient-to-r from-red-400 to-red-600 shadow-lg hover:scale-105 hover:shadow-2xl transition-all duration-300"
-            >
-              <X size={20} /> Cancel Booking
-            </button>
-          </>}
+          {booking?.status !== "Completed" && (
+            <>
+              <button
+                onClick={() => setShowRescheduleModal(true)}
+                className="flex items-center gap-2 px-6 py-3 font-semibold text-white rounded-full bg-gradient-to-r from-yellow-400 to-yellow-600 shadow-lg hover:scale-105 hover:shadow-2xl transition-all duration-300"
+              >
+                <Calendar size={20} /> Reschedule Job
+              </button>
+              <button
+                onClick={() => setShowCancelModal(true)}
+                className="flex items-center gap-2 px-6 py-3 font-semibold text-white rounded-full bg-gradient-to-r from-red-400 to-red-600 shadow-lg hover:scale-105 hover:shadow-2xl transition-all duration-300"
+              >
+                <X size={20} /> Cancel Booking
+              </button>
+            </>
+          )}
 
           {booking?.payment?.status !== "Completed" && (
             <button
@@ -357,7 +360,7 @@ const BookingDetailsPage = () => {
                 </p>
                 <section className="space-y-2">
                   {payment?.histories?.length > 0 ? (
-                    payment.histories.map((history:any) => (
+                    payment.histories.map((history: any) => (
                       <div
                         key={history.id}
                         className="flex items-center justify-between p-3 rounded-lg bg-gray-800 text-white shadow-sm"
@@ -541,6 +544,7 @@ function JobReportModal({ isOpen, onClose, bookingId }: JobReportModalProps) {
     bookingId,
     techName: "",
     beforePhotos: [] as string[],
+    arrivalTime : ""
   });
   const [createJob] = useCreateJobMutation();
   const submitData = async () => {
@@ -612,7 +616,21 @@ function JobReportModal({ isOpen, onClose, bookingId }: JobReportModalProps) {
             }
           />
         </div>
-
+        <div>
+          <label className="block text-sm mb-2 font-semibold flex items-center gap-2">
+            <Clock className="w-4 h-4 text-cyan-400" /> Arrival Time
+          </label>
+          <input
+            type="datetime-local"
+            name="arrivalTime"
+            value={formData.arrivalTime ?? ""}
+           onChange={(e) =>
+              setFormData({ ...formData, arrivalTime: e.target.value })
+            }
+            // disabled={isJobRunning}
+            className="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 focus:border-blue-500 outline-none disabled:opacity-60"
+          />
+        </div>
         {/* Save Button */}
         <button
           onClick={submitData}
