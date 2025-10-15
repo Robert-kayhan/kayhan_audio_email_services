@@ -71,10 +71,10 @@ export default function UpdateBookingPage() {
       // Set formData
       setFormData({
         userData: {
-          firstname: data.booking.User?.firstname || "",
-          lastname: data.booking.User?.lastname || "",
-          email: data.booking.User?.email || "",
-          phone: data.booking.User?.phone || "",
+          firstname: data.booking.BookingCustmour?.firstname || "",
+          lastname: data.booking.BookingCustmour?.lastname || "",
+          email: data.booking.BookingCustmour?.email || "",
+          phone: data.booking.BookingCustmour?.phone || "",
         },
         vehicle: {
           make: data.booking.Vehicle?.make || "",
@@ -126,7 +126,7 @@ export default function UpdateBookingPage() {
         (sum: any, item: any) => sum + item.charge,
         0
       );
-
+      console.log(subtotal)
       setItemsState({
         list,
         newItem: "",
@@ -275,7 +275,7 @@ export default function UpdateBookingPage() {
           </h2>
           <ItemsStep items={itemsState} setItems={setItemsState} />
         </section>
-        <FullPageLoader show={isLoading} message="booking , please wait..." />
+        <FullPageLoader show={isUpdating} message="booking , please wait..." />
         <button
           type="submit"
           disabled={isUpdating}
