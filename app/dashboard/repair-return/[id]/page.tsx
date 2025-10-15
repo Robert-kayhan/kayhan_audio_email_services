@@ -202,18 +202,18 @@ const RepairReportDetailPage = () => {
           >
             Update Admin Tracking
           </button>
-          <button
+         {parseImageArray(userReceivedFiles).length == 0  &&  <button
             onClick={() => setIsReceivedFileModalOpen(true)}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
             Upload Received Images
-          </button>
-          <button
+          </button>}
+        {parseImageArray(productSendFiles).length == 0  &&  <button
             onClick={() => setIsSendFileModalOpen(true)}
             className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
           >
             Upload Send Images
-          </button>
+          </button>}
         </div>
       </div>
 
