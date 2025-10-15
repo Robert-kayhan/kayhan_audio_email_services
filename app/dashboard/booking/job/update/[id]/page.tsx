@@ -130,7 +130,7 @@ export default function JobReportPage() {
   const handleRating = (rating: number) => {
     setFormData({ ...formData, customerRating: rating });
   };
-
+  console.log(formData.afterPhotos)
   const handleStart = async () => {
     const now = new Date().toISOString();
     setFormData((prev) => ({
@@ -156,8 +156,8 @@ export default function JobReportPage() {
 
     try {
       await timeApi({ id, data: { completionTime: now } }).unwrap();
-      alert("Job completed successfully!");
-      refetch();
+      // alert("Job completed successfully!");
+      // refetch();
     } catch (err) {
       console.error("Failed to complete job:", err);
       alert("Failed to update completion time on server");
@@ -176,6 +176,7 @@ export default function JobReportPage() {
 
     try {
       if (isExisting) {
+        console.log(formData , "this is form data")
         await updateJob({
           id,
           data: {
