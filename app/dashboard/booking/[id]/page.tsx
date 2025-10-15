@@ -573,7 +573,7 @@ function JobReportModal({ isOpen, onClose, bookingId }: JobReportModalProps) {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-      <div className="bg-gray-900 p-6 rounded-2xl max-w-md w-full shadow-lg">
+      <div className="bg-gray-900 p-6 rounded-2xl max-w-md w-full overflow-auto shadow-lg">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-white">Job Report</h2>
@@ -599,8 +599,10 @@ function JobReportModal({ isOpen, onClose, bookingId }: JobReportModalProps) {
             className="w-full p-3 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
           >
             <option value="">Select Technician</option>
-            <option value="John Doe">John Doe</option>
-            <option value="Jane Smith">Jane Smith</option>
+            <option value="Ben Dordevic">Ben Dordevic</option>
+            <option value="Peter">Jane Smith</option>
+            <option value="Hunter">Hunter</option>
+            <option value="Ali">Ali</option>
           </select>
         </div>
              <div>
