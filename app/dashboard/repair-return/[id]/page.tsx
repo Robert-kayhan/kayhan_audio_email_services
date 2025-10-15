@@ -11,6 +11,8 @@ import {
   useUpdateRepairReportMutation,
 } from "@/store/api/repair-return/repairApi";
 import { useTimeApiMutation } from "@/store/api/booking/JobReportApi";
+import RepairUserImageModal from "@/components/return-reapair/UploadUserImages";
+import RepairAdminImageModal from "@/components/return-reapair/UploadSendImages";
 const formatValue = (val: any, fallbackKey: string = "name") => {
   if (!val) return "";
   if (typeof val === "object") return val?.[fallbackKey] ?? "";
@@ -27,9 +29,11 @@ const Card = ({ children }: { children: React.ReactNode }) => (
 
 const RepairReportDetailPage = () => {
   const { id } = useParams();
-  const { data, isLoading, isError } = useGetRepairReportQuery(id);
+  const { data, isLoading, isError } = useGetRepairReportQuery(id,{
+    refetchOnFocus : true,
+  });
   const report = data?.data?.result ?? null;
-  console.log(report)
+  console.log(report);
   // --- Notes ---
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
   const [noteText, setNoteText] = useState("");
@@ -50,32 +54,34 @@ const RepairReportDetailPage = () => {
 
   // --- File Uploads ---
   const [isReceivedFileModalOpen, setIsReceivedFileModalOpen] = useState(false);
-  const [userReceivedFiles, setUserReceivedFiles] = useState<string[]>([]);
+  const [userReceivedFiles, setUserReceivedFiles] = useState<any>([]);
   const [isSendFileModalOpen, setIsSendFileModalOpen] = useState(false);
   const [productSendFiles, setProductSendFiles] = useState<string[]>([]);
-const parseImageArray = (imagesStr?: any): string[] => {
-  try {
-    if (!imagesStr) return [];
-    const parsed = JSON.parse(imagesStr);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch (err) {
-    console.error("Invalid image array:", err);
-    return [];
-  }
-};
+  const parseImageArray = (imagesStr?: any): string[] => {
+    try {
+      if (!imagesStr) return [];
+      const parsed = JSON.parse(imagesStr);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (err) {
+      console.error("Invalid image array:", err);
+      return [];
+    }
+  };
   // --- Mutations ---
   const [addNotes, { isLoading: isAdding }] = useAddNotesMutation();
   const [updateRepairReport, { isLoading: isUpdating }] =
     useUpdateRepairReportMutation();
-  const [timeApi , {isLoading : isUpdateTime}] = useTimeApiMutation()
-    let parsedNotes: any[] = [];
+  const [timeApi, { isLoading: isUpdateTime }] = useTimeApiMutation();
+  let parsedNotes: any[] = [];
   try {
     if (typeof report.notes === "string") {
       // Try parsing if it's JSON string
       parsedNotes = JSON.parse(report.notes);
     } else if (Array.isArray(report.notes)) {
       // Filter out invalid items if array contains junk
-      parsedNotes = report.notes.filter((n:any) => n && typeof n === "object" && n.text);
+      parsedNotes = report.notes.filter(
+        (n: any) => n && typeof n === "object" && n.text
+      );
     } else {
       parsedNotes = [];
     }
@@ -107,7 +113,7 @@ const parseImageArray = (imagesStr?: any): string[] => {
     return (
       <div className="p-6 text-red-500">Failed to load repair report.</div>
     );
-    console.log(report?.notes , "this is report")
+  console.log(report?.notes, "this is report");
   // --- Parse Addresses ---
   const billingAddress =
     typeof report.billing_address === "string"
@@ -123,7 +129,7 @@ const parseImageArray = (imagesStr?: any): string[] => {
   const handleAddNote = async () => {
     if (!noteText.trim()) return;
     try {
-      console.log(noteText , "this is noteText")
+      console.log(noteText, "this is noteText");
       await addNotes({ id, data: { text: noteText } }).unwrap();
       toast.success("Note added successfully!");
       setNoteText("");
@@ -353,7 +359,7 @@ const parseImageArray = (imagesStr?: any): string[] => {
         <h2 className="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200">
           Product Send Images
         </h2>
-        <ImageGallery images={productSendFiles} />
+        <ImageGallery images={parseImageArray(productSendFiles)} />
       </Card>
 
       {/* Notes */}
@@ -370,7 +376,7 @@ const parseImageArray = (imagesStr?: any): string[] => {
           </button>
         </div>
 
-         {parsedNotes.length > 0 ? (
+        {parsedNotes.length > 0 ? (
           <ul className="space-y-2">
             {parsedNotes.map((n, idx) => (
               <li
@@ -483,7 +489,7 @@ const parseImageArray = (imagesStr?: any): string[] => {
       )}
 
       {/* File Upload Modals */}
-      {isReceivedFileModalOpen && (
+      {/* {isReceivedFileModalOpen && (
         <Modal
           title="📥 Upload Received Product Images"
           onClose={() => setIsReceivedFileModalOpen(false)}
@@ -509,31 +515,20 @@ const parseImageArray = (imagesStr?: any): string[] => {
             saveLabel="Save"
           />
         </Modal>
+      )} */}
+
+      {isReceivedFileModalOpen && (
+        <RepairUserImageModal
+          isOpen={isReceivedFileModalOpen}
+          onClose={() => setIsReceivedFileModalOpen(false)}
+          returnId={id}
+        />
       )}
 
       {isSendFileModalOpen && (
-        <Modal
-          title="📤 Upload Send Product Images"
+       <RepairAdminImageModal  isOpen={isSendFileModalOpen}
           onClose={() => setIsSendFileModalOpen(false)}
-        >
-          <FileUpload files={productSendFiles} setFiles={setProductSendFiles} />
-          <ModalActions
-            onCancel={() => setIsSendFileModalOpen(false)}
-            onSave={async () => {
-              try {
-                await updateRepairReport({
-                  id,
-                  data: { product_send_productImages: productSendFiles },
-                }).unwrap();
-                toast.success("Send images updated successfully!");
-                setIsSendFileModalOpen(false);
-              } catch (err) {
-                toast.error("Failed to update send images");
-              }
-            }}
-            saveLabel="Save"
-          />
-        </Modal>
+          returnId={id} />
       )}
     </div>
   );

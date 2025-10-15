@@ -20,19 +20,19 @@ const columns: Column<any>[] = [
   { header: "#", accessor: "id", sortable: true },
   {
     header: "Customer",
-    accessor: "User",
+    accessor: "BookingCustmour",
     render: (_: any, row: any) => (
       <Link href={`/dashboard/booking/${row.id}`} className="flex flex-col">
-        <span className="font-medium">{`${row.User?.firstname || ""} ${row.User?.lastname || ""}`}</span>
-        <span className="text-xs text-gray-400">{row.User?.email}</span>
+        <span className="font-medium">{`${row.BookingCustmour?.firstname || ""} ${row.BookingCustmour?.lastname || ""}`}</span>
+        <span className="text-xs text-gray-400">{row.BookingCustmour?.email}</span>
       </Link>
     ),
   },
   {
     header: "Phone",
-    accessor: "User",
+    accessor: "BookingCustmour",
     render: (_: any, row: any) => (
-      <span className="text-sm">{row.User?.phone}</span>
+      <span className="text-sm">{row.BookingCustmour?.phone}</span>
     ),
   },
   {

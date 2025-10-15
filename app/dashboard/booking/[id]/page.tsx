@@ -249,14 +249,14 @@ const BookingDetailsPage = () => {
             <section className="bg-gradient-to-r from-gray-800 to-gray-700 p-4 rounded-xl shadow-lg">
               <h2 className="font-semibold text-lg mb-3">👤 Customer</h2>
               <p>
-                <b>Name:</b> {booking?.User?.firstname}{" "}
-                {booking?.User?.lastname}
+                <b>Name:</b> {booking?.BookingCustmour?.firstname}{" "}
+                {booking?.BookingCustmour?.lastname}
               </p>
               <p>
-                <b>Email:</b> {booking?.User?.email}
+                <b>Email:</b> {booking?.BookingCustmour?.email}
               </p>
               <p>
-                <b>Phone:</b> {booking?.User?.phone}
+                <b>Phone:</b> {booking?.BookingCustmour?.phone}
               </p>
             </section>
           </div>
@@ -603,20 +603,7 @@ function JobReportModal({ isOpen, onClose, bookingId }: JobReportModalProps) {
             <option value="Jane Smith">Jane Smith</option>
           </select>
         </div>
-
-        {/* Before Photos Upload */}
-        <div className="mb-6">
-          <label className="block text-gray-300 mb-2 font-medium">
-            Before Photos
-          </label>
-          <FileUpload
-            files={formData.beforePhotos}
-            setFiles={(urls) =>
-              setFormData({ ...formData, beforePhotos: urls })
-            }
-          />
-        </div>
-        <div>
+             <div>
           <label className="block text-sm mb-2 font-semibold flex items-center gap-2">
             <Clock className="w-4 h-4 text-cyan-400" /> Arrival Time
           </label>
@@ -631,6 +618,19 @@ function JobReportModal({ isOpen, onClose, bookingId }: JobReportModalProps) {
             className="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 focus:border-blue-500 outline-none disabled:opacity-60"
           />
         </div>
+        {/* Before Photos Upload */}
+        <div className="mb-6">
+          <label className="block text-gray-300 mb-2 font-medium">
+            Before Photos
+          </label>
+          <FileUpload
+            files={formData.beforePhotos}
+            setFiles={(urls) =>
+              setFormData({ ...formData, beforePhotos: urls })
+            }
+          />
+        </div>
+       
         {/* Save Button */}
         <button
           onClick={submitData}
