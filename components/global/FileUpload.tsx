@@ -9,8 +9,9 @@ type FileUploadProps = {
 };
 
 const FileUpload: React.FC<FileUploadProps> = ({ files, setFiles }) => {
-  const [previews, setPreviews] = useState<string[]>(files || []);
-
+  const [previews, setPreviews] = useState<string[]>(files );
+  console.log(files , "this is files")
+  console.log(previews , "this is files")
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
 

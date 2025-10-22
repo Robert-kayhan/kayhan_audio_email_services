@@ -35,6 +35,7 @@ const CreateProductPage = () => {
     control,
     reset,
     formState: { errors },
+    watch,
   } = useForm<FormValues>({
     defaultValues: {
       name: "",
@@ -59,7 +60,12 @@ const CreateProductPage = () => {
   const router = useRouter();
 
   // 🔌 Fetch related dropdown data
-  const { data: carModels } = useGetCarModelsQuery({});
+  const watchCompanyId = watch("company_id");
+
+  const { data: carModels } = useGetCarModelsQuery({
+    limit: 10000,
+    company_id: watchCompanyId,
+  });
   const { data: companies } = useGetcompanyQuery({});
   const { data: departments } = useGetDepartmentQuery({});
   const { data: channels } = useGetChannelsQuery({});
@@ -124,7 +130,9 @@ const CreateProductPage = () => {
             <div>
               <label className={labelClass}>SKU Number</label>
               <input
-                {...register("sku_number", { required: "SKU number is required" })}
+                {...register("sku_number", {
+                  required: "SKU number is required",
+                })}
                 className={inputClass}
                 placeholder="Enter SKU"
               />
@@ -141,6 +149,30 @@ const CreateProductPage = () => {
             Associations
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>Channel</label>
+              <select {...register("channel_id")} className={inputClass}>
+                <option value="">Select Channel</option>
+                {channels?.data?.map((ch: any) => (
+                  <option key={ch.id} value={ch.id}>
+                    {ch.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Department */}
+            <div>
+              <label className={labelClass}>Department</label>
+              <select {...register("department_id")} className={inputClass}>
+                <option value="">Select Department</option>
+                {departments?.data?.map((d: any) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name}
+                  </option>
+                ))}
+              </select>
+            </div>
             {/* Car Model */}
             <div>
               <label className={labelClass}>Car Model</label>
@@ -168,30 +200,6 @@ const CreateProductPage = () => {
             </div>
 
             {/* Channel */}
-            <div>
-              <label className={labelClass}>Channel</label>
-              <select {...register("channel_id")} className={inputClass}>
-                <option value="">Select Channel</option>
-                {channels?.data?.map((ch: any) => (
-                  <option key={ch.id} value={ch.id}>
-                    {ch.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Department */}
-            <div>
-              <label className={labelClass}>Department</label>
-              <select {...register("department_id")} className={inputClass}>
-                <option value="">Select Department</option>
-                {departments?.data?.map((d: any) => (
-                  <option key={d.id} value={d.id}>
-                    {d.name}
-                  </option>
-                ))}
-              </select>
-            </div>
           </div>
         </div>
 
@@ -203,15 +211,27 @@ const CreateProductPage = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
               <label className={labelClass}>Factory Price</label>
-              <input type="number" {...register("factory_price")} className={inputClass} />
+              <input
+                type="number"
+                {...register("factory_price")}
+                className={inputClass}
+              />
             </div>
             <div>
               <label className={labelClass}>Retail Price</label>
-              <input type="number" {...register("retail_price")} className={inputClass} />
+              <input
+                type="number"
+                {...register("retail_price")}
+                className={inputClass}
+              />
             </div>
             <div>
               <label className={labelClass}>Wholesale Price</label>
-              <input type="number" {...register("wholesale_price")} className={inputClass} />
+              <input
+                type="number"
+                {...register("wholesale_price")}
+                className={inputClass}
+              />
             </div>
           </div>
         </div>
@@ -224,19 +244,35 @@ const CreateProductPage = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               <label className={labelClass}>Stock</label>
-              <input type="number" {...register("stock")} className={inputClass} />
+              <input
+                type="number"
+                {...register("stock")}
+                className={inputClass}
+              />
             </div>
             <div>
               <label className={labelClass}>Weight (kg)</label>
-              <input type="number" {...register("weight")} className={inputClass} />
+              <input
+                type="number"
+                {...register("weight")}
+                className={inputClass}
+              />
             </div>
             <div>
               <label className={labelClass}>Height (cm)</label>
-              <input type="number" {...register("height")} className={inputClass} />
+              <input
+                type="number"
+                {...register("height")}
+                className={inputClass}
+              />
             </div>
             <div>
               <label className={labelClass}>Width (cm)</label>
-              <input type="number" {...register("width")} className={inputClass} />
+              <input
+                type="number"
+                {...register("width")}
+                className={inputClass}
+              />
             </div>
           </div>
         </div>
@@ -254,7 +290,9 @@ const CreateProductPage = () => {
               <FileUpload files={field.value} setFiles={field.onChange} />
             )}
           />
-          {errors.images && <p className={errorClass}>{errors.images.message}</p>}
+          {errors.images && (
+            <p className={errorClass}>{errors.images.message}</p>
+          )}
         </div>
 
         {/* Submit */}

@@ -50,7 +50,7 @@ const columns: Column<Product & {
     let bg = "";
     let label = "";
 
-    if (val === 0) {
+    if (val <= 0) {
       bg = "bg-red-500/20 text-red-600 border border-red-500/40";
       label = "Out of Stock";
     } else if (val < 10) {
@@ -206,7 +206,7 @@ export default function ProductTablePage() {
               {
                 label: "Edit",
                 onClick: (row) =>
-                  (window.location.href = `/dashboard/products/edit/${row.id}`),
+                  (window.location.href = `/Inventory/product//${row.id}`),
                 className: "text-blue-600 hover:underline",
               },
             ]}
