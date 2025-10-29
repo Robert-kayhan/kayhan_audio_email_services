@@ -5,7 +5,7 @@ import CustomTable, { Column } from "@/components/global/Table";
 import { ChevronDown } from "lucide-react";
 import UploadExcelModal from "@/components/leads/UploadExcelModal";
 import UserFormModal from "@/components/leads/UserFormModal";
-import { useGetAllUserQuery, useDeleteUserMutation } from "@/store/api/UserApi";
+import { useGetAllUserQuery, useDeleteUserMutation ,useGetAllUserWithLeadQuery} from "@/store/api/UserApi";
 import Pagination from "@/components/global/Pagination";
 import toast from "react-hot-toast";
 import UserForUpdate from "@/components/leads/UpdateUserModel";
@@ -36,11 +36,11 @@ export default function TablePage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(25);
   const [user, setUser] = useState<any>();
-
+  // const {data:getDatas} =useGetAllUserWithLeadQuery({})
   // 🔍 Search state and debounce
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
-
+  
   useEffect(() => {
     const delay = setTimeout(() => {
       setSearch(searchInput);
@@ -55,7 +55,21 @@ export default function TablePage() {
     limit,
     search,
   });
-  console.log(data , "this is data")
+  useEffect(() => {
+      const createUser = async () => {
+        try {
+          const response = await fetch("https://mailerapi.kayhanaudio.com.au/api/users/lead-user", {
+            method: "GET",
+          });
+          refetch();
+        } catch (err) {
+          console.error("Failed to create user:", err);
+        }
+      };
+  
+      createUser();
+    }, [refetch]);
+  // console.log(data , "this is data")
   const [deleteUser] = useDeleteUserMutation();
 
   const users = data?.data ?? [];
