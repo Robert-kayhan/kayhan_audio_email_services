@@ -20,6 +20,7 @@ type TableProps<T> = {
   onEdit?: (row: T) => void;
   onDelete?: (row: T) => void;
   customActions?: CustomAction<T>[];
+  customClass?: string;
   showActions?: boolean;
   pageSize?: number;
   rowKey?: (row: T, index: number) => string | number;
@@ -34,6 +35,7 @@ export default function CustomTable<T>({
   showActions = false,
   pageSize = 25,
   rowKey,
+  customClass
 }: TableProps<T>) {
   const [sortBy, setSortBy] = useState<keyof T | null>(null);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
@@ -63,8 +65,8 @@ export default function CustomTable<T>({
           ? 1
           : -1
         : aVal < bVal
-        ? 1
-        : -1;
+          ? 1
+          : -1;
     });
   }, [data, sortBy, sortOrder]);
 
@@ -77,17 +79,23 @@ export default function CustomTable<T>({
   return (
     <div className="overflow-x-auto w-full">
       <table className="min-w-full border border-gray-300 dark:border-gray-700 rounded-md">
-        <thead className="bg-gray-100 dark:bg-gray-800">
+        <thead
+          className={
+            customClass
+              ? `${customClass} sticky top-0 z-20`
+              : "sticky top-0 z-20 bg-gray-100 dark:bg-gray-800"
+          }
+        >
+
           <tr>
             {columns.map((col) => (
               <th
                 key={String(col.accessor)}
                 onClick={() => col.sortable && handleSort(col.accessor)}
-                className={`p-3 text-left font-medium text-sm text-gray-800 dark:text-gray-200 cursor-pointer select-none ${
-                  col.sortable
-                    ? "hover:text-blue-600 dark:hover:text-blue-400"
-                    : ""
-                }`}
+                className={`p-3 text-left font-medium text-sm text-gray-800 dark:text-gray-200 cursor-pointer select-none ${col.sortable
+                  ? "hover:text-blue-600 dark:hover:text-blue-400"
+                  : ""
+                  }`}
               >
                 {col.header}
                 {sortBy === col.accessor &&
@@ -102,7 +110,7 @@ export default function CustomTable<T>({
           </tr>
         </thead>
         <tbody>
-          {paginatedData.map((row:any, index:any) => {
+          {paginatedData.map((row: any, index: any) => {
             const key = rowKey ? rowKey(row, index) : index;
             return (
               <tr
@@ -156,7 +164,7 @@ export default function CustomTable<T>({
           })}
         </tbody>
       </table>
-          
+
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex justify-between items-center mt-4 text-sm px-2">
