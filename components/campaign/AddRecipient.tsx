@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useGetAllUserQuery } from "@/store/api/UserApi";
-import CustomTable, { Column } from "@/components/global/Table";
 import Pagination from "@/components/global/Pagination";
 import { User } from "@/util/interface";
 import { CheckSquare, Square } from "lucide-react";
@@ -11,14 +10,14 @@ interface Props {
   selectedUserIds: any;
   setSelectedUserIds: any;
   onNext: any;
-  role : any
+  role: any;
 }
 
 export default function AddRecipients({
   selectedUserIds,
   setSelectedUserIds,
   onNext,
-  role
+  role,
 }: Props) {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(25);
@@ -28,7 +27,7 @@ export default function AddRecipients({
     page: currentPage,
     limit,
     search,
-    role
+    role,
   });
 
   const users: User[] = data?.data || [];
@@ -42,8 +41,8 @@ export default function AddRecipients({
   const isUserSelected = (id: number) => selectedUserIds.includes(id);
 
   const toggleUser = (id: number) => {
-    setSelectedUserIds((prev:any) =>
-      prev.includes(id) ? prev.filter((uid:any) => uid !== id) : [...prev, id]
+    setSelectedUserIds((prev: any) =>
+      prev.includes(id) ? prev.filter((uid: any) => uid !== id) : [...prev, id]
     );
   };
 
@@ -53,62 +52,31 @@ export default function AddRecipients({
     );
 
     if (areAllSelected) {
-      // Unselect all users from the current page
-      setSelectedUserIds((prev:any) =>
-        prev.filter((id:any) => !allUserIdsOnCurrentPage.includes(id))
+      setSelectedUserIds((prev: any) =>
+        prev.filter((id: any) => !allUserIdsOnCurrentPage.includes(id))
       );
     } else {
-      // Select all users from the current page
-      setSelectedUserIds((prev:any) => [
+      setSelectedUserIds((prev: any) => [
         ...new Set([...prev, ...allUserIdsOnCurrentPage]),
       ]);
     }
   };
 
-  const columns: Column<User>[] = [
-    {
-      header: (
-        <button onClick={toggleSelectAllCurrentPage}>
-          {allUserIdsOnCurrentPage.length > 0 &&
-          allUserIdsOnCurrentPage.every((id) =>
-            selectedUserIds.includes(id)
-          ) ? (
-            <CheckSquare className="text-blue-500" size={18} />
-          ) : (
-            <Square className="text-gray-400 dark:text-gray-500" size={18} />
-          )}
-        </button>
-      ),
-      accessor: "id",
-      render: (_, row:any) => (
-        <button onClick={() => toggleUser(row.id)} className="flex items-center">
-          {isUserSelected(row.id) ? (
-            <CheckSquare className="text-blue-500" size={18} />
-          ) : (
-            <Square className="text-gray-400 dark:text-gray-500" size={18} />
-          )}
-        </button>
-      ),
-    },
-    { header: "ID", accessor: "id" },
-    { header: "Name", accessor: "name" },
-    { header: "Email", accessor: "email" },
-  ];
-
   return (
     <div className="p-6 min-h-screen rounded-lg shadow bg-white text-black dark:bg-gray-950 dark:text-white">
+      {/* Header */}
       <div className="mb-4 flex justify-between items-center">
         <h2 className="text-lg font-semibold">Select Recipients</h2>
-        
+
         <select
-          className="text-sm px-3 py-1 rounded-md border focus:outline-none bg-white text-black border-gray-300 dark:bg-black dark:text-white dark:border-gray-700"
+          className="text-sm px-3 py-1 rounded-md border bg-white text-black border-gray-300 dark:bg-black dark:text-white dark:border-gray-700 focus:outline-none"
           value={limit}
           onChange={(e) => {
             setLimit(Number(e.target.value));
             setCurrentPage(1);
           }}
         >
-          {[5, 10, 25, 50,100,200,500].map((size) => (
+          {[5, 10, 25, 50, 100, 200, 500].map((size) => (
             <option key={size} value={size}>
               Show {size}
             </option>
@@ -116,6 +84,7 @@ export default function AddRecipients({
         </select>
       </div>
 
+      {/* Search */}
       <div className="flex gap-2 items-center mb-4">
         <input
           type="text"
@@ -134,11 +103,86 @@ export default function AddRecipients({
         )}
       </div>
 
-      {isLoading ? (
-        <p>Loading users...</p>
-      ) : (
-        <CustomTable columns={columns} data={users} pageSize={limit} />
-      )}
+      {/* TABLE START */}
+      <div className="overflow-auto max-h-[500px] border rounded-md">
+        <table className="w-full border-collapse text-sm">
+          <thead className="bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-200 sticky top-0 z-20">
+            <tr>
+              <th className="px-4 py-2 border-b border-gray-300 dark:border-gray-700">
+                <button onClick={toggleSelectAllCurrentPage}>
+                  {allUserIdsOnCurrentPage.length > 0 &&
+                  allUserIdsOnCurrentPage.every((id) =>
+                    selectedUserIds.includes(id)
+                  ) ? (
+                    <CheckSquare className="text-blue-500" size={18} />
+                  ) : (
+                    <Square className="text-gray-400 dark:text-gray-500" size={18} />
+                  )}
+                </button>
+              </th>
+
+              <th className="px-4 py-2 border-b border-gray-300 dark:border-gray-700">
+                ID
+              </th>
+              <th className="px-4 py-2 border-b border-gray-300 dark:border-gray-700">
+                Name
+              </th>
+              <th className="px-4 py-2 border-b border-gray-300 dark:border-gray-700">
+                Email
+              </th>
+            </tr>
+          </thead>
+
+          <tbody className="bg-white dark:bg-gray-900">
+            {isLoading ? (
+              <tr>
+                <td colSpan={4} className="py-4 text-center">
+                  Loading users...
+                </td>
+              </tr>
+            ) : users.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="py-4 text-center text-gray-500">
+                  No users found
+                </td>
+              </tr>
+            ) : (
+              users.map((row:any) => (
+                <tr
+                  key={row.id}
+                  className="hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+                >
+                  <td className="px-4 py-2 border-b dark:border-gray-700">
+                    <button
+                      onClick={() => toggleUser(row.id)}
+                      className="flex items-center"
+                    >
+                      {isUserSelected(row?.id) ? (
+                        <CheckSquare className="text-blue-500" size={18} />
+                      ) : (
+                        <Square className="text-gray-400 dark:text-gray-500" size={18} />
+                      )}
+                    </button>
+                  </td>
+
+                  <td className="px-4 py-2 border-b dark:border-gray-700">
+                    {row.id}
+                  </td>
+
+                  <td className="px-4 py-2 border-b dark:border-gray-700">
+                    {row.name}
+                  </td>
+
+                  <td className="px-4 py-2 border-b dark:border-gray-700">
+                    {row.email}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+      {/* TABLE END */}
 
       <Pagination
         currentPage={currentPage}
@@ -150,6 +194,7 @@ export default function AddRecipients({
         tableDataLength={users.length}
       />
 
+      {/* Next Button */}
       <div className="mt-6 flex justify-end">
         <button
           onClick={onNext}

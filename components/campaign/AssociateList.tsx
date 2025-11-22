@@ -27,8 +27,10 @@ const AssociateList = ({ selectedUserIds, onSelectGroupId }: Props) => {
   const { data, isLoading, isError, refetch } = useGetAllLeadGroupQuery({
     page: currentPage,
     limit,
+  } ,{
+    pollingInterval: 1000,
   });
-
+  console.log(data , "this is data")
   const [createLeadGroup, { isLoading: creating }] = useCreateLeadGroupMutation();
   const [updateLeadGroup] = useUpdateLeadGroupMutation();
 
@@ -65,7 +67,7 @@ const AssociateList = ({ selectedUserIds, onSelectGroupId }: Props) => {
       refetch();
     } catch (error) {
       console.error("Update group failed:", error);
-      toast.error("Failed to update group.");
+      // toast.error("Failed to update group.");
     }
   };
 
