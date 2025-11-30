@@ -4,7 +4,7 @@ import { apiSlice } from "../apiSlcie";
 export const DepartmentApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getcompany: builder.query({
-      query: ({ page = 1, limit = 10, search = "" }) =>
+      query: ({ page = 1, limit = 10000, search = "" }) =>
         `${Company_URL}?page=${page}&limit=${limit}&search=${search}`,
       providesTags: ["Channels"],
     }),

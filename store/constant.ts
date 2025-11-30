@@ -13,4 +13,5 @@ export const Department_URL = "/api/department";
 export const Company_URL = "/api/comapany";
 export const CarModel_URL = "/api/car-model";
 export const Product_URL = "/api/product";
-export const Repair_URl = "/api/repair-return"
+export const Repair_URl = "/api/repair-return";
+export const Tech_repair="/api/tech-support-request"
