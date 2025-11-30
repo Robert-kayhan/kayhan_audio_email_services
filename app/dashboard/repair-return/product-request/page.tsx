@@ -243,7 +243,7 @@ export default function RepairReportTablePage() {
 
           {/* Create Button */}
           <Link
-            href="/dashboard/repair-return/create"
+            href="/dashboard/repair-return/product-request/create"
             className="bg-blue-600 text-white px-4 py-2 rounded-md flex items-center gap-1 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-400"
           >
             Create
