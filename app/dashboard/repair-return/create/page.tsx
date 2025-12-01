@@ -15,6 +15,13 @@ const isOutOfWarranty = (orderDate: string) => {
   return new Date() > oneYearLater;
 };
 
+interface Product {
+  product_id: number;
+  name: string;
+  price: number;
+  quantity: number;
+}
+
 const OrderSelector = () => {
   const [orderOptions, setOrderOptions] = useState<{ value: number; label: string }[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<{ value: number; label: string } | null>(null);
@@ -31,10 +38,10 @@ const OrderSelector = () => {
   const router = useRouter();
 
   // Manual entry state
-  const [manualUser, setManualUser] = useState({ name: "", last_name: "", email: "", phone: "" });
+  const [manualUser, setManualUser] = useState({ name: "", last_name: "", email: "", phone: "", id: "" });
   const [manualBilling, setManualBilling] = useState({ street: "", city: "", state: "", country: "", postcode: "" });
   const [manualShipping, setManualShipping] = useState({ street: "", city: "", state: "", country: "", postcode: "" });
-  const [manualProducts, setManualProducts] = useState<{ id: number; name: string; price: number; quantity: number }[]>([]);
+  const [manualProducts, setManualProducts] = useState<Product[]>([]);
 
   // Fetch orders when searchText changes (debounced)
   useEffect(() => {
@@ -43,10 +50,11 @@ const OrderSelector = () => {
         const res = await axios.get(`${process.env.NEXT_PUBLIC_KAYHAN_URL}/v1/order/search`, {
           params: { page: 1, status: "", search: searchText },
         });
+
         if (res.data.success) {
           const options = res.data.data.result.map((o: any) => ({
-            value: o.id,
-            label: `Order #${o.id}`,
+            value: o?.order_id || o.id,
+            label: `Order #${o?.order_id || o.id}`,
           }));
           setOrderOptions(options);
         }
@@ -67,10 +75,46 @@ const OrderSelector = () => {
     if (!selectedOrder) return;
     setLoading(true);
     setError("");
+
     try {
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_KAYHAN_URL}/v1/order/search/${selectedOrder.value}`);
+      const res = await axios.get(
+        `${process.env.NEXT_PUBLIC_KAYHAN_URL}/v1/order/get-order-by-id/${selectedOrder.value}`
+      );
+
       if (res.data.success && res.data.data) {
-        setOrderDetail(res.data.data);
+        const order = res.data.data;
+
+        let products: Product[] = [];
+
+        // Use new API products array
+        if (Array.isArray(order.products) && order.products.length > 0) {
+          products = order.products.map((p: any, idx: number) => ({
+            product_id: p.product_id || idx + 1,
+            name: p.name || p.product_name,
+            price: p.price || p.regular_price || 0,
+            quantity: p.quantity || 1,
+          }));
+        } 
+        // Fallback: parse old stringified product_details
+        else if (order.product_details) {
+          try {
+            const parsed = JSON.parse(order.product_details);
+            products = parsed.map((p: any, idx: number) => ({
+              product_id: idx + 1,
+              name: p.product_name,
+              price: Number(p.product_price),
+              quantity: Number(p.product_qty),
+            }));
+          } catch (e) {
+            console.error("Failed to parse product_details", e);
+          }
+        }
+
+        setOrderDetail({
+          ...order,
+          products,
+        });
+
         setSelectedProducts([]);
       } else {
         setOrderDetail(null);
@@ -100,7 +144,7 @@ const OrderSelector = () => {
 
       if (orderDetail) {
         const selectedProductDetails =
-          orderDetail.products?.filter((p: any) => selectedProducts.includes(p.product_id)) || [];
+          orderDetail.products?.filter((p: Product) => selectedProducts.includes(p.product_id)) || [];
 
         if (selectedProductDetails.length === 0) {
           toast.error("Please select at least one product!");
@@ -110,11 +154,11 @@ const OrderSelector = () => {
         const data = {
           order_id: orderDetail.id,
           customer_id: orderDetail.customer_id || orderDetail.id,
-          customer_name: orderDetail.billing_address?.name,
-          customer_email: orderDetail.billing_address?.email,
-          customer_phone: orderDetail.billing_address?.phone,
-          billing_address: orderDetail.billing_address,
-          shipping_address: orderDetail.shipping_address,
+          customer_name: orderDetail.billing_address?.name || orderDetail?.billing_name,
+          customer_email: orderDetail.billing_address?.email || orderDetail?.billing_email,
+          customer_phone: orderDetail.billing_address?.phone || orderDetail?.billing_phone,
+          billing_address: orderDetail.billing_address || orderDetail.billing_address,
+          shipping_address: orderDetail.shipping_address || orderDetail?.shipping_address,
           products: selectedProductDetails,
           user_tracking_number: trackingNumber,
           user_post_method: postMethod,
@@ -125,6 +169,7 @@ const OrderSelector = () => {
         router.push("/dashboard/repair-return");
       } else {
         const data = {
+          order_id: manualUser.id,
           customer_name: manualUser.name,
           customer_email: manualUser.email,
           customer_phone: manualUser.phone,
@@ -146,18 +191,18 @@ const OrderSelector = () => {
 
   // Manual products
   const handleAddManualProduct = () => {
-    const newProduct = { id: Date.now(), name: "", price: 0, quantity: 1 };
+    const newProduct: Product = { product_id: Date.now(), name: "", price: 0, quantity: 1 };
     setManualProducts([...manualProducts, newProduct]);
   };
 
-  const handleManualProductChange = (id: number, field: keyof typeof manualProducts[0], value: any) => {
-    setManualProducts(prev => prev.map(p => (p.id === id ? { ...p, [field]: value } : p)));
+  const handleManualProductChange = (id: number, field: keyof Product, value: any) => {
+    setManualProducts(prev => prev.map(p => (p.product_id === id ? { ...p, [field]: value } : p)));
   };
 
   return (
     <div className="min-h-screen flex justify-center bg-gray-100 dark:bg-gray-900 p-6 transition-colors">
       <div className="bg-white dark:bg-gray-800 max-w-5xl w-full p-8 rounded-2xl shadow-lg transition-colors">
-        <h2 className="text-3xl font-bold mb-8 text-center text-gray-800 dark:text-gray-100">Repair and return</h2>
+        <h2 className="text-3xl font-bold mb-8 text-center text-gray-800 dark:text-gray-100">Repair and Return</h2>
 
         {/* Order selector */}
         <div className="flex gap-3 mb-6">
@@ -204,10 +249,10 @@ const OrderSelector = () => {
             <section className="p-6 border rounded-xl shadow-sm bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
               <h4 className="font-semibold mb-2 text-gray-700 dark:text-gray-200">Customer Details</h4>
               <div className="grid grid-cols-2 gap-4">
-                <input className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100" value={orderDetail.user_detail?.name || ""} readOnly />
+                <input className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100" value={orderDetail.user_detail?.name || orderDetail?.billing_name} readOnly />
                 <input className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100" value={orderDetail.user_detail?.last_name || ""} readOnly />
-                <input className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 col-span-2" value={orderDetail.user_detail?.email || ""} readOnly />
-                <input className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 col-span-2" value={orderDetail.user_detail?.phone || ""} readOnly />
+                <input className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 col-span-2" value={orderDetail.user_detail?.email || orderDetail?.billing_email} readOnly />
+                <input className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 col-span-2" value={orderDetail.user_detail?.phone || orderDetail?.billing_phone} readOnly />
               </div>
             </section>
 
@@ -225,7 +270,7 @@ const OrderSelector = () => {
               <section className="p-6 border rounded-xl shadow-sm bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
                 <h4 className="font-semibold mb-3 text-gray-700 dark:text-gray-200">Shipping Address</h4>
                 <div className="space-y-2 text-gray-800 dark:text-gray-100">
-                  <p>{orderDetail.shipping_address?.street_address}</p>
+                  <p>{orderDetail.shipping_address?.street_address || orderDetail?.billing_address?.street_address}</p>
                   <p>{orderDetail.shipping_address?.city}, {orderDetail.shipping_address?.state_name}</p>
                   <p>{orderDetail.shipping_address?.country_name} - {orderDetail.shipping_address?.postcode}</p>
                 </div>
@@ -246,7 +291,7 @@ const OrderSelector = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {orderDetail.products?.map((prod: any) => (
+                    {orderDetail.products?.map((prod: Product) => (
                       <tr key={prod.product_id} className="hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
                         <td className="border px-3 py-2 text-center">
                           <input type="checkbox" checked={selectedProducts.includes(prod.product_id)} onChange={() => handleProductToggle(prod.product_id)} />
@@ -270,6 +315,7 @@ const OrderSelector = () => {
             <section className="p-6 border rounded-xl bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
               <h4 className="font-semibold mb-2 text-gray-700 dark:text-gray-200">User Details</h4>
               <div className="grid grid-cols-2 gap-4">
+                <input placeholder="Order no " className="border p-2 rounded-lg bg-white dark:bg-gray-800 col-span-2 dark:border-gray-600 dark:text-gray-100" value={manualUser.id} onChange={(e) => setManualUser({ ...manualUser, id: e.target.value })} />
                 <input placeholder="First Name" className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100" value={manualUser.name} onChange={(e) => setManualUser({ ...manualUser, name: e.target.value })} />
                 <input placeholder="Last Name" className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100" value={manualUser.last_name} onChange={(e) => setManualUser({ ...manualUser, last_name: e.target.value })} />
                 <input placeholder="Email" className="border p-2 rounded-lg col-span-2 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100" value={manualUser.email} onChange={(e) => setManualUser({ ...manualUser, email: e.target.value })} />
@@ -302,12 +348,12 @@ const OrderSelector = () => {
             <section className="p-6 border rounded-xl bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
               <h4 className="font-semibold mb-3 text-gray-700 dark:text-gray-200">Products</h4>
               <button onClick={handleAddManualProduct} className="mb-3 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition">Add Product</button>
-              <div className="space-y-3">
-                {manualProducts.map((prod) => (
-                  <div key={prod.id} className="grid grid-cols-4 gap-3 items-center">
-                    <input placeholder="Name" className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100" value={prod.name} onChange={(e) => handleManualProductChange(prod.id, "name", e.target.value)} />
-                    <input type="number" placeholder="Price" className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100" value={prod.price} onChange={(e) => handleManualProductChange(prod.id, "price", Number(e.target.value))} />
-                    <input type="number" placeholder="Quantity" className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100" value={prod.quantity} onChange={(e) => handleManualProductChange(prod.id, "quantity", Number(e.target.value))} />
+              <div className="space-y-2">
+                {manualProducts.map((p) => (
+                  <div key={p.product_id} className="flex gap-2 items-center">
+                    <input placeholder="Name" className="border p-2 rounded-lg w-1/3 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100" value={p.name} onChange={(e) => handleManualProductChange(p.product_id, "name", e.target.value)} />
+                    <input placeholder="Price" type="number" className="border p-2 rounded-lg w-1/6 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100" value={p.price} onChange={(e) => handleManualProductChange(p.product_id, "price", Number(e.target.value))} />
+                    <input placeholder="Quantity" type="number" className="border p-2 rounded-lg w-1/6 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100" value={p.quantity} onChange={(e) => handleManualProductChange(p.product_id, "quantity", Number(e.target.value))} />
                   </div>
                 ))}
               </div>
@@ -315,24 +361,19 @@ const OrderSelector = () => {
           </div>
         )}
 
-        {/* Shipping Info + Submit */}
-        <div className="mt-8 space-y-6">
-          <section className="p-6 border rounded-xl shadow-sm bg-gray-50 dark:bg-gray-700 dark:border-gray-600 space-y-4">
-            <h4 className="font-semibold text-gray-700 dark:text-gray-200">Shipping Info</h4>
-            <div className="grid grid-cols-2 gap-4">
-              <input type="text" placeholder="Tracking Number" className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100" value={trackingNumber} onChange={(e) => setTrackingNumber(e.target.value)} />
-              <input type="text" placeholder="Post Method" className="border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100" value={postMethod} onChange={(e) => setPostMethod(e.target.value)} />
-            </div>
-          </section>
-
-          <button
-            onClick={handleSubmit}
-            disabled={isLoading}
-            className="w-full py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg shadow transition disabled:opacity-50"
-          >
-            {isLoading ? "Submitting…" : "Create Repair Report"}
-          </button>
+        {/* Tracking + Post Method */}
+        <div className="grid md:grid-cols-2 gap-6 mt-6">
+          <input placeholder="Tracking Number" className="border p-2 rounded-lg w-full bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100" value={trackingNumber} onChange={(e) => setTrackingNumber(e.target.value)} />
+          <input placeholder="Post Method" className="border p-2 rounded-lg w-full bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100" value={postMethod} onChange={(e) => setPostMethod(e.target.value)} />
         </div>
+
+        <button
+          onClick={handleSubmit}
+          className="mt-6 w-full px-5 py-3 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition disabled:opacity-50"
+          disabled={isLoading}
+        >
+          {isLoading ? "Submitting…" : "Submit Repair Report"}
+        </button>
       </div>
     </div>
   );
