@@ -15,3 +15,4 @@ export const CarModel_URL = "/api/car-model";
 export const Product_URL = "/api/product";
 export const Repair_URl = "/api/repair-return";
 export const Tech_repair="/api/tech-support-request"
+export const ORDER_URL = "/api/order"
