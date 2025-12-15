@@ -6,7 +6,7 @@ export const ProductApi = apiSlice.injectEndpoints({
     getProduct: builder.query({
       query: ({ page = 1, limit = 10, search = "" }) =>
         `${Product_URL}?page=${page}&limit=${limit}&search=${search}`,
-      providesTags: ["Channels"],
+      // providesTags: ["Channels"],
     }),
 
     getProductById: builder.query({
