@@ -114,7 +114,7 @@ export default function ProductTablePage() {
   // Fetch Products
   const { data, isLoading, isError, refetch } = useGetProductQuery(
     { page: currentPage, limit, search },
-    { refetchOnFocus: true, refetchOnMountOrArgChange: true }
+    // { refetchOnFocus: true, refetchOnMountOrArgChange: true }
   );
   console.log(data)
   const products: Product[] = data?.data ?? [];
