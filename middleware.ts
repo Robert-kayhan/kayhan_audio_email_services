@@ -12,10 +12,10 @@ export function middleware(req: NextRequest) {
   }
 
   // ✅ Redirect unauthenticated users away from protected routes
-  // if (!token && pathname.startsWith("/dashboard")) {
-  //   url.pathname = "/sign-in";
-  //   return NextResponse.redirect(url);
-  // }
+  if (!token && pathname.startsWith("/dashboard")) {
+    url.pathname = "/sign-in";
+    return NextResponse.redirect(url);
+  }
 
   return NextResponse.next();
 }
