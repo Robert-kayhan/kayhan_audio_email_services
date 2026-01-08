@@ -5,6 +5,7 @@ import CustomTable, { Column } from "@/components/global/Table";
 import Pagination from "@/components/global/Pagination";
 import { useGetAllLeadFollowUpQuery } from "@/store/api/lead/leadFollowApi";
 import Link from "next/link";
+import DownloadAllProductReport from "@/components/leads/DownloadAllProductReport";
 
 type LeadFollowUp = {
   id: number;
@@ -141,12 +142,16 @@ const LeadFollowUpPage = () => {
     <div className="p-6 mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Lead Follow-Ups</h1>
-        <Link
-          href="/dashboard/lead-folow-up/create"
-          className="border-black dark:border-white border px-3 py-2 rounded-xl"
-        >
-          Create
-        </Link>
+        <div className="flex gap-2" >
+          <Link
+            href="/dashboard/lead-folow-up/create"
+            className="border-black dark:border-white border px-3 py-2 rounded-xl"
+          >
+            Create
+          </Link>
+          <DownloadAllProductReport />
+
+        </div>
       </div>
 
       {/* Filters and Search */}
@@ -155,11 +160,10 @@ const LeadFollowUpPage = () => {
           <button
             key={status}
             onClick={() => setLeadStatus(status)}
-            className={`px-4 py-2 rounded-md text-sm ${
-              leadStatus === status
+            className={`px-4 py-2 rounded-md text-sm ${leadStatus === status
                 ? "bg-blue-600 text-white"
                 : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white"
-            }`}
+              }`}
           >
             {status === "all" ? "All" : status}
           </button>
