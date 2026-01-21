@@ -85,6 +85,9 @@ const CampaignDetailsForm = ({ details, setDetails, onNext }: Props) => {
             <option value="sales@mailer.kayhanaudio.com.au">
               sales@mailer.kayhanaudio.com.au
             </option>
+            <option value="wholesales@mailer.kayhanaudio.com.au">
+             wholesales@mailer.kayhanaudio.com.au
+            </option>
           </select>
         </div>
 
