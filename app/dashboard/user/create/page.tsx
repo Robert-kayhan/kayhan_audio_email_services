@@ -6,10 +6,11 @@ import toast from "react-hot-toast";
 import { Country, State, City } from "country-state-city";
 import { useCreateSingleUserMutation } from "@/store/api/UserApi";
 import { useRouter } from "next/navigation";
-
+import { useSearchParams } from "next/navigation";
 const CreateUserPage = () => {
   const [createSingleUser] = useCreateSingleUserMutation();
-
+  const searchParams = useSearchParams();
+  const userType = searchParams.get("type"); // wholesale / null
   const [formData, setFormData] = useState({
     firstname: "",
     lastname: "",
@@ -30,18 +31,18 @@ const CreateUserPage = () => {
 
   const stateOptions = selectedCountry
     ? State.getStatesOfCountry(selectedCountry.value).map((state) => ({
-        label: state.name,
-        value: state.isoCode,
-      }))
+      label: state.name,
+      value: state.isoCode,
+    }))
     : [];
 
   const cityOptions = selectedState
     ? City.getCitiesOfState(selectedCountry.value, selectedState.value).map(
-        (city) => ({
-          label: city.name,
-          value: city.name,
-        })
-      )
+      (city) => ({
+        label: city.name,
+        value: city.name,
+      })
+    )
     : [];
 
   const handleInputChange = (
@@ -74,6 +75,7 @@ const CreateUserPage = () => {
       country: selectedCountry.label,
       state: selectedState.label,
       city: selectedCity.label,
+      role : userType === "wholesale" ? 3: null
     };
     console.log(payload, "this is payload");
     try {

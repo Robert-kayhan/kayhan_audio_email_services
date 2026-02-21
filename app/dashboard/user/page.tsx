@@ -54,6 +54,7 @@ export default function TablePage() {
     page: currentPage,
     limit,
     search,
+    role : 0,
   });
   useEffect(() => {
       const createUser = async () => {

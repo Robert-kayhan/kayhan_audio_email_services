@@ -1,6 +1,13 @@
 import { campaign_url, email_url } from "../constant";
 import { apiSlice } from "./apiSlcie"; // check typo in file name if needed
-
+export interface SendUsingExcelPayload {
+  campaignName: string;
+  campaignSubject: string;
+  fromEmail: string;
+  senderName: string;
+  templateId: number;
+  file: File; // excel file
+}
 // Define campaign type (optional but helpful)
 export interface CampaignPayload {
   campaignName: string;
@@ -55,6 +62,23 @@ export const CompaignApi = apiSlice.injectEndpoints({
         method: "POST",
       }),
     }),
+    sendUsingExcel: builder.mutation<any, SendUsingExcelPayload>({
+      query: (data) => {
+        const formData = new FormData();
+        formData.append("campaignName", data.campaignName);
+        formData.append("campaignSubject", data.campaignSubject);
+        formData.append("fromEmail", data.fromEmail);
+        formData.append("senderName", data.senderName);
+        formData.append("templateId", String(data.templateId));
+        formData.append("file", data.file);
+
+        return {
+          url: `${campaign_url}/send-using-exel`, // ✅ must match backend route
+          method: "POST",
+          body: formData,
+        };
+      },
+    }),
   }),
 });
 
@@ -65,4 +89,5 @@ export const {
   useDeleteCampaignMutation,
   useSendComgainMutation,
   useUpdateCampaignMutation,
+  useSendUsingExcelMutation
 } = CompaignApi;

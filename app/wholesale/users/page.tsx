@@ -7,6 +7,8 @@ import { useGetAllUserQuery, useDeleteUserMutation } from "@/store/api/UserApi";
 import Pagination from "@/components/global/Pagination";
 import toast from "react-hot-toast";
 import UserForUpdate from "@/components/leads/UpdateUserModel";
+import Link from "next/link";
+import { ChevronDown } from "lucide-react";
 
 type User = {
   name: string;
@@ -147,7 +149,37 @@ export default function TablePage() {
               </option>
             ))}
           </select>
+          <div className="relative inline-block text-left">
+            <button
+              onClick={() => setDropdownOpen((prev) => !prev)}
+              className="bg-blue-600 text-white px-4 py-2 rounded-md flex items-center gap-1 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-400"
+            >
+              Create
+              <ChevronDown size={16} />
+            </button>
+
+            {dropdownOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-white text-black border border-gray-200 rounded shadow z-50 dark:bg-gray-800 dark:text-white dark:border-gray-700">
+                <Link
+                  href="/dashboard/user/create?type=wholesale"
+                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  Create Single Lead
+                </Link>
+                <button
+                  onClick={() => {
+                    setDropdownOpen(false);
+                    setShowModal(true);
+                  }}
+                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  Create Multiple Leads
+                </button>
+              </div>
+            )}
+          </div>
         </div>
+
       </div>
 
       {/* Table or State */}
