@@ -4,7 +4,7 @@ import { useState } from "react";
 import { X, Upload } from "lucide-react";
 import toast from "react-hot-toast";
 import { useCreateMultipleUserMutation } from "@/store/api/UserApi";
-
+import { useSearchParams } from "next/navigation";
 type Props = {
   isOpen: boolean;
   onClose: () => void;
@@ -16,7 +16,8 @@ export default function UploadExcelModal({ isOpen, onClose, refetch }: Props) {
   const [fileName, setFileName] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [createMultipleUser] = useCreateMultipleUserMutation();
-
+  const searchParams = useSearchParams();
+  const userType = searchParams.get("type"); // wholesale / null
   const handleUpload = async () => {
     if (!selectedFile) {
       toast.error("Please select a file to upload");
@@ -25,7 +26,10 @@ export default function UploadExcelModal({ isOpen, onClose, refetch }: Props) {
 
     const formData = new FormData();
     formData.append("file", selectedFile);
-
+    if (userType) {
+      // formData.append("type", userType);
+      formData.append("type", userType === "wholesale" ? "wholesale" : "retail");
+    }
     try {
       setLoading(true);
       const res = await createMultipleUser(formData).unwrap();
@@ -37,8 +41,8 @@ export default function UploadExcelModal({ isOpen, onClose, refetch }: Props) {
     } catch (error) {
       toast.error(
         (error as any)?.data?.message ||
-          (error as any)?.message ||
-          "Something went wrong"
+        (error as any)?.message ||
+        "Something went wrong"
       );
     } finally {
       setLoading(false);
@@ -76,7 +80,7 @@ export default function UploadExcelModal({ isOpen, onClose, refetch }: Props) {
 
         {/* ✅ Download link added here */}
         <a
-         href="/SampleXLSXFile.xlsx" // Change path as needed
+          href="/SampleXLSXFile.xlsx" // Change path as needed
           download
           className="mt-3 inline-block text-blue-400 hover:underline text-sm"
         >
