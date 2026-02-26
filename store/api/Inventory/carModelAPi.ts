@@ -3,20 +3,23 @@ import { apiSlice } from "../apiSlcie";
 export const carModelApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     // Get all car models with pagination & search
-  getCarModels: builder.query<
-  any, // response type
-  { page?: number; limit?: number; search?: string; company_id?: any; parent_id?: number }
->({
-  query: ({ page = 1, limit = 10, search = "", company_id, parent_id }) => {
-    let url = `${CarModel_URL}?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`;
+    getCarModels: builder.query<
+      any,
+      { page?: number; limit?: number; search?: string; company_id?: any; parent_id?: number | null }
+    >({
+      query: ({ page = 1, limit = 10, search = "", company_id, parent_id }) => {
+        let url = `${CarModel_URL}?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`;
 
-    if (company_id !== undefined) url += `&company_id=${company_id}`;
-    if (parent_id !== undefined) url += `&parent_id=${parent_id}`;
+        if (company_id !== undefined) url += `&company_id=${company_id}`;
 
-    return url;
-  },
-  providesTags: ["CarModels"],
-}),
+        // ✅ THIS IS IMPORTANT
+        if (parent_id === null) url += `&parent_id=null`;
+        else if (parent_id !== undefined) url += `&parent_id=${parent_id}`;
+
+        return url;
+      },
+      providesTags: ["CarModels"],
+    }),
 
 
     // Get single car model by ID

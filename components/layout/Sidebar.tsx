@@ -114,6 +114,10 @@ const navItems = [
         label: "Product",
         href: "/Inventory/product/",
       },
+       {
+        label: "Version",
+        href: "/Inventory/virson",
+      },
       {
         label: "Orders",
         href: "/Inventory/orders",

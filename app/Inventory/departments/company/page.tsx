@@ -5,7 +5,8 @@ import CustomTable, { Column } from "@/components/global/Table";
 import Pagination from "@/components/global/Pagination";
 import toast from "react-hot-toast";
 import CreateModel from "@/components/Inventory/department/CreeateCompanyModel";
-import { useGetcompanyQuery , useDeletecompanyMutation } from "@/store/api/Inventory/comapnyApi";
+import { useGetcompanyQuery, useDeletecompanyMutation } from "@/store/api/Inventory/comapnyApi";
+import Link from "next/link";
 type Channel = {
   id: number;
   name: string;
@@ -15,10 +16,16 @@ type Channel = {
 };
 
 const columns: Column<Channel>[] = [
-  { header: "ID", accessor: "id", sortable: true },
-  { header: "Name", accessor: "name", sortable: true },
-  { header: "Description", accessor: "description", sortable: true },
-  { header: "Created At", accessor: "createdAt" },
+  { header: "ID", accessor: "id", sortable: true, },
+  {
+    header: "Name", accessor: "name", sortable: true, render: (val, row) => (
+      <Link href={`/Inventory/departments/company/${row.id}`} className="hover:underline">
+        {val}
+      </Link>
+    ),
+  }, 
+{ header: "Description", accessor: "description", sortable: true },
+{ header: "Created At", accessor: "createdAt" },
 ];
 
 const ChannelPage = () => {
@@ -48,9 +55,9 @@ const ChannelPage = () => {
     page: currentPage,
     limit,
     search,
-  } , {
-    refetchOnMountOrArgChange: true, 
-    refetchOnFocus: true, 
+  }, {
+    refetchOnMountOrArgChange: true,
+    refetchOnFocus: true,
     pollingInterval: 10000,
   });
 
