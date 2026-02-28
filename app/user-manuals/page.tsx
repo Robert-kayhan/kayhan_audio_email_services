@@ -507,14 +507,14 @@ export default function Page() {
             </p>
           </div>
 
-          <Link
+          {/* <Link
             href="/dashboard/user-manuals/create"
             className="inline-flex items-center justify-center rounded-xl bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-black dark:bg-white dark:text-black dark:hover:bg-gray-200"
           >
             + Create Manual
-          </Link>
+          </Link> */}
         </div>
-      </div>
+      </div> 
 
       <div className="mx-auto grid max-w-6xl grid-cols-1 gap-4 p-5 lg:grid-cols-12">
         {/* LEFT SIDEBAR */}

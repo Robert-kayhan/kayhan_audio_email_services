@@ -19,7 +19,9 @@ import {
   BookKeyIcon,
   ReceiptText,
   ArchiveXIcon,
+  BookCopy
 } from "lucide-react";
+
 import { useLogoutMutation } from "@/store/api/AuthApi";
 import { Layers } from "lucide-react";
 const userInfo = {
@@ -97,6 +99,26 @@ const navItems = [
       },
     ],
   },
+   { icon: BookCopy, label: "Product Guide", href: "#" ,subItems: [
+     {
+        label: "Product Guides",
+        href: "/dashboard/user-manuals",
+      },
+      {
+        label: "Product Guides Types",
+        href: "/dashboard/user-manuals/types",
+      },
+      {
+        label: "Company",
+        href: "/Inventory/departments/company",
+      },
+    
+       {
+        label: "Version",
+        href: "/Inventory/virson",
+      },
+      
+    ], },
   { icon: Layers, label: "Inventory", href: "#" ,subItems: [
      {
         label: "Channel",

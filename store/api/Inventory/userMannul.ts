@@ -117,7 +117,7 @@ export const UserMannul = apiSlice.injectEndpoints({
     }),
 
     // ✅ UPDATE
-    updateUserManual: builder.mutation<any, { id: number; data: UserManualUpdatePayload }>({
+    updateUserManual: builder.mutation<any, { id: number; data: any }>({
       query: ({ id, data }) => ({
         url: `/api/user-manuals/${id}`,
         method: "PUT",
